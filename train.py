@@ -77,7 +77,6 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             target_onehot = target_onehot.cuda()
             target = target.cuda()
 
-        # compute output and loss
         output = model(images)
         loss = criterion(output, target_onehot)
         
@@ -239,6 +238,7 @@ if __name__ == '__main__':
         acc = eval(test_loader, model, args)
         
         if acc > best_acc:
+            print(filename)
             torch.save(model, filename)
             best_acc = acc
             print('Save model: ' + filename)

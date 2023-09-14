@@ -62,15 +62,26 @@ def train(net, trainloader, epochs):
 
 
 def test(net, testloader):
+    _NUM_CLASSES = 10
     """Validate the model on the test set."""
-    criterion = torch.nn.CrossEntropyLoss()
+    # criterion = torch.nn.CrossEntropyLoss()
+    criterion = torch.nn.BCEWithLogitsLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
         for images, labels in tqdm(testloader):
-            outputs = net(images.to(DEVICE))
+            
+            labels.unsqueeze_(1)
+            target_onehot = torch.FloatTensor(labels.shape[0], _NUM_CLASSES)
+            target_onehot.zero_()
+            target_onehot.scatter_(1, labels, 1)
             labels = labels.to(DEVICE)
-            loss += criterion(outputs, labels).item()
+
+            outputs = net(images.to(DEVICE))
+            labels_one_hot = target_onehot.to(DEVICE)
+
+            loss += criterion(outputs, labels_one_hot).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+            # print(f"ACC: {correct / len(outputs.data)}")
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy
 
@@ -93,33 +104,7 @@ def fine_tune(model, iterations, dataset_path, print_frequency=100):
     weight_decay = 1e-4
     finetune_lr = 0.001
 
-    train_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
-    transform=transforms.Compose([
-        transforms.RandomCrop(32, padding=4), 
-        transforms.Resize(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    ]))
-
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset,
-        batch_size=batch_size, 
-        pin_memory=True,
-        shuffle=True)#, sampler=train_sampler)
-
-
-    val_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
-    transform=transforms.Compose([
-        transforms.Resize(224), 
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    ]))
-    val_loader = torch.utils.data.DataLoader(
-        val_dataset,
-        batch_size=batch_size,
-        shuffle=False,
-        pin_memory=True) #, sampler=valid_sampler)
+    train_loader, val_loader = load_data(dataset_path)
 
     criterion = torch.nn.BCEWithLogitsLoss()
     
@@ -161,13 +146,47 @@ def fine_tune(model, iterations, dataset_path, print_frequency=100):
     return model
 
 
-def load_data():
+def load_data(dataset_path):
     """Load CIFAR-10 (training and test set)."""
-    trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    trainset = CIFAR10("./data", train=True, download=True, transform=trf)
-    testset = CIFAR10("./data", train=False, download=True, transform=trf)
-    return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
+    # trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    # trainset = CIFAR10("./data", train=True, download=True, transform=trf)
+    # testset = CIFAR10("./data", train=False, download=True, transform=trf)
+    # return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
 
+    batch_size = 128
+    # momentum = 0.9
+    # weight_decay = 1e-4
+    # finetune_lr = 0.001
+
+    train_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
+    transform=transforms.Compose([
+        transforms.RandomCrop(32, padding=4), 
+        transforms.Resize(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    ]))
+
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset,
+        batch_size=batch_size, 
+        pin_memory=True,
+        shuffle=True)#, sampler=train_sampler)
+
+
+    val_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
+    transform=transforms.Compose([
+        transforms.Resize(224), 
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    ]))
+    val_loader = torch.utils.data.DataLoader(
+        val_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        pin_memory=True) #, sampler=valid_sampler)
+    
+    return train_loader, val_loader
 
 # #############################################################################
 # 2. Federation of the pipeline with Flower
@@ -175,7 +194,9 @@ def load_data():
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
-trainloader, testloader = load_data()
+
+dataset_path = "data/"
+trainloader, testloader = load_data(dataset_path)
 
 
 # Define Flower client
@@ -191,9 +212,9 @@ class FlowerClient(fl.client.NumPyClient):
         return self.properties
 
     def set_parameters(self, parameters):
-        params_dict = zip(net.state_dict().keys(), parameters)
+        params_dict = zip(self.model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        net.load_state_dict(state_dict, strict=True)
+        self.model.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
         print("############ FIT ############")
@@ -208,37 +229,33 @@ class FlowerClient(fl.client.NumPyClient):
         print(type(self.model))
         print(self.model)
 
-        fine_tune(self.model, 5, "data/", print_frequency=100)
+        self.model = fine_tune(self.model, 5, "data/", print_frequency=1)
 
         # train(net, trainloader, epochs=1)
-        return self.get_parameters(self.model), len(trainloader.dataset), {}
+        return self.get_parameters(None), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
-        loss, accuracy = test(net, testloader)
+        loss, accuracy = test(self.model, testloader)
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
-while True:
-    print("retry")
-    try:
-        # Start Flower client
-        fl.client.start_numpy_client(
-            # server_address="10.0.0.20:8080",
-            server_address="127.0.0.1:8080",
-            client=FlowerClient(),
-        )
-    except:
-        continue
+fl.client.start_numpy_client(
+    # server_address="10.0.0.20:8080",
+    server_address="127.0.0.1:8080",
+    client=FlowerClient(),
+)
 
 # while True:
-# 	print("retry")
-	
-# 	try:
-# 		# Start Flower client
-# 		fl.client.start_numpy_client(
-# 		    # server_address="10.0.0.20:8080",
-# 		    server_address="127.0.0.1:8080",
-# 		    client=FlowerClient(),
-# 		)
-# 	except:
-# 		continue
+#     print("retry")
+#     try:
+#         # Start Flower client
+#         fl.client.start_numpy_client(
+#             # server_address="10.0.0.20:8080",
+#             server_address="127.0.0.1:8080",
+#             client=FlowerClient(),
+#         )
+#     except KeyboardInterrupt:
+#         break
+#     except:
+#         pass
+#         # sleep(3)

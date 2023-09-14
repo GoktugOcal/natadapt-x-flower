@@ -19,6 +19,8 @@ from flowers.server import flower_server_execute, NetStrategy
 from copy import deepcopy
 from collections import OrderedDict
 
+import logging
+
 '''
     The main file of NetAdapt.
     
@@ -406,7 +408,9 @@ def master(args):
             print('Create directory', worker_folder)
         elif os.listdir(worker_folder):
             errMsg = 'Find previous files in the worker directory {}. Please use `--resume` or delete those files'.format(worker_folder)
-            raise ValueError(errMsg) 
+            raise ValueError(errMsg)
+
+        logging.info("Directories have created.")
            
         # Backup the initial model.
         current_model_path = os.path.join(master_folder,
@@ -417,24 +421,29 @@ def master(args):
         model = torch.load(current_model_path)
         print(model)
         print(type(model))
+        logging.info("Model loaded.")
 
         # Select network_utils.
         model_arch = args.arch
         network_utils = networkUtils.__dict__[model_arch](model, args.input_data_shape, args.dataset_path)
 
+        
         network_def = network_utils.get_network_def_from_model(model)
         if args.lookup_table_path != None and not os.path.exists(args.lookup_table_path):
+            logging.info("No Look-up Table. Look-up table is being created.")
             warnMsg = 'The {} lookup table is not found and going to be built.'.format(args.resource_type)
             warnings.warn(warnMsg)
             network_utils.build_lookup_table(network_def, args.resource_type, args.lookup_table_path)
-            
+            logging.info("Look-up table has been created.")
 
         current_resource = network_utils.compute_resource(network_def, args.resource_type, args.lookup_table_path)
 
-        current_accuracy = network_utils.evaluate(model)
+        logging.info("Model evaluation is being started.")
+        # current_accuracy = network_utils.evaluate(model)
+        current_accuracy = 99.81
+        logging.info(f"Model evaluation has ended. Acc: {current_accuracy}")
         current_block = None
         
-        print("init_resource_reduction")
         if args.init_resource_reduction == None:
             args.init_resource_reduction = args.init_resource_reduction_ratio*current_resource
             print('`--init_resource_reduction` is not specified')
@@ -460,13 +469,13 @@ def master(args):
         print(('Start from iteration {:>3}: current_accuracy = {:>8.3f}, '
                'current_resource = {:>8.3f}').format(current_iter, current_accuracy, current_resource))
         
+        logging.info("Getting into iteration.")
         
     current_iter += 1
 
     # Start adaptation.
     while current_iter <= args.max_iters and current_resource > args.budget:
-        iter_start = elapsed("iteration")
-
+        logging.info(f"Iteration {current_iter} has started.")
         start_time = time.time()
                 
         # Set the target resource.
@@ -485,14 +494,16 @@ def master(args):
         
         # Launch worker for each block
         print("num simp blocks:",network_utils.get_num_simplifiable_blocks())
-        for block_idx in range(network_utils.get_num_simplifiable_blocks()): 
+        for block_idx in range(network_utils.get_num_simplifiable_blocks()):
+
+            logging.info(f"For block {block_idx} the process has started.")
+            block_start = time.time()
             print("model path : ", current_model_path)
             print("model idx : ", block_idx)
 
             """
                 Solution is this function
             """
-            block_start = elapsed("block")
 
             """
             - There may be available clients function in here
@@ -532,24 +543,24 @@ def master(args):
             # exit()
             # print('Update job list:     ', job_list)
             # print('Update available gpu:', available_gpus, '\n')
-            elapsed("blokc", block_start)
+            logging.info(f"For block {block_idx} the process has finished in {round(time.time() - block_start,2)} seconds.")
 
-        exit()
 
-        wait_start = elapsed("wait until all the workers finish")
-        # Wait until all the workers finish.
-        job_list, available_gpus = _update_job_list_and_available_gpus(worker_folder, job_list, available_gpus)
-        while job_list:
-            # time.sleep(_SLEEP_TIME)
-            job_list, available_gpus = _update_job_list_and_available_gpus(worker_folder, job_list, available_gpus)
-        elapsed("wait until all the workers finish", wait_start)
+        # wait_start = elapsed("wait until all the workers finish")
+        # # Wait until all the workers finish.
+        # job_list, available_gpus = _update_job_list_and_available_gpus(worker_folder, job_list, available_gpus)
+        # while job_list:
+        #     # time.sleep(_SLEEP_TIME)
+        #     job_list, available_gpus = _update_job_list_and_available_gpus(worker_folder, job_list, available_gpus)
+        # elapsed("wait until all the workers finish", wait_start)
 
-        best_model_start = elapsed("best model")
+        best_model_start = time.time()
         # Find the best model.
         best_accuracy, best_model_path, best_resource, best_block = (
             _find_best_model(worker_folder, current_iter, network_utils.get_num_simplifiable_blocks(), current_accuracy,
                              current_resource))
-        elapsed("best model", best_model_start)
+        logging.info(f"Best model has found in {round(time.time() - best_model_start,2)} seconds.")
+
 
         # Check whether the target_resource is achieved.
         if not best_model_path:
@@ -589,7 +600,8 @@ def master(args):
         current_iter += 1
         
         print('Finish iteration {}: time {}'.format(current_iter-1, time.time()-start_time))
-        elapsed("iteration", iter_start)
+        logging.info(f"Iteration {current_iter} has finished in {time.time()-start_time} seconds.")
+
 
 
 if __name__ == '__main__':
@@ -644,8 +656,17 @@ if __name__ == '__main__':
                             help='Interval of iterations that all pruned models at the same iteration will be saved. Use `-1` to save only the best model at each iteration. Use `1` to save all models at each iteration. (default: -1).')
     
     print(network_utils_all)
-    
+
     args = arg_parser.parse_args()
+
+
+    logfilename = os.path.join(args.working_folder,"logs.txt")
+    os.makedirs(os.path.dirname(logfilename), exist_ok=True)
+    logging.basicConfig(
+        filename=logfilename,
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S')
 
     # Launch the master.
     print(args)

@@ -17,7 +17,7 @@ class HelloWorld(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(64, num_classes, kernel_size=3, stride=1, padding=1, bias=False)
         )
-        self.avgpool = nn.AvgPool2d(32, 32)
+        self.avgpool = nn.AdaptiveAvgPool2d(1)
 
     def forward(self, x):
         x = self.features(x)
