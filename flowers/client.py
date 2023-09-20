@@ -239,23 +239,23 @@ class FlowerClient(fl.client.NumPyClient):
         loss, accuracy = test(self.model, testloader)
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
-fl.client.start_numpy_client(
-    # server_address="10.0.0.20:8080",
-    server_address="127.0.0.1:8080",
-    client=FlowerClient(),
-)
+# fl.client.start_numpy_client(
+#     server_address="10.0.0.20:8080",
+#     # server_address="127.0.0.1:8080",
+#     client=FlowerClient(),
+# )
 
-# while True:
-#     print("retry")
-#     try:
-#         # Start Flower client
-#         fl.client.start_numpy_client(
-#             # server_address="10.0.0.20:8080",
-#             server_address="127.0.0.1:8080",
-#             client=FlowerClient(),
-#         )
-#     except KeyboardInterrupt:
-#         break
-#     except:
-#         pass
-#         # sleep(3)
+while True:
+    print("retry")
+    try:
+        # Start Flower client
+        fl.client.start_numpy_client(
+            server_address="10.0.0.20:8080",
+            # server_address="127.0.0.1:8080",
+            client=FlowerClient(),
+        )
+    except KeyboardInterrupt:
+        break
+    except:
+        # pass
+        sleep(3)
