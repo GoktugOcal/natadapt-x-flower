@@ -42,11 +42,13 @@ class NetStrategy(FedAvg):
 
     def __init__(
         self,
-        network_arch
+        network_arch,
+        netadapt_info
     ) -> None:
         super().__init__()
         self.network_arch = network_arch
         self.network_arch_str = self.network_arch
+        self.netadapt_info = netadapt_info
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -66,7 +68,12 @@ class NetStrategy(FedAvg):
         cfg_fit = []
         for cli in clients:
             print(cli)
-            config = {"network_arch" : self.network_arch_str}
+            config = {
+                "network_arch" : self.network_arch_str,
+                "server_round" : server_round,
+                "netadapt_iteration" : self.netadapt_info["netadapt_iteration"],
+                "block_id" : self.netadapt_info["block_id"]
+                }
 
             fit_ins = FitIns(parameters, deepcopy(config))
             # append
@@ -80,9 +87,16 @@ class NetStrategy(FedAvg):
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
+
+        if not results:
+            return None, {}
+
         parameters_aggregated, metrics_aggregated = super().aggregate_fit(
             server_round=server_round, results=results, failures=failures
         )
+
+        print("############ HEREEEEEEEEE ############")
+        print(metrics_aggregated)
 
         self.parameters_aggregated = parameters_to_ndarrays(parameters_aggregated)
         self.metrics_aggregated = metrics_aggregated
@@ -101,13 +115,15 @@ class NetStrategy(FedAvg):
         if eval_res is None:
             return None
         loss, metrics = eval_res
-        print("Evaluation done.")
+        logging.info(f"Evaluation done, {metrics}")
+
         return loss, metrics
 
 
 def flower_server_execute(strategy):
     fl.server.start_server(
         server_address="0.0.0.0:8080",
-        config=fl.server.ServerConfig(num_rounds=1),
+        config=fl.server.ServerConfig(num_rounds=3),
         strategy=strategy,
+        grpc_max_message_length=1073741824
     )

@@ -30,6 +30,8 @@ import logging
 # Define constants.
 _MASTER_FOLDER_FILENAME = 'master'
 _WORKER_FOLDER_FILENAME = 'worker'
+_CLIENT_FOLDER_FILENAME = 'client'
+_SERVER_FOLDER_FILENAME = 'server'
 _WORKER_PY_FILENAME = 'worker.py'
 _HISTORY_PICKLE_FILENAME = 'history.pickle'
 _HISTORY_TEXT_FILENAME = 'history.txt'
@@ -117,10 +119,10 @@ def worker(
     # Choose the filters.
     simplified_model = network_utils.simplify_model_based_on_network_def(simplified_network_def, model)
 
-    print('Original model:')
-    print(model)
-    print(type(model))
-    print('')
+    # print('Original model:')
+    # print(model)
+    # print(type(model))
+    # print('')
     print('Simplified model:')
     print(simplified_model)
     print(type(simplified_model))
@@ -134,7 +136,11 @@ def worker(
     buffer.close()
 
     print("########## FLOWER ##########")
-    strategy = NetStrategy(model_bytes)
+    netadapt_info = {
+        "netadapt_iteration" : netadapt_iteration,
+        "block_id" : block
+    }
+    strategy = NetStrategy(model_bytes, netadapt_info)
     print("> Strategy defined")
     flower_server_execute(strategy=strategy)
     print("> Server Closed")
@@ -350,6 +356,8 @@ def master(args):
     # Set the important paths.
     master_folder = os.path.join(args.working_folder, _MASTER_FOLDER_FILENAME)
     worker_folder = os.path.join(args.working_folder, _WORKER_FOLDER_FILENAME)
+    client_folder = os.path.join(args.working_folder, _CLIENT_FOLDER_FILENAME)
+    server_folder = os.path.join(args.working_folder, _SERVER_FOLDER_FILENAME)
     history_pickle_file = os.path.join(master_folder, _HISTORY_PICKLE_FILENAME)
     history_text_file = os.path.join(master_folder, _HISTORY_TEXT_FILENAME)
 
@@ -409,6 +417,23 @@ def master(args):
         elif os.listdir(worker_folder):
             errMsg = 'Find previous files in the worker directory {}. Please use `--resume` or delete those files'.format(worker_folder)
             raise ValueError(errMsg)
+
+        if not os.path.exists(server_folder):
+            os.mkdir(server_folder)
+            print('Create directory', server_folder)
+        elif os.listdir(server_folder):
+            errMsg = 'Find previous files in the server directory {}. Please use `--resume` or delete those files'.format(server_folder)
+            raise ValueError(errMsg)
+        
+        for cn in range(1,args.nc + 1):
+            client_folder_name = os.path.join(args.working_folder, _CLIENT_FOLDER_FILENAME + "_" + str(cn))
+            if not os.path.exists(client_folder_name):
+                os.mkdir(client_folder_name)
+                print('Create directory', client_folder_name)
+            elif os.listdir(client_folder_name):
+                errMsg = 'Find previous files in the client directory {}. Please use `--resume` or delete those files'.format(client_folder_name)
+                raise ValueError(errMsg)
+
 
         logging.info("Directories have created.")
            
@@ -655,6 +680,9 @@ if __name__ == '__main__':
     arg_parser.add_argument('-si', '--save_interval', type=int, default=-1,
                             help='Interval of iterations that all pruned models at the same iteration will be saved. Use `-1` to save only the best model at each iteration. Use `1` to save all models at each iteration. (default: -1).')
     
+    arg_parser.add_argument('-nc', '--nc', type=int,
+                            help="Number of clients for federated learning.")
+
     print(network_utils_all)
 
     args = arg_parser.parse_args()

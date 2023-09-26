@@ -1,52 +1,117 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+from torch.utils.data import DataLoader
+from torchvision.datasets import CIFAR10
+import torchvision.transforms as transforms
+import torchvision.datasets as datasets
+import torch.utils.data.sampler as sampler
+from torchvision.transforms import Compose, Normalize, ToTensor
+from tqdm import tqdm
 
-class CNN(nn.Module):
-    def __init__(self):
-        super(CNN, self).__init__()
-        # First Convolutional Layer
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
-        self.relu1 = nn.ReLU()
-        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
-        
-        # Second Convolutional Layer
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.relu2 = nn.ReLU()
-        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
-        
-        # Third Convolutional Layer
-        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
-        self.relu3 = nn.ReLU()
-        self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
-        
-        # Fourth Convolutional Layer
-        self.conv4 = nn.Conv2d(128, 256, kernel_size=3, padding=1)
-        self.relu4 = nn.ReLU()
-        self.pool4 = nn.MaxPool2d(kernel_size=2, stride=2)
-        
-        # Fully Connected Layers
-        self.fc1 = nn.Linear(256 * 4 * 4, 512)
-        self.relu5 = nn.ReLU()
-        self.fc2 = nn.Linear(512, 10)  # 10 classes for CIFAR-10
-        
-    def forward(self, x):
-        x = self.pool1(self.relu1(self.conv1(x)))
-        x = self.pool2(self.relu2(self.conv2(x)))
-        x = self.pool3(self.relu3(self.conv3(x)))
-        x = self.pool4(self.relu4(self.conv4(x)))
-        
-        # Flatten the tensor before passing to fully connected layers
-        x = x.view(-1, 256 * 4 * 4)
-        
-        x = self.relu5(self.fc1(x))
-        x = self.fc2(x)
-        return x
+from time import time
 
-# Create an instance of the CNN model
-cnn_model = CNN()
+def load_data(dataset_path):
+    """Load CIFAR-10 (training and test set)."""
+    # trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    # trainset = CIFAR10("./data", train=True, download=True, transform=trf)
+    # testset = CIFAR10("./data", train=False, download=True, transform=trf)
+    # return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
 
-print(cnn_model)
+    batch_size = 128
+    # momentum = 0.9
+    # weight_decay = 1e-4
+    # finetune_lr = 0.001
+
+    train_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
+    transform=transforms.Compose([
+        transforms.RandomCrop(32, padding=4), 
+        transforms.Resize(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    ]))
+
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset,
+        batch_size=batch_size, 
+        pin_memory=True,
+        shuffle=True)#, sampler=train_sampler)
 
 
-# from torchsummary import summary
-# print(summary(cnn_model, (3, 224, 224) ))
+    val_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
+    transform=transforms.Compose([
+        transforms.Resize(224), 
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    ]))
+    val_loader = torch.utils.data.DataLoader(
+        val_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        pin_memory=True) #, sampler=valid_sampler)
+    
+    return train_loader, val_loader
+
+
+def test(net, testloader):
+    _NUM_CLASSES = 10
+    """Validate the model on the test set."""
+    # criterion = torch.nn.CrossEntropyLoss()
+    criterion = torch.nn.BCEWithLogitsLoss()
+    correct, loss = 0, 0.0
+
+    net.eval()
+    with torch.no_grad():
+        for images, labels in tqdm(testloader):
+
+            # s = time()
+            labels.unsqueeze_(1)
+            target_onehot = torch.FloatTensor(labels.shape[0], _NUM_CLASSES)
+            target_onehot.zero_()
+            target_onehot.scatter_(1, labels, 1)
+            labels.squeeze_(1)
+            labels = labels.to(DEVICE)
+            # print("1:", time() - s)
+
+            # s = time()
+            outputs = net(images.to(DEVICE))
+            # outputs = net(images)
+            labels_one_hot = target_onehot.to(DEVICE)
+            # print("2:", time() - s)
+
+            # s = time()
+            loss += criterion(outputs, labels_one_hot).item()
+            # print("3:", time() - s)
+
+            # s = time()            
+            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+            # print("4:", time() - s)
+
+            print(correct)
+            
+    accuracy = correct / len(testloader.dataset)
+    return loss, accuracy
+
+
+
+
+
+if __name__ == "__main__":
+
+    DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = torch.load("models/alexnet/model_pt21.pth.tar")
+
+    dataset_path = "data/"
+    trainloader, testloader = load_data(dataset_path)
+
+    loss, accuracy = test(model, testloader)
+
+    print(accuracy)
+
+
+
+
+
+
+

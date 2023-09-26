@@ -1,10 +1,13 @@
+from argparse import ArgumentParser
 import warnings
 from collections import OrderedDict
 import json
 import io
+import os
 import sys
 import pickle
 import base64
+from traceback import print_exc
 
 import flwr as fl
 import torch
@@ -74,6 +77,7 @@ def test(net, testloader):
             target_onehot = torch.FloatTensor(labels.shape[0], _NUM_CLASSES)
             target_onehot.zero_()
             target_onehot.scatter_(1, labels, 1)
+            labels.squeeze_(1)
             labels = labels.to(DEVICE)
 
             outputs = net(images.to(DEVICE))
@@ -81,7 +85,9 @@ def test(net, testloader):
 
             loss += criterion(outputs, labels_one_hot).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+            # print(correct)
             # print(f"ACC: {correct / len(outputs.data)}")
+    print(correct, len(testloader.dataset))
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy
 
@@ -174,7 +180,7 @@ def load_data(dataset_path):
         shuffle=True)#, sampler=train_sampler)
 
 
-    val_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
+    val_dataset = datasets.CIFAR10(root=dataset_path, train=False, download=True,
     transform=transforms.Compose([
         transforms.Resize(224), 
         transforms.ToTensor(),
@@ -201,6 +207,11 @@ trainloader, testloader = load_data(dataset_path)
 
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
+    def __init__(self, client_id, log_file):
+        super().__init__()
+        self.client_id = client_id
+        self.log_file = log_file
+        
     def get_parameters(self, config):
         if hasattr(self, "model"):
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
@@ -218,16 +229,16 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         print("############ FIT ############")
+        self.netadapt_config = config
 
-        # if hasattr(self, "model"):
         ## Receive the model
         buffer = io.BytesIO(config["network_arch"])
         self.model = torch.jit.load(buffer)
         buffer.close()
         ## Check the received model
         self.model.eval()
-        print(type(self.model))
-        print(self.model)
+        # print(type(self.model))
+        # print(self.model)
 
         self.model = fine_tune(self.model, 5, "data/", print_frequency=1)
 
@@ -237,25 +248,55 @@ class FlowerClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
         loss, accuracy = test(self.model, testloader)
+
+        with open(self.log_file, "a") as f:
+            line = ",".join(
+                [
+                    str(self.netadapt_config["netadapt_iteration"]),
+                    str(self.netadapt_config["block_id"]),
+                    str(self.netadapt_config["server_round"]),
+                    str(accuracy),
+                    str(loss)
+                ]
+            )
+            line += "\n"
+            f.write(line)
+
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
-# fl.client.start_numpy_client(
-#     server_address="10.0.0.20:8080",
-#     # server_address="127.0.0.1:8080",
-#     client=FlowerClient(),
-# )
 
-while True:
-    print("retry")
-    try:
-        # Start Flower client
-        fl.client.start_numpy_client(
-            server_address="10.0.0.20:8080",
-            # server_address="127.0.0.1:8080",
-            client=FlowerClient(),
-        )
-    except KeyboardInterrupt:
-        break
-    except:
-        # pass
-        sleep(3)
+if __name__ == '__main__':
+    arg_parser = ArgumentParser()
+    arg_parser.add_argument('working_folder', type=str, 
+                            help='Root folder where models, related files and history information are saved.')
+    arg_parser.add_argument("-no", "--no", type=int,
+                            help="id of the client")
+    args = arg_parser.parse_args()
+    client_id = args.no
+
+    client_folder_name = os.path.join(args.working_folder, "client" + "_" + str(client_id))
+    log_file = os.path.join(client_folder_name, "logs.txt")
+
+    if not os.path.exists(log_file):
+        with open(log_file, "w") as f:
+            f.write("Iteration,Block,Round,Accuracy,Loss\n")
+
+    while True:
+        print("Waiting for server connnection...")
+        try:
+            # Start Flower client
+            fl.client.start_numpy_client(
+                server_address="10.0.0.20:8080",
+                # server_address="127.0.0.1:8080",
+                client=FlowerClient(
+                    client_id,
+                    log_file
+                ),
+                grpc_max_message_length = 1073741824
+            )
+        except KeyboardInterrupt:
+            break
+        except Exception as e:
+            # logging.Warning(e)
+            print_exc()
+            sleep(3)
