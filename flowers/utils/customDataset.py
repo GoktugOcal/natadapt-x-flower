@@ -15,8 +15,8 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         img = self.data[idx]
-        print(np.asarray(img).astype(np.float32).shape)
-        img = Image.fromarray(np.asarray(img).astype(np.float32)).convert('RGB')
+        np_img = np.array(img, dtype = np.uint8)
+        img = Image.fromarray(np_img, "RGB")
 
         if self.transform is not None:
             img = self.transform(img)

@@ -173,19 +173,20 @@ def save_file(config_path, train_path, test_path, train_data, test_data, num_cli
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
     ])
 
-    for idx, train_dict in enumerate(train_data):
-        
+    for idx, train_dict in enumerate(train_data):        
         data = train_dict["x"]
         labels = train_dict["y"]
         custom_dataset = CustomDataset(data, labels, transform=transform)
-        print(custom_dataset[0]["data"].shape)
-
         with open(train_path + str(idx) + '.pkl', 'wb') as f:
             pickle.dump(custom_dataset, f)
 
     for idx, test_dict in enumerate(test_data):
-        with open(test_path + str(idx) + '.npz', 'wb') as f:
-            np.savez_compressed(f, data=test_dict)
+        data = test_dict["x"]
+        labels = test_dict["y"]
+        custom_dataset = CustomDataset(data, labels, transform=transform)
+        with open(test_path + str(idx) + '.pkl', 'wb') as f:
+            pickle.dump(custom_dataset, f)
+            
     with open(config_path, 'w') as f:
         ujson.dump(config, f)
 

@@ -20,9 +20,9 @@ import torchvision.datasets as datasets
 import torch.utils.data.sampler as sampler
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
-
 from time import sleep
 
+from utils.customDataset import CustomDataset
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -91,7 +91,7 @@ def test(net, testloader):
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy
 
-def fine_tune(model, iterations, dataset_path, print_frequency=100):
+def fine_tune(model, iterations, train_dataset_path, test_dataset_path, print_frequency=100):
     '''
         short-term fine-tune a simplified model
         
@@ -110,7 +110,7 @@ def fine_tune(model, iterations, dataset_path, print_frequency=100):
     weight_decay = 1e-4
     finetune_lr = 0.001
 
-    train_loader, val_loader = load_data(dataset_path)
+    train_loader, val_loader = load_data(train_dataset_path, test_dataset_path)
 
     criterion = torch.nn.BCEWithLogitsLoss()
     
@@ -135,6 +135,7 @@ def fine_tune(model, iterations, dataset_path, print_frequency=100):
             print('Fine-tuning iteration {}'.format(i))
             sys.stdout.flush()
         
+        print(target, type(target))
         target.unsqueeze_(1)
         target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
         target_onehot.zero_()
@@ -152,7 +153,7 @@ def fine_tune(model, iterations, dataset_path, print_frequency=100):
     return model
 
 
-def load_data(dataset_path):
+def load_data(train_dataset_path, test_dataset_path):
     """Load CIFAR-10 (training and test set)."""
     # trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     # trainset = CIFAR10("./data", train=True, download=True, transform=trf)
@@ -164,35 +165,47 @@ def load_data(dataset_path):
     # weight_decay = 1e-4
     # finetune_lr = 0.001
 
-    train_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
-    transform=transforms.Compose([
-        transforms.RandomCrop(32, padding=4), 
-        transforms.Resize(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    ]))
-
+    train_data = pickle.load(open(train_dataset_path, "rb"))
     train_loader = torch.utils.data.DataLoader(
-        train_dataset,
-        batch_size=batch_size, 
-        pin_memory=True,
-        shuffle=True)#, sampler=train_sampler)
-
-
-    val_dataset = datasets.CIFAR10(root=dataset_path, train=False, download=True,
-    transform=transforms.Compose([
-        transforms.Resize(224), 
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    ]))
-    val_loader = torch.utils.data.DataLoader(
-        val_dataset,
+        train_data,
         batch_size=batch_size,
-        shuffle=False,
-        pin_memory=True) #, sampler=valid_sampler)
+        shuffle=True)
+
+    test_data = pickle.load(open(test_dataset_path, "rb"))
+    val_dataset = torch.utils.data.DataLoader(
+        train_data,
+        batch_size=batch_size,
+        shuffle=True)
+
+    # train_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
+    # transform=transforms.Compose([
+    #     transforms.RandomCrop(32, padding=4), 
+    #     transforms.Resize(224),
+    #     transforms.RandomHorizontalFlip(),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    # ]))
+
+    # train_loader = torch.utils.data.DataLoader(
+    #     train_dataset,
+    #     batch_size=batch_size, 
+    #     pin_memory=True,
+    #     shuffle=True)#, sampler=train_sampler)
+
+
+    # val_dataset = datasets.CIFAR10(root=dataset_path, train=False, download=True,
+    # transform=transforms.Compose([
+    #     transforms.Resize(224), 
+    #     transforms.ToTensor(),
+    #     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    # ]))
+    # val_dataset = torch.utils.data.DataLoader(
+    #     val_dataset,
+    #     batch_size=batch_size,
+    #     shuffle=False,
+    #     pin_memory=True) #, sampler=valid_sampler)
     
-    return train_loader, val_loader
+    return train_loader, test_data
 
 # #############################################################################
 # 2. Federation of the pipeline with Flower
@@ -201,8 +214,8 @@ def load_data(dataset_path):
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
 
-dataset_path = "data/"
-trainloader, testloader = load_data(dataset_path)
+# dataset_path = "data/"
+# trainloader, testloader = load_data(dataset_path)
 
 
 # Define Flower client
@@ -240,13 +253,21 @@ class FlowerClient(fl.client.NumPyClient):
         # print(type(self.model))
         # print(self.model)
 
-        self.model = fine_tune(self.model, 5, "data/", print_frequency=1)
+        train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
+        test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"
+
+        self.model = fine_tune(self.model, 5, train_dataset_path, test_dataset_path, print_frequency=1)
 
         # train(net, trainloader, epochs=1)
         return self.get_parameters(None), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
+
+        train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
+        test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"        
+        trainLoader, testLoader = load_data(train_dataset_path, test_dataset_path)
+        
         loss, accuracy = test(self.model, testloader)
 
         with open(self.log_file, "a") as f:

@@ -28,23 +28,14 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
 
     if check(config_path, train_path, test_path, num_clients, num_classes, niid, balance, partition):
         return
-        
-    # Get Cifar10 data
-
-    transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-        ]
-    )
-
-    # transform = transforms.Compose([
-    #     transforms.RandomCrop(32, padding=4), 
-    #     transforms.Resize(224),
-    #     transforms.RandomHorizontalFlip(),
-    #     transforms.ToTensor(),
-    #     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    # ])
+    
+    transform = transforms.Compose([
+        transforms.RandomCrop(32, padding=4), 
+        transforms.Resize(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    ])
 
     trainset = torchvision.datasets.CIFAR10(
         root=dir_path+"rawdata", train=True, download=True, transform=transform)
@@ -54,36 +45,24 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
         trainset, batch_size=len(trainset.data), shuffle=False)
     testloader = torch.utils.data.DataLoader(
         testset, batch_size=len(testset.data), shuffle=False)
-    
-    print("Enumerate")
-    for idx, train_data in enumerate(trainloader, 0):
-        trainset.data, trainset.targets = train_data
-    for _, test_data in enumerate(testloader, 0):
-        testset.data, testset.targets = test_data
 
     dataset_image = []
-    dataset_label = []
-
-    print("Extend")
-    dataset_image.extend(trainset.data.cpu().detach().numpy())
-    dataset_image.extend(testset.data.cpu().detach().numpy())
-    dataset_label.extend(trainset.targets.cpu().detach().numpy())
-    dataset_label.extend(testset.targets.cpu().detach().numpy())
+    dataset_image.extend(trainset.data)
+    dataset_image.extend(testset.data)
     dataset_image = np.array(dataset_image)
+
+    train_targets = trainset.targets
+    test_targets = testset.targets
+
+    dataset_label = []
+    dataset_label.extend(train_targets)
+    dataset_label.extend(test_targets)
     dataset_label = np.array(dataset_label)
 
-    # dataset = []
-    # for i in range(num_classes):
-    #     idx = dataset_label == i
-    #     dataset.append(dataset_image[idx])
 
-    print("Seperate Data")
     X, y, statistic = separate_data((dataset_image, dataset_label), num_clients, num_classes, 
                                     niid, balance, partition)
-    print("Split Data")
     train_data, test_data = split_data(X, y)
-    print(type(train_data))
-    exit()
     save_file(config_path, train_path, test_path, train_data, test_data, num_clients, num_classes, 
         statistic, niid, balance, partition)
 
