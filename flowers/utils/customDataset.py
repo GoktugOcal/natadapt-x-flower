@@ -20,10 +20,15 @@ class CustomDataset(Dataset):
 
         if self.transform is not None:
             img = self.transform(img)
+            # print(type(img))
 
-        sample = {
-            'data': img,
-            'label': self.labels[idx]
-        }
+        class_id = torch.tensor([self.labels[idx]])
+
+        return img, class_id
+
+        # sample = {
+        #     'data': img,
+        #     'label': self.labels[idx]
+        # }
         
-        return sample
+        # return sample

@@ -73,25 +73,26 @@ def test(net, testloader):
     with torch.no_grad():
         for images, labels in tqdm(testloader):
             
-            labels.unsqueeze_(1)
+            # labels.unsqueeze_(1)
             target_onehot = torch.FloatTensor(labels.shape[0], _NUM_CLASSES)
             target_onehot.zero_()
             target_onehot.scatter_(1, labels, 1)
-            labels.squeeze_(1)
+            # labels.squeeze_(1)
             labels = labels.to(DEVICE)
 
             outputs = net(images.to(DEVICE))
             labels_one_hot = target_onehot.to(DEVICE)
 
             loss += criterion(outputs, labels_one_hot).item()
-            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+            correct += (torch.max(outputs.data, 1)[1] == labels.squeeze_(1)).sum().item()
             # print(correct)
             # print(f"ACC: {correct / len(outputs.data)}")
-    print(correct, len(testloader.dataset))
+    # print(correct, len(testloader.dataset))
     accuracy = correct / len(testloader.dataset)
+    print("Test Accuracy :", round(accuracy, 3), "| Total no samples :", len(testloader.dataset))
     return loss, accuracy
 
-def fine_tune(model, iterations, train_dataset_path, test_dataset_path, print_frequency=100):
+def fine_tune(model, iterations, train_loader, print_frequency=100):
     '''
         short-term fine-tune a simplified model
         
@@ -110,7 +111,7 @@ def fine_tune(model, iterations, train_dataset_path, test_dataset_path, print_fr
     weight_decay = 1e-4
     finetune_lr = 0.001
 
-    train_loader, val_loader = load_data(train_dataset_path, test_dataset_path)
+    # train_loader, val_loader = load_data(train_dataset_path, test_dataset_path)
 
     criterion = torch.nn.BCEWithLogitsLoss()
     
@@ -135,12 +136,11 @@ def fine_tune(model, iterations, train_dataset_path, test_dataset_path, print_fr
             print('Fine-tuning iteration {}'.format(i))
             sys.stdout.flush()
         
-        print(target, type(target))
-        target.unsqueeze_(1)
+        # target.unsqueeze_(1)
         target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
         target_onehot.zero_()
         target_onehot.scatter_(1, target, 1)
-        target.squeeze_(1)
+        # target.squeeze_(1)
         input, target = input.cuda(), target.cuda()
         target_onehot = target_onehot.cuda()
 
@@ -161,9 +161,9 @@ def load_data(train_dataset_path, test_dataset_path):
     # return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
 
     batch_size = 128
-    # momentum = 0.9
-    # weight_decay = 1e-4
-    # finetune_lr = 0.001
+    momentum = 0.9
+    weight_decay = 1e-4
+    finetune_lr = 0.001
 
     train_data = pickle.load(open(train_dataset_path, "rb"))
     train_loader = torch.utils.data.DataLoader(
@@ -172,10 +172,12 @@ def load_data(train_dataset_path, test_dataset_path):
         shuffle=True)
 
     test_data = pickle.load(open(test_dataset_path, "rb"))
-    val_dataset = torch.utils.data.DataLoader(
-        train_data,
+    test_loader = torch.utils.data.DataLoader(
+        test_data,
         batch_size=batch_size,
         shuffle=True)
+
+    # dataset_path = "./data/"
 
     # train_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
     # transform=transforms.Compose([
@@ -199,13 +201,13 @@ def load_data(train_dataset_path, test_dataset_path):
     #     transforms.ToTensor(),
     #     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
     # ]))
-    # val_dataset = torch.utils.data.DataLoader(
+    # test_loader = torch.utils.data.DataLoader(
     #     val_dataset,
     #     batch_size=batch_size,
     #     shuffle=False,
     #     pin_memory=True) #, sampler=valid_sampler)
     
-    return train_loader, test_data
+    return train_loader, test_loader
 
 # #############################################################################
 # 2. Federation of the pipeline with Flower
@@ -217,13 +219,14 @@ net = Net().to(DEVICE)
 # dataset_path = "data/"
 # trainloader, testloader = load_data(dataset_path)
 
-
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(self, client_id, log_file):
+    def __init__(self, client_id, log_file, train_loader, test_loader):
         super().__init__()
         self.client_id = client_id
         self.log_file = log_file
+
+        self.trainLoader, self.testLoader = train_loader, test_loader
         
     def get_parameters(self, config):
         if hasattr(self, "model"):
@@ -256,19 +259,19 @@ class FlowerClient(fl.client.NumPyClient):
         train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
         test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"
 
-        self.model = fine_tune(self.model, 5, train_dataset_path, test_dataset_path, print_frequency=1)
+        self.model = fine_tune(self.model, 5, self.trainLoader, print_frequency=1)
 
         # train(net, trainloader, epochs=1)
-        return self.get_parameters(None), len(trainloader.dataset), {}
+        return self.get_parameters(None), len(self.trainLoader.dataset), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
 
-        train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
-        test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"        
-        trainLoader, testLoader = load_data(train_dataset_path, test_dataset_path)
+        # train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
+        # test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"        
+        # trainLoader, testLoader = load_data(train_dataset_path, test_dataset_path)
         
-        loss, accuracy = test(self.model, testloader)
+        loss, accuracy = test(self.model, self.testLoader)
 
         with open(self.log_file, "a") as f:
             line = ",".join(
@@ -283,7 +286,7 @@ class FlowerClient(fl.client.NumPyClient):
             line += "\n"
             f.write(line)
 
-        return loss, len(testloader.dataset), {"accuracy": accuracy}
+        return loss, len(self.testLoader.dataset), {"accuracy": accuracy}
 
 
 if __name__ == '__main__':
@@ -298,6 +301,10 @@ if __name__ == '__main__':
     client_folder_name = os.path.join(args.working_folder, "client" + "_" + str(client_id))
     log_file = os.path.join(client_folder_name, "logs.txt")
 
+    train_dataset_path = f"./data/Cifar10/train/{client_id}.pkl"
+    test_dataset_path = f"./data/Cifar10/test/{client_id}.pkl"
+    trainloader, testloader = load_data(train_dataset_path, test_dataset_path)
+
     if not os.path.exists(log_file):
         with open(log_file, "w") as f:
             f.write("Iteration,Block,Round,Accuracy,Loss\n")
@@ -311,7 +318,9 @@ if __name__ == '__main__':
                 # server_address="127.0.0.1:8080",
                 client=FlowerClient(
                     client_id,
-                    log_file
+                    log_file,
+                    train_loader= trainloader,
+                    test_loader=testloader
                 ),
                 grpc_max_message_length = 1073741824
             )
