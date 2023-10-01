@@ -8,6 +8,8 @@ import torchvision.transforms as transforms
 from non_iid_generator.utils.dataset_utils import check, separate_data, split_data, save_file
 from utils.customDataset import CustomDataset
 from argparse import ArgumentParser
+import pickle
+
 
 random.seed(1)
 np.random.seed(1)
@@ -25,8 +27,9 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
     config_path = dir_path + "config.json"
     train_path = dir_path + "train/"
     test_path = dir_path + "test/"
+    server_path = dir_path + "server/"
 
-    if check(config_path, train_path, test_path, num_clients, num_classes, niid, balance, partition):
+    if check(config_path, train_path, test_path, server_path, num_clients, num_classes, niid, balance, partition):
         return
     
     transform = transforms.Compose([
@@ -59,10 +62,39 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
     dataset_label.extend(test_targets)
     dataset_label = np.array(dataset_label)
 
+    # Splitting
+
+
+    ######## FOR SERVER'S INITIAL TRAINING ########
+    split_idx = int(len(dataset_label)/3)
+    initial_train_image = dataset_image[:split_idx]
+    initial_train_label = dataset_label[:split_idx]
+    initial_dict = {
+        "x" : initial_train_image,
+        "y" : initial_train_label
+    }
+    transform=transforms.Compose([
+        transforms.RandomCrop(32, padding=4), 
+        transforms.Resize(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    ])
+
+    data = initial_dict["x"]
+    labels = initial_dict["y"]
+    custom_dataset = CustomDataset(data, labels, transform=transform)
+    with open(server_path + "train" + '.pkl', 'wb') as f:
+        pickle.dump(custom_dataset, f)
+    
+
+    dataset_image = dataset_image[split_idx:]
+    dataset_label = dataset_label[split_idx:]
 
     X, y, statistic = separate_data((dataset_image, dataset_label), num_clients, num_classes, 
                                     niid, balance, partition)
     train_data, test_data = split_data(X, y)
+
     save_file(config_path, train_path, test_path, train_data, test_data, num_clients, num_classes, 
         statistic, niid, balance, partition)
 

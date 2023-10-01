@@ -7,9 +7,11 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torch.backends.cudnn as cudnn
+import pickle
 
 import nets as models
 import functions as fns
+from utils.customDataset import CustomDataset
 
 _NUM_CLASSES = 10
 
@@ -66,11 +68,11 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     end = time.time()
     
     for i, (images, target) in enumerate(train_loader):
-        target.unsqueeze_(1)
+        # target.unsqueeze_(1)
         target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
         target_onehot.zero_()
         target_onehot.scatter_(1, target, 1)
-        target.squeeze_(1)
+        # target.squeeze_(1)
         
         if not args.no_cuda:
             images = images.cuda()
@@ -182,26 +184,34 @@ if __name__ == '__main__':
         print('Create new directory `{}`'.format(path))        
 
     # Data loader
-    train_dataset = datasets.CIFAR10(root=args.data, train=True, download=True,
-        transform=transforms.Compose([
-            transforms.RandomCrop(32, padding=4), 
-            transforms.Resize(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-        ]))
+    # train_dataset = datasets.CIFAR10(root=args.data, train=True, download=True,
+    #     transform=transforms.Compose([
+    #         transforms.RandomCrop(32, padding=4), 
+    #         transforms.Resize(224),
+    #         transforms.RandomHorizontalFlip(),
+    #         transforms.ToTensor(),
+    #         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    #     ]))
+    # train_loader = torch.utils.data.DataLoader(
+    #     train_dataset, batch_size=args.batch_size, shuffle=True,
+    #     num_workers=args.workers, pin_memory=True)
+    # test_dataset = datasets.CIFAR10(root=args.data, train=False, download=True,
+    #     transform=transforms.Compose([
+    #         transforms.Resize(224),
+    #         transforms.ToTensor(),
+    #         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    #     ]))
+    # test_loader = torch.utils.data.DataLoader(
+    #     test_dataset, batch_size=args.batch_size, shuffle=False,
+    #     num_workers=args.workers, pin_memory=True)
+
+    train_dataset_path = os.path.join(args.data, "Cifar10", "server", "train.pkl")
+    train_data = pickle.load(open(train_dataset_path, "rb"))
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=True)
-    test_dataset = datasets.CIFAR10(root=args.data, train=False, download=True,
-        transform=transforms.Compose([
-            transforms.Resize(224),
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-        ]))
-    test_loader = torch.utils.data.DataLoader(
-        test_dataset, batch_size=args.batch_size, shuffle=False,
-        num_workers=args.workers, pin_memory=True)
+        train_data,
+        batch_size=args.batch_size,
+        shuffle=True)
+
     
     # Network
     cudnn.benchmark = True
