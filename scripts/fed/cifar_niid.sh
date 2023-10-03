@@ -1,1 +1,1 @@
-python flowers/generate_cifar10.py -nc 3 -c 10 -niid noniid -b - -p dir
+python generate_cifar10.py -nc 3 -c 10 -niid noniid -b - -p dir

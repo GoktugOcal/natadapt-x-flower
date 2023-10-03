@@ -25,10 +25,3 @@ class CustomDataset(Dataset):
         class_id = torch.tensor([self.labels[idx]])
 
         return img, class_id
-
-        # sample = {
-        #     'data': img,
-        #     'label': self.labels[idx]
-        # }
-        
-        # return sample

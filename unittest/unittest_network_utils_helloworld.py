@@ -13,12 +13,13 @@ import copy
 MODEL_ARCH = 'helloworld'
 INPUT_DATA_SHAPE = (3, 32, 32)
 LOOKUP_TABLE_PATH = os.path.join('../models', MODEL_ARCH,  'lut.pkl')
+DEVICE = os.environ["TORCH_DEVICE"]
 
 model = models.__dict__[MODEL_ARCH]()
 for i in range(4):
     layer = getattr(model.features, str(i*2))
     layer.weight.data = torch.zeros_like(layer.weight.data)
-model = model.cuda()
+model = model.to(DEVICE)
 
 network_utils = networkUtils.helloworld(model, INPUT_DATA_SHAPE)
 
@@ -145,7 +146,7 @@ class TestNetworkUtils_helloworld(unittest.TestCase):
         acc_3 = network_utils.evaluate(simp_model_3)
         self.assertEqual(acc_3, 80, "Evaluation function error")
         
-        input = torch.randn((4, 3, 32, 32)).cuda()
+        input = torch.randn((4, 3, 32, 32)).to(DEVICE)
         _ = simp_model_1(input)
         _ = simp_model_2(input)
         _ = simp_model_3(input)
@@ -161,7 +162,7 @@ class TestNetworkUtils_helloworld(unittest.TestCase):
         model_finetune = network_utils.fine_tune(model_0, iterations=1)
         for layer_idx in range(4):
             layer = getattr(model_finetune.features, str(layer_idx*2))
-            temp = (layer.weight.data == (torch.zeros_like(layer.weight.data).cuda() + layer_idx))
+            temp = (layer.weight.data == (torch.zeros_like(layer.weight.data).to(DEVICE) + layer_idx))
             temp = torch.min(temp)
             temp = temp.item()
             self.assertTrue(temp, "Fintune function error when iteration = 1")
@@ -169,7 +170,7 @@ class TestNetworkUtils_helloworld(unittest.TestCase):
         model_finetune_0 = network_utils.fine_tune(model_0, iterations=0)
         for layer_idx in range(4):
             layer = getattr(model_finetune_0.features, str(layer_idx*2))
-            temp = (layer.weight.data == (torch.zeros_like(layer.weight.data).cuda()))
+            temp = (layer.weight.data == (torch.zeros_like(layer.weight.data).to(DEVICE)))
             temp = torch.min(temp)
             temp = temp.item()
             self.assertTrue(temp, "Finetune function error when iteration = 0")

@@ -1,8 +1,11 @@
+import os
 import torch
 import torch.nn as nn
 import nets as models
 import functions as fns
 from argparse import ArgumentParser
+
+DEVICE = os.environ["TORCH_DEVICE"]
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -69,7 +72,7 @@ if __name__ == '__main__':
     print('Number of parameters: ', num_param)
     print('-------------------------------------------')
     
-    model = model.cuda()
+    model = model.to(DEVICE)
     
     print('Building latency lookup table for', 
           torch.cuda.get_device_name())

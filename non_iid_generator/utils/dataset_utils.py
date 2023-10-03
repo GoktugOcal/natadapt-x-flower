@@ -3,7 +3,7 @@ import ujson
 import numpy as np
 import gc
 from sklearn.model_selection import train_test_split
-from utils.customDataset import CustomDataset
+from non_iid_generator.customDataset import CustomDataset
 import pickle
 from torchvision.transforms import transforms
 

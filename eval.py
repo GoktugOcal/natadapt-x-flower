@@ -13,6 +13,8 @@ import nets as models
 import functions as fns
 
 _NUM_CLASSES = 10
+DEVICE = os.environ["TORCH_DEVICE"]
+
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -75,8 +77,8 @@ def eval(test_loader, model, args):
     end = time.time()
     for i, (images, target) in enumerate(test_loader):
         if not args.no_cuda:
-            images = images.cuda()
-            target = target.cuda()
+            images = images.to(DEVICE)
+            target = target.to(DEVICE)
         output = model(images)
         batch_acc = compute_accuracy(output, target)
         acc.update(batch_acc, images.size(0))
@@ -136,7 +138,7 @@ if __name__ == '__main__':
     model = models.__dict__[model_arch](num_classes=num_classes)
 
     if not args.no_cuda:
-        model = model.cuda()          
+        model = model.to(DEVICE)          
     
     # Evaluation
     filename = os.path.join(args.save_dir)

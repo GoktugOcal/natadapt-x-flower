@@ -22,14 +22,15 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 from time import sleep
 
-from utils.customDataset import CustomDataset
+from non_iid_generator.customDataset import CustomDataset
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
 # #############################################################################
 
 warnings.filterwarnings("ignore", category=UserWarning)
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEVICE = os.environ["TORCH_DEVICE"]
 
 
 class Net(nn.Module):
@@ -73,6 +74,8 @@ def test(net, testloader):
     with torch.no_grad():
         for images, labels in tqdm(testloader):
             
+            # if len(labels.shape) > 1: labels = labels.reshape(len(labels))
+
             # labels.unsqueeze_(1)
             target_onehot = torch.FloatTensor(labels.shape[0], _NUM_CLASSES)
             target_onehot.zero_()
@@ -122,7 +125,7 @@ def fine_tune(model, iterations, train_loader, print_frequency=100):
         momentum=momentum,
         weight_decay=weight_decay)
 
-    model = model.cuda()
+    model = model.to(DEVICE)
     model.train()
     dataloader_iter = iter(train_loader)
     for i in range(iterations):
@@ -136,13 +139,16 @@ def fine_tune(model, iterations, train_loader, print_frequency=100):
             print('Fine-tuning iteration {}'.format(i))
             sys.stdout.flush()
         
-        # target.unsqueeze_(1)
+        # Ensure the target shape is sth like torch.Size([batch_size])
+        if len(labels.shape) > 1: labels = labels.reshape(len(labels))
+
+        target.unsqueeze_(1)
         target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
         target_onehot.zero_()
         target_onehot.scatter_(1, target, 1)
-        # target.squeeze_(1)
-        input, target = input.cuda(), target.cuda()
-        target_onehot = target_onehot.cuda()
+        target.squeeze_(1)
+        input, target = input.to(DEVICE), target.to(DEVICE)
+        target_onehot = target_onehot.to(DEVICE)
 
         pred = model(input)
         loss = criterion(pred, target_onehot)

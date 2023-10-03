@@ -1,3 +1,4 @@
+import os
 import torch
 import copy
 import sys
@@ -9,6 +10,9 @@ from scipy.interpolate import Rbf
 
 from collections import OrderedDict
 from constants import *
+
+DEVICE = os.environ["TORCH_DEVICE"]
+
 
 def update_progress(index, length, **kwargs):
     '''
@@ -89,7 +93,7 @@ def extract_feature_map_sizes(model, input_data_shape):
     '''
     fmap_sizes_dict = {}
     hooks = []
-    model = model.cuda()
+    model = model.to(DEVICE)
     model.eval()
 
     def _register_hook(module):
@@ -107,7 +111,7 @@ def extract_feature_map_sizes(model, input_data_shape):
             hooks.append(module.register_forward_hook(_hook))
 
     model.apply(_register_hook)
-    _ = model(torch.randn([1, *input_data_shape]).cuda())
+    _ = model(torch.randn([1, *input_data_shape]).to(DEVICE))
     for hook in hooks:
         hook.remove()
 
@@ -503,7 +507,7 @@ def build_latency_lookup_table(network_def_full, lookup_table_path, min_conv_fea
                     else:
                         raise ValueError('Not support this type of layer.')
                     if torch.cuda.is_available():
-                        layer_test = layer_test.cuda()
+                        layer_test = layer_test.to(DEVICE)
                     measurement = measure_latency(layer_test, input_data_shape, measure_latency_sample_times)
                 else:
                     raise ValueError('Only support building the lookup table for `LATENCY`.')

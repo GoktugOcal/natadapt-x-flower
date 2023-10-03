@@ -14,6 +14,8 @@ import torch.utils.data.sampler as sampler
 
 sys.path.append(os.path.abspath('../'))
 
+DEVICE = os.environ["TORCH_DEVICE"]
+
 from constants import *
 import functions as fns
 
@@ -258,7 +260,7 @@ class networkUtils_alexnet(NetworkUtilsAbstract):
         _NUM_CLASSES = 10
         optimizer = torch.optim.SGD(model.parameters(), self.finetune_lr, 
                                          momentum=self.momentum, weight_decay=self.weight_decay)
-        model = model.cuda()
+        model = model.to(DEVICE)
         model.train()
         dataloader_iter = iter(self.train_loader)
         for i in range(iterations):
@@ -277,8 +279,8 @@ class networkUtils_alexnet(NetworkUtilsAbstract):
             target_onehot.zero_()
             target_onehot.scatter_(1, target, 1)
             target.squeeze_(1)
-            input, target = input.cuda(), target.cuda()
-            target_onehot = target_onehot.cuda()
+            input, target = input.to(DEVICE), target.to(DEVICE)
+            target_onehot = target_onehot.to(DEVICE)
 
             pred = model(input)
             loss = self.criterion(pred, target_onehot)
@@ -300,13 +302,13 @@ class networkUtils_alexnet(NetworkUtilsAbstract):
                 accuracy: (float) (0~100)
         '''
         
-        model = model.cuda()
+        model = model.to(DEVICE)
         model.eval()
         acc = .0
         num_samples = .0
         with torch.no_grad():
             for i, (input, target) in enumerate(self.val_loader):
-                input, target = input.cuda(), target.cuda()
+                input, target = input.to(DEVICE), target.to(DEVICE)
                 pred = model(input)
                 pred = pred.argmax(dim=1)
                 batch_acc = torch.sum(target == pred)

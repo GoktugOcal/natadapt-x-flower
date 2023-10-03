@@ -6,7 +6,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from non_iid_generator.utils.dataset_utils import check, separate_data, split_data, save_file
-from utils.customDataset import CustomDataset
+from non_iid_generator.customDataset import CustomDataset
 from argparse import ArgumentParser
 import pickle
 
@@ -62,8 +62,8 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
     dataset_label.extend(test_targets)
     dataset_label = np.array(dataset_label)
 
-    # Splitting
-
+    ################## Splitting ##################
+    ###############################################
 
     ######## FOR SERVER'S INITIAL TRAINING ########
     split_idx = int(len(dataset_label)/3)
@@ -88,6 +88,7 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
         pickle.dump(custom_dataset, f)
     
 
+    ######## REST OF THE DATA ########
     dataset_image = dataset_image[split_idx:]
     dataset_label = dataset_label[split_idx:]
 

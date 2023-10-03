@@ -99,7 +99,9 @@ def test(net, testloader):
 
 if __name__ == "__main__":
 
-    DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    DEVICE = os.environ["TORCH_DEVICE"]
+
     model = torch.load("models/alexnet/model_pt21.pth.tar")
 
     dataset_path = "data/"

@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from argparse import ArgumentParser
 import os
 import time
@@ -11,9 +14,11 @@ import pickle
 
 import nets as models
 import functions as fns
-from utils.customDataset import CustomDataset
+from non_iid_generator.customDataset import CustomDataset
 
 _NUM_CLASSES = 10
+DEVICE = os.environ["TORCH_DEVICE"]
+
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -68,16 +73,20 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     end = time.time()
     
     for i, (images, target) in enumerate(train_loader):
-        # target.unsqueeze_(1)
+        
+        # Ensure the target shape is sth like torch.Size([batch_size])
+        if len(target.shape) > 1: target = target.reshape(len(target))
+
+        target.unsqueeze_(1)
         target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
         target_onehot.zero_()
         target_onehot.scatter_(1, target, 1)
-        # target.squeeze_(1)
+        target.squeeze_(1)
         
         if not args.no_cuda:
-            images = images.cuda()
-            target_onehot = target_onehot.cuda()
-            target = target.cuda()
+            images = images.to(DEVICE)
+            target_onehot = target_onehot.to(DEVICE)
+            target = target.to(DEVICE)
 
         output = model(images)
         loss = criterion(output, target_onehot)
@@ -123,8 +132,8 @@ def eval(test_loader, model, args):
     end = time.time()
     for i, (images, target) in enumerate(test_loader):
         if not args.no_cuda:
-            images = images.cuda()
-            target = target.cuda()
+            images = images.to(DEVICE)
+            target = target.to(DEVICE)
         output = model(images)
         batch_acc = compute_accuracy(output, target)
         acc.update(batch_acc, images.size(0))
@@ -177,6 +186,12 @@ if __name__ == '__main__':
                     help='disables training on GPU')
     args = arg_parser.parse_args()
     print(args)
+
+    # if not args.no_cuda:
+    #     os.environ["TORCH_DEVICE"] = "cpu"
+    # else:
+    #     os.environ["TORCH_DEVICE"] = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     
     path = os.path.dirname(args.save_dir)
     if not os.path.exists(path):
@@ -219,9 +234,10 @@ if __name__ == '__main__':
     model_arch = args.arch
     model = models.__dict__[model_arch](num_classes=num_classes)
     criterion = nn.BCEWithLogitsLoss()
-    if not args.no_cuda:
-        model = model.cuda()
-        criterion = criterion.cuda()
+
+    
+    model = model.to(DEVICE)
+    criterion = criterion.to(DEVICE)
 
     # optionally resume from a checkpoint
     if args.resume:

@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from argparse import ArgumentParser
 import os
 import io
@@ -682,10 +685,16 @@ if __name__ == '__main__':
     
     arg_parser.add_argument('-nc', '--nc', type=int,
                             help="Number of clients for federated learning.")
+    arg_parser.add_argument('--no-cuda', action='store_true', default=False, dest='no_cuda',
+                    help='disables training on GPU')
+    args = arg_parser.parse_args()
+
+    if not args.no_cuda:
+        os.environ["TORCH_DEVICE"] = "cpu"
+    else:
+        os.environ["TORCH_DEVICE"] = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     print(network_utils_all)
-
-    args = arg_parser.parse_args()
 
 
     logfilename = os.path.join(args.working_folder,"logs.txt")
