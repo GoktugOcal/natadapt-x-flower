@@ -20,7 +20,7 @@ import torchvision.datasets as datasets
 import torch.utils.data.sampler as sampler
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
-from time import sleep
+from time import sleep, time
 
 from non_iid_generator.customDataset import CustomDataset
 
@@ -71,6 +71,7 @@ def test(net, testloader):
     # criterion = torch.nn.CrossEntropyLoss()
     criterion = torch.nn.BCEWithLogitsLoss()
     correct, loss = 0, 0.0
+    latency_measurements = []
     with torch.no_grad():
         for images, labels in tqdm(testloader):
             
@@ -82,9 +83,11 @@ def test(net, testloader):
             target_onehot.scatter_(1, labels, 1)
             # labels.squeeze_(1)
             labels = labels.to(DEVICE)
-
+            
+            s = time()
             outputs = net(images.to(DEVICE))
             labels_one_hot = target_onehot.to(DEVICE)
+            latency_measurements.append(time() - s)
 
             loss += criterion(outputs, labels_one_hot).item()
             correct += (torch.max(outputs.data, 1)[1] == labels.squeeze_(1)).sum().item()
@@ -93,7 +96,7 @@ def test(net, testloader):
     # print(correct, len(testloader.dataset))
     accuracy = correct / len(testloader.dataset)
     print("Test Accuracy :", round(accuracy, 3), "| Total no samples :", len(testloader.dataset))
-    return loss, accuracy
+    return loss, accuracy #latency_measurements
 
 def fine_tune(model, iterations, train_loader, print_frequency=100):
     '''

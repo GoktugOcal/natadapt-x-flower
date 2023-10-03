@@ -227,6 +227,13 @@ if __name__ == '__main__':
         batch_size=args.batch_size,
         shuffle=True)
 
+    test_dataset_path = os.path.join(args.data, "Cifar10", "server", "test.pkl")
+    test_data = pickle.load(open(test_dataset_path, "rb"))
+    test_loader = torch.utils.data.DataLoader(
+        test_data,
+        batch_size=args.batch_size,
+        shuffle=True)
+
     
     # Network
     cudnn.benchmark = True

@@ -5,7 +5,7 @@ import random
 import torch
 import torchvision
 import torchvision.transforms as transforms
-from non_iid_generator.utils.dataset_utils import check, separate_data, split_data, save_file
+from non_iid_generator.utils.dataset_utils import check, separate_data, split_data, save_file, split_server_data, server_data_save
 from non_iid_generator.customDataset import CustomDataset
 from argparse import ArgumentParser
 import pickle
@@ -69,24 +69,18 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
     split_idx = int(len(dataset_label)/3)
     initial_train_image = dataset_image[:split_idx]
     initial_train_label = dataset_label[:split_idx]
-    initial_dict = {
-        "x" : initial_train_image,
-        "y" : initial_train_label
-    }
-    transform=transforms.Compose([
-        transforms.RandomCrop(32, padding=4), 
-        transforms.Resize(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    ])
 
-    data = initial_dict["x"]
-    labels = initial_dict["y"]
-    custom_dataset = CustomDataset(data, labels, transform=transform)
-    with open(server_path + "train" + '.pkl', 'wb') as f:
-        pickle.dump(custom_dataset, f)
-    
+    train_dataset, test_dataset = split_server_data(
+        initial_train_image=initial_train_image,
+        initial_train_label=initial_train_label,
+        split_idx=split_idx,
+        transform=transform)
+
+    server_data_save(
+        server_path=server_path,
+        train_dataset=train_dataset,
+        test_dataset=test_dataset
+    )
 
     ######## REST OF THE DATA ########
     dataset_image = dataset_image[split_idx:]

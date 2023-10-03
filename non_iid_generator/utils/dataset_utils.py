@@ -195,6 +195,31 @@ def save_file(config_path, train_path, test_path, train_data, test_data, num_cli
 
     print("Finish generating dataset.\n")
 
+def split_server_data(initial_train_image, initial_train_label, split_idx, transform):
+
+    X_train, X_test, y_train, y_test = train_test_split(
+            initial_train_image,
+            initial_train_label,
+            train_size=0.75,
+            shuffle=True)
+
+    train_dataset = CustomDataset(X_train, y_train, transform=transform)
+    test_dataset = CustomDataset(X_test, y_test, transform=transform)
+
+    print("Initial training dataset for server have been created.")
+
+    return train_dataset, test_dataset
+
+def server_data_save(server_path, train_dataset, test_dataset):
+
+    with open(server_path + "train" + '.pkl', 'wb') as f:
+        pickle.dump(train_dataset, f)
+    
+    with open(server_path + "test" + '.pkl', 'wb') as f:
+        pickle.dump(test_dataset, f)
+    
+    print("Initial training dataset for server have been saved.")
+
 # def save_file(config_path, train_path, test_path, train_data, test_data, num_clients, 
 #                 num_classes, statistic, niid=False, balance=True, partition=None):
 #     config = {
