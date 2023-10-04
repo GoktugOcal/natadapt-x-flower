@@ -96,7 +96,7 @@ def test(net, testloader):
     # print(correct, len(testloader.dataset))
     accuracy = correct / len(testloader.dataset)
     print("Test Accuracy :", round(accuracy, 3), "| Total no samples :", len(testloader.dataset))
-    return loss, accuracy #latency_measurements
+    return loss, accuracy, latency_measurements
 
 def fine_tune(model, iterations, train_loader, print_frequency=100):
     '''
@@ -280,7 +280,8 @@ class FlowerClient(fl.client.NumPyClient):
         # test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"        
         # trainLoader, testLoader = load_data(train_dataset_path, test_dataset_path)
         
-        loss, accuracy = test(self.model, self.testLoader)
+        loss, accuracy, latency_measurements = test(self.model, self.testLoader)
+        mean_latency = np.mean(latency_measurements)
 
         with open(self.log_file, "a") as f:
             line = ",".join(

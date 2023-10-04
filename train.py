@@ -134,6 +134,9 @@ def eval(test_loader, model, args):
         if not args.no_cuda:
             images = images.to(DEVICE)
             target = target.to(DEVICE)
+
+        if len(target.shape) > 1: target = target.reshape(len(target))
+        
         output = model(images)
         batch_acc = compute_accuracy(output, target)
         acc.update(batch_acc, images.size(0))

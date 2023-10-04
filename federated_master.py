@@ -17,7 +17,7 @@ import warnings
 import common
 import network_utils as networkUtils
 
-from flowers.server import flower_server_execute, NetStrategy
+from server import flower_server_execute, NetStrategy
 
 from copy import deepcopy
 from collections import OrderedDict
@@ -128,7 +128,7 @@ def worker(
     # print('')
     print('Simplified model:')
     print(simplified_model)
-    print(type(simplified_model))
+    # print(type(simplified_model))
 
     ### TORCHSCRIPT
     scripted_model = torch.jit.script(simplified_model)
@@ -689,10 +689,10 @@ if __name__ == '__main__':
                     help='disables training on GPU')
     args = arg_parser.parse_args()
 
-    if not args.no_cuda:
-        os.environ["TORCH_DEVICE"] = "cpu"
-    else:
-        os.environ["TORCH_DEVICE"] = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # if not args.no_cuda:
+    #     os.environ["TORCH_DEVICE"] = "cpu"
+    # else:
+    #     os.environ["TORCH_DEVICE"] = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     print(network_utils_all)
 
