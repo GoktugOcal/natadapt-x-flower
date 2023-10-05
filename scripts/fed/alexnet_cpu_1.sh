@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES=0 python federated_master.py \
+CUDA_VISIBLE_DEVICES=-1 python federated_master.py \
     models/alexnet/fed/test-cpu-1-prune-by-latency \
     3 224 224 \
     -im models/alexnet/model_cpu.pth.tar -gp 0 \

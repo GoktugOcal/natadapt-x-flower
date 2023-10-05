@@ -116,9 +116,6 @@ def worker(
                                                                resource_type,
                                                                lookup_table_path))  
 
-
-
-
     # Choose the filters.
     simplified_model = network_utils.simplify_model_based_on_network_def(simplified_network_def, model)
 

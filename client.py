@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from argparse import ArgumentParser
 import warnings
 from collections import OrderedDict
@@ -9,6 +12,7 @@ import pickle
 import base64
 from traceback import print_exc
 
+import numpy as np
 import flwr as fl
 import torch
 import torch.nn as nn
@@ -143,7 +147,7 @@ def fine_tune(model, iterations, train_loader, print_frequency=100):
             sys.stdout.flush()
         
         # Ensure the target shape is sth like torch.Size([batch_size])
-        if len(labels.shape) > 1: labels = labels.reshape(len(labels))
+        if len(target.shape) > 1: target = target.reshape(len(target))
 
         target.unsqueeze_(1)
         target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
@@ -282,6 +286,7 @@ class FlowerClient(fl.client.NumPyClient):
         
         loss, accuracy, latency_measurements = test(self.model, self.testLoader)
         mean_latency = np.mean(latency_measurements)
+        print("Average Latency in Client :", mean_latency)
 
         with open(self.log_file, "a") as f:
             line = ",".join(
