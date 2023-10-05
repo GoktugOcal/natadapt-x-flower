@@ -430,6 +430,8 @@ def master(args):
             if not os.path.exists(client_folder_name):
                 os.mkdir(client_folder_name)
                 print('Create directory', client_folder_name)
+                with open(os.path.join(client_folder_name,"logs.txt"), "w") as f:
+                    f.write("Iteration,Block,Round,Accuracy,Loss\n")
             elif os.listdir(client_folder_name):
                 errMsg = 'Find previous files in the client directory {}. Please use `--resume` or delete those files'.format(client_folder_name)
                 raise ValueError(errMsg)

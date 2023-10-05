@@ -310,18 +310,28 @@ if __name__ == '__main__':
                             help='Root folder where models, related files and history information are saved.')
     arg_parser.add_argument("-no", "--no", type=int,
                             help="id of the client")
+    arg_parser.add_argument("--server_ip", type=str, required=True,
+                            help="Ipv4 address of the Federated Learning Server.",
+    )
     args = arg_parser.parse_args()
     client_id = args.no
 
     client_folder_name = os.path.join(args.working_folder, "client" + "_" + str(client_id))
-    log_file = os.path.join(client_folder_name, "logs.txt")
+    logfilename = os.path.join(client_folder_name, "logs.txt")
+
+    os.makedirs(os.path.dirname(logfilename), exist_ok=True)
+    logging.basicConfig(
+        filename=logfilename,
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S')
 
     train_dataset_path = f"./data/Cifar10/train/{client_id}.pkl"
     test_dataset_path = f"./data/Cifar10/test/{client_id}.pkl"
     trainloader, testloader = load_data(train_dataset_path, test_dataset_path)
 
-    if not os.path.exists(log_file):
-        with open(log_file, "w") as f:
+    if not os.path.exists(logfilename):
+        with open(logfilename, "w") as f:
             f.write("Iteration,Block,Round,Accuracy,Loss\n")
 
     while True:
@@ -329,7 +339,8 @@ if __name__ == '__main__':
         try:
             # Start Flower client
             fl.client.start_numpy_client(
-                server_address="10.0.0.20:8080",
+                server_address=args.server_ip + ":8080",
+                # server_address="10.0.0.20:8080",
                 # server_address="127.0.0.1:8080",
                 client=FlowerClient(
                     client_id,
