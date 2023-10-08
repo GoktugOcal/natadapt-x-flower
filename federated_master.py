@@ -141,23 +141,26 @@ def worker(
         "block_id" : block
     }
     strategy = NetStrategy(model_bytes, netadapt_info)
-    print("> Strategy defined")
+    logging.info("> Strategy defined")
     flower_server_execute(strategy=strategy)
-    print("> Server Closed")
+    logging.info("> Server Closed")
     print("########## FLOWER ##########")
 
 
     fine_tuned_model = deepcopy(simplified_model)
+    logging.info("> Deep Copy")
 
     # Convert `List[np.ndarray]` to PyTorch`state_dict`
     params_dict = zip(fine_tuned_model.state_dict().keys(), strategy.parameters_aggregated)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     fine_tuned_model.load_state_dict(state_dict, strict=True)
+    logging.info("> Load State Dict")
+
 
     #### FLOWER GOES
     # fine_tuned_model = network_utils.fine_tune(simplified_model, short_term_fine_tune_iteration)
     fine_tuned_accuracy = network_utils.evaluate(fine_tuned_model)
-    print('Accuracy after finetune:', fine_tuned_accuracy)
+    logging.info('Accuracy after finetune:', fine_tuned_accuracy)
     #### FLOWER OUT
 
 
@@ -177,6 +180,7 @@ def worker(
                            common.WORKER_FINISH_FILENAME_TEMPLATE.format(netadapt_iteration, block)),
               'w') as file_id:
         file_id.write('finished.')
+    logging.info('Results have been saved.')
 
     # release GPU memory
     del simplified_model, fine_tuned_model
@@ -551,7 +555,7 @@ def master(args):
             #                                           args.short_term_fine_tune_iteration, args.input_data_shape,
             #                                           job_list, available_gpus, args.lookup_table_path,
             #                                           args.dataset_path, args.arch)
-
+            logging.info("Worker starts.")
             worker(
                 gpu = 0,
                 model_path=current_model_path,
@@ -707,3 +711,4 @@ if __name__ == '__main__':
     # Launch the master.
     print(args)
     master(args)
+    logging.info("DONE.")

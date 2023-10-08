@@ -17,7 +17,7 @@ from custom_nodes.dockerclient import DockerClient
 
 logging.basicConfig(level=logging.DEBUG)
 
-WORKING_PATH = "models/alexnet/fed/test-cpu-3-prune-by-latency"
+WORKING_PATH = "models/alexnet/fed/test-cpu-4-prune-by-latency"
 
 def main():
     parser = argparse.ArgumentParser(description="Core")
@@ -69,7 +69,7 @@ def main():
             f"-mi 10 -bur 0.25 -rt LATENCY  -irr 0.025 -rd 0.96 "
             f"-lr 0.001 -st 500 -lt latency_lut/lut_alexnet_pt21.pkl "
             f"-dp data/ --arch alexnet "
-            f"-nc 3 "
+            f"-nc 3"
         )
         time.sleep(5)  # Give server enough time to start
 
@@ -80,7 +80,7 @@ def main():
                 f"docker exec -td DockerClient{3 + i} python client.py "
                 f"{WORKING_PATH} "
                 f"--server_ip {iface1_data.ip4} "
-                f"--no {i+1} "
+                f"--no {i} "
             )
 
         # Wait for the last client process to end
@@ -88,7 +88,7 @@ def main():
             f"docker exec -t DockerClient{2 + len(clients)} python client.py "
             f"{WORKING_PATH} "
             f"--server_ip {iface1_data.ip4} "
-            f"--no {len(clients)} ",
+            f"--no {len(clients) - 1} ",
             wait=True,
         )
 

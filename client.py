@@ -26,6 +26,8 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 from time import sleep, time
 
+import logging
+
 from non_iid_generator.customDataset import CustomDataset
 
 # #############################################################################
@@ -286,7 +288,10 @@ class FlowerClient(fl.client.NumPyClient):
         
         loss, accuracy, latency_measurements = test(self.model, self.testLoader)
         mean_latency = np.mean(latency_measurements)
-        print("Average Latency in Client :", mean_latency)
+
+        logging.info(f">>>> Server Round : {self.netadapt_config['server_round']} Iteration : {self.netadapt_config['netadapt_iteration']} Block Id : {self.netadapt_config['block_id']}")
+        logging.info("Accuracy :", accuracy)
+        logging.info("Average Latency in Client :", mean_latency)
 
         with open(self.log_file, "a") as f:
             line = ",".join(
@@ -300,6 +305,7 @@ class FlowerClient(fl.client.NumPyClient):
             )
             line += "\n"
             f.write(line)
+
 
         return loss, len(self.testLoader.dataset), {"accuracy": accuracy}
 
@@ -318,10 +324,13 @@ if __name__ == '__main__':
 
     client_folder_name = os.path.join(args.working_folder, "client" + "_" + str(client_id))
     logfilename = os.path.join(client_folder_name, "logs.txt")
+    debug_logfilename = os.path.join(client_folder_name, "logs_debug.txt")
 
     os.makedirs(os.path.dirname(logfilename), exist_ok=True)
+    os.makedirs(os.path.dirname(debug_logfilename), exist_ok=True)
+
     logging.basicConfig(
-        filename=logfilename,
+        filename=debug_logfilename,
         format='%(asctime)s %(levelname)-8s %(message)s',
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S')
@@ -344,7 +353,7 @@ if __name__ == '__main__':
                 # server_address="127.0.0.1:8080",
                 client=FlowerClient(
                     client_id,
-                    log_file,
+                    logfilename,
                     train_loader= trainloader,
                     test_loader=testloader
                 ),
