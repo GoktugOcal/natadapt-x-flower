@@ -160,7 +160,7 @@ def worker(
     #### FLOWER GOES
     # fine_tuned_model = network_utils.fine_tune(simplified_model, short_term_fine_tune_iteration)
     fine_tuned_accuracy = network_utils.evaluate(fine_tuned_model)
-    logging.info('Accuracy after finetune:', fine_tuned_accuracy)
+    logging.info('Accuracy after finetune : ' + str(fine_tuned_accuracy))
     #### FLOWER OUT
 
 
@@ -710,5 +710,9 @@ if __name__ == '__main__':
 
     # Launch the master.
     print(args)
-    master(args)
+    try:
+        master(args)
+    except Exception as e:
+        logging.warning(e)
+    
     logging.info("DONE.")

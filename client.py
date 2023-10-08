@@ -288,10 +288,12 @@ class FlowerClient(fl.client.NumPyClient):
         
         loss, accuracy, latency_measurements = test(self.model, self.testLoader)
         mean_latency = np.mean(latency_measurements)
+        print(">>>> ",len(latency_measurements), mean_latency)
+
 
         logging.info(f">>>> Server Round : {self.netadapt_config['server_round']} Iteration : {self.netadapt_config['netadapt_iteration']} Block Id : {self.netadapt_config['block_id']}")
-        logging.info("Accuracy :", accuracy)
-        logging.info("Average Latency in Client :", mean_latency)
+        logging.info("Accuracy : " + str(accuracy))
+        logging.info("Average Latency in Client : " + str(mean_latency))
 
         with open(self.log_file, "a") as f:
             line = ",".join(

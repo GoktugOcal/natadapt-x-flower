@@ -51,7 +51,7 @@ def main():
             client_ifaces.append(prefixes.create_iface(new_client))
 
         # add links
-        link_options = LinkOptions(bandwidth=500_000_000)
+        link_options = LinkOptions(bandwidth=100_000_000_000)
         session.add_link(servernode.id, switch.id, iface1_data)
         for client, iface in zip(clients, client_ifaces):
             session.add_link(client.id, switch.id, iface, options=link_options)
@@ -68,13 +68,12 @@ def main():
             f"-im models/alexnet/model_cpu.pth.tar -gp 0 "
             f"-mi 10 -bur 0.25 -rt LATENCY  -irr 0.025 -rd 0.96 "
             f"-lr 0.001 -st 500 -lt latency_lut/lut_alexnet_pt21.pkl "
-            f"-dp data/ --arch alexnet "
+            f"-dp data/Cifar10/server --arch alexnet "
             f"-nc 3"
         )
         time.sleep(5)  # Give server enough time to start
 
         for i, client in enumerate(clients[:-1]):
-            print(i)
             # DockerClient starts from 3 because 1 is switch and 2 is server
             client.host_cmd(
                 f"docker exec -td DockerClient{3 + i} python client.py "

@@ -99,29 +99,39 @@ class networkUtils_alexnet(NetworkUtilsAbstract):
         self.weight_decay = 1e-4
         self.finetune_lr = finetune_lr
         
-        train_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
-        transform=transforms.Compose([
-            transforms.RandomCrop(32, padding=4), 
-            transforms.Resize(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-        ]))
+        # train_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
+        # transform=transforms.Compose([
+        #     transforms.RandomCrop(32, padding=4), 
+        #     transforms.Resize(224),
+        #     transforms.RandomHorizontalFlip(),
+        #     transforms.ToTensor(),
+        #     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+        # ]))
     
+        # train_loader = torch.utils.data.DataLoader(
+        # train_dataset, batch_size=self.batch_size, 
+        # num_workers=self.num_workers, pin_memory=True, shuffle=True)#, sampler=train_sampler)
+        train_data = pickle.load(open(os.path.join(dataset_path,"train.pkl"), "rb"))
         train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=self.batch_size, 
-        num_workers=self.num_workers, pin_memory=True, shuffle=True)#, sampler=train_sampler)
+            train_data,
+            batch_size=self.batch_size,
+            shuffle=True)
         self.train_loader = train_loader
         
-        val_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
-        transform=transforms.Compose([
-            transforms.Resize(224), 
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-        ]))
+        # val_dataset = datasets.CIFAR10(root=dataset_path, train=True, download=True,
+        # transform=transforms.Compose([
+        #     transforms.Resize(224), 
+        #     transforms.ToTensor(),
+        #     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+        # ]))
+        # val_loader = torch.utils.data.DataLoader(
+        # val_dataset, batch_size=self.batch_size, shuffle=False,
+        # num_workers=self.num_workers, pin_memory=True) #, sampler=valid_sampler)
+        val_dataset = pickle.load(open(os.path.join(dataset_path,"test.pkl"), "rb"))
         val_loader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=self.batch_size, shuffle=False,
-        num_workers=self.num_workers, pin_memory=True) #, sampler=valid_sampler)
+            val_dataset,
+            batch_size=self.batch_size,
+            shuffle=True)
         self.val_loader = val_loader   
         
         self.criterion = torch.nn.BCEWithLogitsLoss()
@@ -308,6 +318,10 @@ class networkUtils_alexnet(NetworkUtilsAbstract):
         num_samples = .0
         with torch.no_grad():
             for i, (input, target) in enumerate(self.val_loader):
+
+                # Ensure the target shape is sth like torch.Size([batch_size])
+                if len(target.shape) > 1: target = target.reshape(len(target))
+
                 input, target = input.to(DEVICE), target.to(DEVICE)
                 pred = model(input)
                 pred = pred.argmax(dim=1)
