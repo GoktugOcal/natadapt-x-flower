@@ -146,7 +146,9 @@ def worker(
         model_bytes,
         netadapt_info,
         min_fit_clients = no_clients,
-        min_available_clients = no_clients)
+        min_available_clients = no_clients,
+        min_evaluate_clients = no_clients
+        )
     logging.info("> Strategy defined")
     flower_server_execute(strategy=strategy)
     logging.info("> Server Closed")
