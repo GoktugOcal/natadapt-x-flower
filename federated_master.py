@@ -68,6 +68,7 @@ def elapsed(title:str, start=None):
 
 def worker(
     gpu,
+    no_clients,
     model_path,
     arch,
     input_data_shape,
@@ -133,6 +134,7 @@ def worker(
     buffer = io.BytesIO()
     torch.jit.save(scripted_model, buffer)
     model_bytes = buffer.getvalue()
+    logging.info("Size of the encoded model : %d", len(model_bytes))
     buffer.close()
 
     print("########## FLOWER ##########")
@@ -140,7 +142,11 @@ def worker(
         "netadapt_iteration" : netadapt_iteration,
         "block_id" : block
     }
-    strategy = NetStrategy(model_bytes, netadapt_info)
+    strategy = NetStrategy(
+        model_bytes,
+        netadapt_info,
+        min_fit_clients = no_clients,
+        min_available_clients = no_clients)
     logging.info("> Strategy defined")
     flower_server_execute(strategy=strategy)
     logging.info("> Server Closed")
@@ -148,13 +154,11 @@ def worker(
 
 
     fine_tuned_model = deepcopy(simplified_model)
-    logging.info("> Deep Copy")
 
     # Convert `List[np.ndarray]` to PyTorch`state_dict`
     params_dict = zip(fine_tuned_model.state_dict().keys(), strategy.parameters_aggregated)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     fine_tuned_model.load_state_dict(state_dict, strict=True)
-    logging.info("> Load State Dict")
 
 
     #### FLOWER GOES
@@ -558,6 +562,7 @@ def master(args):
             logging.info("Worker starts.")
             worker(
                 gpu = 0,
+                no_clients = args.nc,
                 model_path=current_model_path,
                 arch = args.arch,
                 input_data_shape = args.input_data_shape,

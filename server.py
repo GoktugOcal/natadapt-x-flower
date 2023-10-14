@@ -43,9 +43,14 @@ class NetStrategy(FedAvg):
     def __init__(
         self,
         network_arch,
-        netadapt_info
+        netadapt_info,
+        min_available_clients,
+        min_fit_clients
     ) -> None:
-        super().__init__()
+        super().__init__(
+            min_available_clients = min_available_clients,
+            min_fit_clients = min_fit_clients
+            )
         self.network_arch = network_arch
         self.network_arch_str = self.network_arch
         self.netadapt_info = netadapt_info
@@ -63,18 +68,23 @@ class NetStrategy(FedAvg):
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
-        print("############ GOKTUG - serverside ############")
 
         cfg_fit = []
         for cli in clients:
-            print(cli)
-            config = {
-                "network_arch" : self.network_arch_str,
-                "server_round" : server_round,
-                "netadapt_iteration" : self.netadapt_info["netadapt_iteration"],
-                "block_id" : self.netadapt_info["block_id"]
-                }
-
+            if server_round == 1:
+                config = {
+                    "network_arch" : self.network_arch_str,
+                    "server_round" : server_round,
+                    "netadapt_iteration" : self.netadapt_info["netadapt_iteration"],
+                    "block_id" : self.netadapt_info["block_id"]
+                    }
+            else: 
+                config = {
+                    "server_round" : server_round,
+                    "netadapt_iteration" : self.netadapt_info["netadapt_iteration"],
+                    "block_id" : self.netadapt_info["block_id"]
+                    }
+            
             fit_ins = FitIns(parameters, deepcopy(config))
             # append
             cfg_fit.append((cli, fit_ins))

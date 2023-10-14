@@ -45,6 +45,7 @@ class DockerClient(DockerNode):
         :param options: options for creating node
         """
         super().__init__(session, _id, name, server, options)
+        self.no_cpus = options.no_cpus
 
     
     def startup(self) -> None:
@@ -72,7 +73,7 @@ class DockerClient(DockerNode):
             # create container and retrieve the created containers PID
             self.host_cmd(
                 f"{DOCKER} run -td --init --net=none --hostname {hostname} "
-                f"--cpus=\"4\" "
+                f"--cpus=\"{self.no_cpus}\" "
                 f"--name {self.name} --sysctl net.ipv6.conf.all.disable_ipv6=0 "
                 f"{binds} {volumes} "
                 f"--privileged {self.image} tail -f /dev/null"

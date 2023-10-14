@@ -262,11 +262,16 @@ class FlowerClient(fl.client.NumPyClient):
         print("############ FIT ############")
         self.netadapt_config = config
 
-        ## Receive the model
-        buffer = io.BytesIO(config["network_arch"])
-        self.model = torch.jit.load(buffer)
-        buffer.close()
-        ## Check the received model
+        if "network_arch" in list(config.keys()):
+            ## Receive the model
+            buffer = io.BytesIO(config["network_arch"])
+            logging.info("Model received from server, the size is : %d", len(buffer.getvalue()))
+            self.model = torch.jit.load(buffer)
+            buffer.close()
+        else:
+            self.set_parameters(parameters=parameters)
+        
+        ## Check the received model 
         self.model.eval()
         # print(type(self.model))
         # print(self.model)
@@ -277,7 +282,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.model = fine_tune(self.model, 5, self.trainLoader, print_frequency=1)
 
         # train(net, trainloader, epochs=1)
-        return self.get_parameters(None), len(self.trainLoader.dataset), {}
+        return self.get_parameters(config), len(self.trainLoader.dataset), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
