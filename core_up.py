@@ -40,7 +40,7 @@ def main():
         options = DockerNode.create_options()
         options.image = "pynode"
         options.binds = [(os.getcwd() + "/models", "/app/models")]
-        options.no_cpus = 2
+        options.no_cpus = 3
         servernode = session.add_node(DockerServer, options=options)
         iface1_data = prefixes.create_iface(servernode)
 

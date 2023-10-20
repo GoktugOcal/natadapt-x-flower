@@ -136,34 +136,38 @@ def fine_tune(model, iterations, train_loader, print_frequency=100):
 
     model = model.to(DEVICE)
     model.train()
-    dataloader_iter = iter(train_loader)
+    # dataloader_iter = iter(train_loader)
+    logging.info("Fine tuning started.")
     for i in range(iterations):
-        try:
-            (input, target) = next(dataloader_iter)
-        except:
-            dataloader_iter = iter(train_loader)
-            (input, target) = next(dataloader_iter)
+        logging.info(f"> Iteration {str(i)} start")
+        for i, (input, target) in enumerate(train_loader):
+
+            # (input, target) = next(dataloader_iter)
             
-        if i % print_frequency == 0:
-            print('Fine-tuning iteration {}'.format(i))
-            sys.stdout.flush()
-        
-        # Ensure the target shape is sth like torch.Size([batch_size])
-        if len(target.shape) > 1: target = target.reshape(len(target))
+            logging.info(f"> Here")
 
-        target.unsqueeze_(1)
-        target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
-        target_onehot.zero_()
-        target_onehot.scatter_(1, target, 1)
-        target.squeeze_(1)
-        input, target = input.to(DEVICE), target.to(DEVICE)
-        target_onehot = target_onehot.to(DEVICE)
+            if i % print_frequency == 0:
+                logging.info('Fine-tuning iteration {}'.format(i))
+                sys.stdout.flush()
+            
+            # Ensure the target shape is sth like torch.Size([batch_size])
+            if len(target.shape) > 1: target = target.reshape(len(target))
 
-        pred = model(input)
-        loss = criterion(pred, target_onehot)
-        optimizer.zero_grad()
-        loss.backward()  # compute gradient and do SGD step
-        optimizer.step()
+            target.unsqueeze_(1)
+            target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
+            target_onehot.zero_()
+            target_onehot.scatter_(1, target, 1)
+            target.squeeze_(1)
+            input, target = input.to(DEVICE), target.to(DEVICE)
+            target_onehot = target_onehot.to(DEVICE)
+
+            pred = model(input)
+            loss = criterion(pred, target_onehot)
+            optimizer.zero_grad()
+            loss.backward()  # compute gradient and do SGD step
+            optimizer.step()
+
+            del loss, pred
 
     return model
 
@@ -259,7 +263,6 @@ class FlowerClient(fl.client.NumPyClient):
         self.model.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
-        print("############ FIT ############")
         self.netadapt_config = config
 
         if "network_arch" in list(config.keys()):
@@ -278,8 +281,9 @@ class FlowerClient(fl.client.NumPyClient):
 
         train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
         test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"
-
+        
         self.model = fine_tune(self.model, 5, self.trainLoader, print_frequency=1)
+        logging.info("Fine tuning ended.")
 
         # train(net, trainloader, epochs=1)
         return self.get_parameters(config), len(self.trainLoader.dataset), {}
@@ -291,12 +295,12 @@ class FlowerClient(fl.client.NumPyClient):
         # test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"        
         # trainLoader, testLoader = load_data(train_dataset_path, test_dataset_path)
         
+        logging.info(f">>>> Server Round : {self.netadapt_config['server_round']} Iteration : {self.netadapt_config['netadapt_iteration']} Block Id : {self.netadapt_config['block_id']}")
         loss, accuracy, latency_measurements = test(self.model, self.testLoader)
         mean_latency = np.mean(latency_measurements)
         print(">>>> ",len(latency_measurements), mean_latency)
 
 
-        logging.info(f">>>> Server Round : {self.netadapt_config['server_round']} Iteration : {self.netadapt_config['netadapt_iteration']} Block Id : {self.netadapt_config['block_id']}")
         logging.info("Accuracy : " + str(accuracy))
         logging.info("Average Latency in Client : " + str(mean_latency))
 
