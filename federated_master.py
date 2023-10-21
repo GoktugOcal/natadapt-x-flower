@@ -38,6 +38,7 @@ _SERVER_FOLDER_FILENAME = 'server'
 _WORKER_PY_FILENAME = 'worker.py'
 _HISTORY_PICKLE_FILENAME = 'history.pickle'
 _HISTORY_TEXT_FILENAME = 'history.txt'
+_SERVER_TEXT_FILENAME = 'server.txt'
 _SLEEP_TIME = 1
 
 # Define keys.
@@ -150,7 +151,7 @@ def worker(
         min_evaluate_clients = no_clients
         )
     logging.info("> Strategy defined")
-    flower_server_execute(strategy=strategy)
+    hist = flower_server_execute(strategy=strategy)
     logging.info("> Server Closed")
     print("########## FLOWER ##########")
 
@@ -190,7 +191,7 @@ def worker(
 
     # release GPU memory
     del simplified_model, fine_tuned_model
-    return 
+    return hist
 
 
 def _launch_worker(worker_folder, model_path, block, resource_type, constraint, netadapt_iteration,
@@ -370,6 +371,9 @@ def master(args):
     server_folder = os.path.join(args.working_folder, _SERVER_FOLDER_FILENAME)
     history_pickle_file = os.path.join(master_folder, _HISTORY_PICKLE_FILENAME)
     history_text_file = os.path.join(master_folder, _HISTORY_TEXT_FILENAME)
+    server_text_file = os.path.join(server_folder, _SERVER_TEXT_FILENAME)
+
+    
 
     # Get available GPUs.
     available_gpus = args.gpus
@@ -435,7 +439,7 @@ def master(args):
             errMsg = 'Find previous files in the server directory {}. Please use `--resume` or delete those files'.format(server_folder)
             raise ValueError(errMsg)
         
-        for cn in range(1,args.nc + 1):
+        for cn in range(args.nc):
             client_folder_name = os.path.join(args.working_folder, _CLIENT_FOLDER_FILENAME + "_" + str(cn))
             if not os.path.exists(client_folder_name):
                 os.mkdir(client_folder_name)
@@ -445,6 +449,9 @@ def master(args):
             elif os.listdir(client_folder_name):
                 errMsg = 'Find previous files in the client directory {}. Please use `--resume` or delete those files'.format(client_folder_name)
                 raise ValueError(errMsg)
+
+        with open(server_text_file, 'w') as file_id:
+            file_id.write('Iteration,Block,Round,Resource,Accuracy,Losses\n')
 
 
         logging.info("Directories have created.")
@@ -562,7 +569,7 @@ def master(args):
             #                                           job_list, available_gpus, args.lookup_table_path,
             #                                           args.dataset_path, args.arch)
             logging.info("Worker starts.")
-            worker(
+            hist = worker(
                 gpu = 0,
                 no_clients = args.nc,
                 model_path=current_model_path,
@@ -583,6 +590,19 @@ def master(args):
             # print('Update available gpu:', available_gpus, '\n')
             logging.info(f"For block {block_idx} the process has finished in {round(time.time() - block_start,2)} seconds.")
 
+            print(hist.losses_distributed)
+            for round_no in range(1,len(hist.losses_distributed)+1):
+                acc = dict(hist.metrics_distributed["accuracy"])[round_no]
+                loss = dict(hist.losses_distributed)[round_no]
+                with open(server_text_file, 'a') as file_id:
+                    file_id.write('{},{},{},{},{},{}\n'.format( current_iter,
+                                                            block_idx,
+                                                            round_no,
+                                                            current_resource,
+                                                            acc,
+                                                            loss)
+                                                            )
+            
 
         # wait_start = elapsed("wait until all the workers finish")
         # # Wait until all the workers finish.

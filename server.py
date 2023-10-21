@@ -46,12 +46,14 @@ class NetStrategy(FedAvg):
         netadapt_info,
         min_available_clients,
         min_fit_clients,
-        min_evaluate_clients
+        min_evaluate_clients,
+        evaluate_metrics_aggregation_fn = weighted_average
     ) -> None:
         super().__init__(
             min_available_clients = min_available_clients,
             min_fit_clients = min_fit_clients,
-            min_evaluate_clients = min_evaluate_clients
+            min_evaluate_clients = min_evaluate_clients,
+            evaluate_metrics_aggregation_fn = weighted_average
             )
         self.network_arch = network_arch
         self.network_arch_str = self.network_arch
@@ -132,10 +134,12 @@ class NetStrategy(FedAvg):
         return loss, metrics
 
 
-def flower_server_execute(strategy):
-    fl.server.start_server(
+def flower_server_execute(strategy, no_rounds=3):
+    hist = fl.server.start_server(
         server_address="0.0.0.0:8080",
-        config=fl.server.ServerConfig(num_rounds=5),
+        config=fl.server.ServerConfig(num_rounds=10),
         strategy=strategy,
         grpc_max_message_length=1073741824
     )
+
+    return hist

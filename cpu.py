@@ -1,19 +1,33 @@
 import psutil
 from datetime import datetime
+import time
+import logging
 
-filename = "cpu_logs_test-1.txt"
+cpu_filename = "cpu_logs_test-1.txt"
+mem_filename = "mem_logs_test-1.txt"
 
-file = open(filename, "w")
+
+cpu_file = open(cpu_filename, "w")
 no_cores = psutil.cpu_count()
-header = "datetime;"+";".join([str(i) for i in range(1,no_cores+1)])
-file.write(header)
-file.close()
+cpu_header = "datetime;"+";".join([str(i) for i in range(1,no_cores+1)])
+cpu_file.write(cpu_header)
+cpu_file.close()
 
-file = open(filename, "a")
+mem_file = open(mem_filename,"w")
+mem_header = "datetime;util"
+mem_file.write(mem_header)
+mem_file.close()
+
+
+cpu_file = open(cpu_filename, "a")
+mem_file = open(mem_filename, "a")
+
 while True:
-    print("hop")
-    per_cpu = psutil.cpu_percent(percpu=True, interval=3)
     now = datetime.now()
-    file.write(f"\n{now.strftime('%m/%d/%Y %H:%M:%S')};"+";".join([str(usage) for usage in per_cpu]))
-    #for idx, usage in enumerate(per_cpu):
-        #print(f"CORE {idx+1}: {usage}%")
+    per_cpu = psutil.cpu_percent(percpu=True)
+    cpu_file.write(f"\n{now.strftime('%m/%d/%Y %H:%M:%S')};"+";".join([str(usage) for usage in per_cpu]))
+    
+    mem_util = psutil.virtual_memory().percent
+    mem_file.write(f"\n{now.strftime('%m/%d/%Y %H:%M:%S')};{mem_util}")
+    
+    time.sleep(5)

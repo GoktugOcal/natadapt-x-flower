@@ -74,6 +74,7 @@ class DockerClient(DockerNode):
             self.host_cmd(
                 f"{DOCKER} run -td --init --net=none --hostname {hostname} "
                 f"--cpus=\"{self.no_cpus}\" "
+                f"--memory=\"2g\" "
                 f"--name {self.name} --sysctl net.ipv6.conf.all.disable_ipv6=0 "
                 f"{binds} {volumes} "
                 f"--privileged {self.image} tail -f /dev/null"

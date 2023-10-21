@@ -17,7 +17,8 @@ from custom_nodes.dockerclient import DockerClient
 
 logging.basicConfig(level=logging.DEBUG)
 
-WORKING_PATH = "models/alexnet/fed/test-cpu-10nc-mac"
+WORKING_PATH = "models/alexnet/fed/test-cpu-10nc-mac-0bw"
+MAX_ITER = 5
 NO_CLIENTS = 10
 
 def main():
@@ -40,7 +41,7 @@ def main():
         options = DockerNode.create_options()
         options.image = "pynode"
         options.binds = [(os.getcwd() + "/models", "/app/models")]
-        options.no_cpus = 3
+        options.no_cpus = 4
         servernode = session.add_node(DockerServer, options=options)
         iface1_data = prefixes.create_iface(servernode)
 
@@ -84,7 +85,7 @@ def main():
             f"{WORKING_PATH} "
             f"3 224 224 "
             f"-im models/alexnet/model_cpu.pth.tar -gp 0 "
-            f"-mi 10 -bur 0.25 -rt FLOPS  -irr 0.025 -rd 0.96 "
+            f"-mi {MAX_ITER} -bur 0.25 -rt FLOPS  -irr 0.025 -rd 0.96 "
             f"-lr 0.001 -st 500 "
             f"-dp data/Cifar10/server --arch alexnet "
             f"-nc {NO_CLIENTS}"

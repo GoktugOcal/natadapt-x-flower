@@ -104,7 +104,7 @@ def test(net, testloader):
     print("Test Accuracy :", round(accuracy, 3), "| Total no samples :", len(testloader.dataset))
     return loss, accuracy, latency_measurements
 
-def fine_tune(model, iterations, train_loader, print_frequency=100):
+def fine_tune(model, no_epoch, train_loader, print_frequency=100):
     '''
         short-term fine-tune a simplified model
         
@@ -138,17 +138,13 @@ def fine_tune(model, iterations, train_loader, print_frequency=100):
     model.train()
     # dataloader_iter = iter(train_loader)
     logging.info("Fine tuning started.")
-    for i in range(iterations):
-        logging.info(f"> Iteration {str(i)} start")
+    for i in range(no_epoch):
+        if i % print_frequency == 0:
+            logging.info('Fine-tuning Epoch {}'.format(i))
+            sys.stdout.flush()
         for i, (input, target) in enumerate(train_loader):
 
             # (input, target) = next(dataloader_iter)
-            
-            logging.info(f"> Here")
-
-            if i % print_frequency == 0:
-                logging.info('Fine-tuning iteration {}'.format(i))
-                sys.stdout.flush()
             
             # Ensure the target shape is sth like torch.Size([batch_size])
             if len(target.shape) > 1: target = target.reshape(len(target))
@@ -323,9 +319,9 @@ class FlowerClient(fl.client.NumPyClient):
 
 if __name__ == '__main__':
     arg_parser = ArgumentParser()
-    arg_parser.add_argument('working_folder', type=str, 
+    arg_parser.add_argument('working_folder', type=str,
                             help='Root folder where models, related files and history information are saved.')
-    arg_parser.add_argument("-no", "--no", type=int,
+    arg_parser.add_argument("-no", "--no", type=int, required=True,
                             help="id of the client")
     arg_parser.add_argument("--server_ip", type=str, required=True,
                             help="Ipv4 address of the Federated Learning Server.",
@@ -355,7 +351,6 @@ if __name__ == '__main__':
             f.write("Iteration,Block,Round,Accuracy,Loss\n")
 
     while True:
-        print("Waiting for server connnection...")
         try:
             # Start Flower client
             fl.client.start_numpy_client(
@@ -373,6 +368,10 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             break
         except Exception as e:
-            # logging.Warning(e)
-            print_exc()
+            if(e.__class__.__name__ == "_MultiThreadedRendezvous"):
+                print("Waiting for server connnection...")
+            else:
+                logging.warning(e)
+                print_exc()
+                
             sleep(3)
