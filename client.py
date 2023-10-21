@@ -142,8 +142,9 @@ def fine_tune(model, no_epoch, train_loader, print_frequency=100):
         if i % print_frequency == 0:
             logging.info('Fine-tuning Epoch {}'.format(i))
             sys.stdout.flush()
-        for i, (input, target) in enumerate(train_loader):
-
+        for i, (input, target) in enumerate(tqdm(train_loader)):
+            
+            logging.info(f"\tBatch no: {i}")
             # (input, target) = next(dataloader_iter)
             
             # Ensure the target shape is sth like torch.Size([batch_size])
@@ -373,5 +374,5 @@ if __name__ == '__main__':
             else:
                 logging.warning(e)
                 print_exc()
-                
+
             sleep(3)

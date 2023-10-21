@@ -18,7 +18,7 @@ from non_iid_generator.customDataset import CustomDataset
 
 _NUM_CLASSES = 10
 DEVICE = os.environ["TORCH_DEVICE"]
-
+DEVICE = "cuda"
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -189,6 +189,12 @@ if __name__ == '__main__':
                     help='disables training on GPU')
     args = arg_parser.parse_args()
     print(args)
+
+    # if not args.no_cuda:
+    #     os.environ["TORCH_DEVICE"] = "cpu"
+    # else:
+    #     os.environ["TORCH_DEVICE"] = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     
     path = os.path.dirname(args.save_dir)
     if not os.path.exists(path):
@@ -196,52 +202,55 @@ if __name__ == '__main__':
         print('Create new directory `{}`'.format(path))        
 
     # Data loader
-    # train_dataset = datasets.CIFAR10(root=args.data, train=True, download=True,
-    #     transform=transforms.Compose([
-    #         transforms.RandomCrop(32, padding=4), 
-    #         transforms.Resize(224),
-    #         transforms.RandomHorizontalFlip(),
-    #         transforms.ToTensor(),
-    #         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    #     ]))
-    # train_loader = torch.utils.data.DataLoader(
-    #     train_dataset, batch_size=args.batch_size, shuffle=True,
-    #     num_workers=args.workers, pin_memory=True)
-    # test_dataset = datasets.CIFAR10(root=args.data, train=False, download=True,
-    #     transform=transforms.Compose([
-    #         transforms.Resize(224),
-    #         transforms.ToTensor(),
-    #         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    #     ]))
-    # test_loader = torch.utils.data.DataLoader(
-    #     test_dataset, batch_size=args.batch_size, shuffle=False,
-    #     num_workers=args.workers, pin_memory=True)
-
-    train_dataset_path = os.path.join(args.data, "Cifar10", "server", "train.pkl")
-    train_data = pickle.load(open(train_dataset_path, "rb"))
+    train_dataset = datasets.CIFAR10(root=args.data, train=True, download=True,
+        transform=transforms.Compose([
+            transforms.RandomCrop(32, padding=4), 
+            transforms.Resize(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+        ]))
     train_loader = torch.utils.data.DataLoader(
-        train_data,
-        batch_size=args.batch_size,
-        shuffle=True)
-
-    test_dataset_path = os.path.join(args.data, "Cifar10", "server", "test.pkl")
-    test_data = pickle.load(open(test_dataset_path, "rb"))
+        train_dataset, batch_size=args.batch_size, shuffle=True,
+        num_workers=args.workers, pin_memory=True)
+    test_dataset = datasets.CIFAR10(root=args.data, train=False, download=True,
+        transform=transforms.Compose([
+            transforms.Resize(224),
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+        ]))
     test_loader = torch.utils.data.DataLoader(
-        test_data,
-        batch_size=args.batch_size,
-        shuffle=True)
+        test_dataset, batch_size=args.batch_size, shuffle=False,
+        num_workers=args.workers, pin_memory=True)
+
+    # train_dataset_path = os.path.join(args.data, "Cifar10", "server", "train.pkl")
+    # train_data = pickle.load(open(train_dataset_path, "rb"))
+    # train_loader = torch.utils.data.DataLoader(
+    #     train_data,
+    #     batch_size=args.batch_size,
+    #     shuffle=True)
+
+    # test_dataset_path = os.path.join(args.data, "Cifar10", "server", "test.pkl")
+    # test_data = pickle.load(open(test_dataset_path, "rb"))
+    # test_loader = torch.utils.data.DataLoader(
+    #     test_data,
+    #     batch_size=args.batch_size,
+    #     shuffle=True)
 
     
     # Network
     cudnn.benchmark = True
     num_classes = _NUM_CLASSES
     model_arch = args.arch
-    model = models.__dict__[model_arch](num_classes=num_classes)
+    model = models.__dict__[model_arch](reducing_rate=0.5,num_classes=num_classes)
     criterion = nn.BCEWithLogitsLoss()
 
     
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
+
+    params_count = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Total number of trainable params {params_count}")
 
     # optionally resume from a checkpoint
     if args.resume:

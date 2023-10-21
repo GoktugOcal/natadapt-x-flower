@@ -19,7 +19,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 WORKING_PATH = "models/alexnet/fed/test-cpu-10nc-mac-0bw"
 MAX_ITER = 5
-NO_CLIENTS = 10
+NO_CLIENTS = 5
+CPU_PER_CLIENT = 2
+MEM_LIMIT_PER_CLIENT = "4g"
 
 def main():
     parser = argparse.ArgumentParser(description="Core")
@@ -41,7 +43,8 @@ def main():
         options = DockerNode.create_options()
         options.image = "pynode"
         options.binds = [(os.getcwd() + "/models", "/app/models")]
-        options.no_cpus = 4
+        options.no_cpus = CPU_PER_CLIENT
+        options.mem_limit = MEM_LIMIT_PER_CLIENT
         servernode = session.add_node(DockerServer, options=options)
         iface1_data = prefixes.create_iface(servernode)
 

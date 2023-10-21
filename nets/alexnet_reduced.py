@@ -3,17 +3,17 @@ import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 
 
-__all__ = ['AlexNet', 'alexnet']
+__all__ = ['AlexNet_reduced', 'alexnet_reduced']
 
 
-model_urls = {
-    'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
-}
+# model_urls = {
+#     'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
+# }
 
-class AlexNet(nn.Module):
+class AlexNet_reduced(nn.Module):
 
     def __init__(self,reducing_rate = 1):
-        super(AlexNet, self).__init__()
+        super(AlexNet_reduced, self).__init__()
         self.reducing_rate = reducing_rate
         self.features_rate = 1
 
@@ -51,14 +51,14 @@ class AlexNet(nn.Module):
         return x
 
 
-def alexnet(reducing_rate=1, pretrained=False, progress=True, num_classes=1000):
+def alexnet_reduced(reducing_rate=1, pretrained=False, progress=True, num_classes=1000):
     r"""AlexNet model architecture from the
     `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
-    model = AlexNet(reducing_rate=reducing_rate)
+    model = AlexNet_reduced(reducing_rate=reducing_rate)
     if pretrained:
         state_dict = model_zoo.load_url(model_urls['alexnet'], progress=progress)
         model.load_state_dict(state_dict)

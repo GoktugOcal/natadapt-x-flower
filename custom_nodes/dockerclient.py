@@ -46,6 +46,7 @@ class DockerClient(DockerNode):
         """
         super().__init__(session, _id, name, server, options)
         self.no_cpus = options.no_cpus
+        self.mem_limit = options.mem_limit
 
     
     def startup(self) -> None:
@@ -74,7 +75,7 @@ class DockerClient(DockerNode):
             self.host_cmd(
                 f"{DOCKER} run -td --init --net=none --hostname {hostname} "
                 f"--cpus=\"{self.no_cpus}\" "
-                f"--memory=\"2g\" "
+                f"--memory=\"{self.mem_limit}\" "
                 f"--name {self.name} --sysctl net.ipv6.conf.all.disable_ipv6=0 "
                 f"{binds} {volumes} "
                 f"--privileged {self.image} tail -f /dev/null"
