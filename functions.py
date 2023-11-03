@@ -686,7 +686,7 @@ def simplify_network_def_based_on_constraint(network_def, block, constraint, res
     return simplified_network_def, simplified_resource
 
 
-def simplify_network_def_based_on_constraint_test(network_def, block, constraint, resource_type, iteration, log_path,
+def simplify_network_def_based_on_constraint_test(network_def, block, constraint, resource_type, iteration, log_path, coeff,
                                              lookup_table_path=None, skip_connection_block_sets=[], 
                                              min_feature_size=8):
     '''
@@ -761,7 +761,7 @@ def simplify_network_def_based_on_constraint_test(network_def, block, constraint
     if max_num_out_channels >= min_feature_size:
         # Try numbers of channels that are multiples of '_MIN_FEATURE_SIZE'.
         num_out_channels_try = list(range(max_num_out_channels // min_feature_size * min_feature_size, 
-                                          min_feature_size - 1, -min_feature_size*2))
+                                          min_feature_size - 1, -min_feature_size*coeff))
     else:
         num_out_channels_try = [max_num_out_channels]
 

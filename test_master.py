@@ -114,23 +114,14 @@ def worker(
         raise ValueError("Block index >= number of simplifiable blocks")
     
     network_def = network_utils.get_network_def_from_model(model)
-    # simplified_network_def, simplified_resource = (
-    #     fns.simplify_network_def_based_on_constraint_test(network_def,
-    #                                                            block,
-    #                                                            constraint,
-    #                                                            resource_type,
-    #                                                            netadapt_iteration,
-    #                                                            log_path,
-    #                                                            lookup_table_path
-    #                                                            ))
-
     simplified_network_def, simplified_resource = (
-        fns.simplify_network_def_based_on_constraint(network_def,
+        fns.simplify_network_def_based_on_constraint_test(network_def,
                                                                block,
                                                                constraint,
                                                                resource_type,
                                                                netadapt_iteration,
                                                                log_path,
+                                                               1,
                                                                lookup_table_path
                                                                ))
 
