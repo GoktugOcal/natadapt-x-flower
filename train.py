@@ -19,8 +19,8 @@ from non_iid_generator.customDataset import CustomDataset
 from utils import imagenet_loader
 
 _NUM_CLASSES = 10
-# DEVICE = os.environ["TORCH_DEVICE"]
-DEVICE = "cuda"
+DEVICE = os.environ["TORCH_DEVICE"]
+# DEVICE = "cuda"
 
 
 
