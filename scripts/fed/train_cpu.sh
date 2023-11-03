@@ -1,5 +1,5 @@
 python train.py \
     data/ \
-    --dir models/alexnet/model_cpu.pth.tar \
+    --dir models/alexnet/model_cuda.pth.tar \
     --arch alexnet \
-    --no-cuda
+    # --no-cuda

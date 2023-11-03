@@ -17,10 +17,10 @@ from custom_nodes.dockerclient import DockerClient
 
 logging.basicConfig(level=logging.DEBUG)
 
-WORKING_PATH = "models/alexnet/fed/test-test"
+WORKING_PATH = "models/alexnet/fed/pure-test-1"
 MAX_ITER = 5
 NO_CLIENTS = 5
-CPU_PER_CLIENT = 4
+CPU_PER_CLIENT = 8
 MEM_LIMIT_PER_CLIENT = "4g"
 
 def main():
@@ -71,26 +71,9 @@ def main():
         session.instantiate()
 
         # Execute python scripts
-        # # Latency
-        # servernode.host_cmd(
-        #     f"docker exec -td DockerServer2 python federated_master.py "
-        #     f"{WORKING_PATH} "
-        #     f"3 224 224 "
-        #     f"-im models/alexnet/model_cpu.pth.tar -gp 0 "
-        #     f"-mi 10 -bur 0.25 -rt LATENCY  -irr 0.025 -rd 0.96 "
-        #     f"-lr 0.001 -st 500 -lt latency_lut/lut_alexnet_pt21.pkl "
-        #     f"-dp data/Cifar10/server --arch alexnet "
-        #     f"-nc {NO_CLIENTS}"
-        # )
-        # MAC
         servernode.host_cmd(
-            f"docker exec -td DockerServer2 python federated_master.py "
+            f"docker exec -td DockerServer2 python pure_server.py "
             f"{WORKING_PATH} "
-            f"3 224 224 "
-            f"-im models/alexnet/model_cpu.pth.tar -gp 0 "
-            f"-mi {MAX_ITER} -bur 0.25 -rt FLOPS  -irr 0.025 -rd 0.96 "
-            f"-lr 0.001 -st 500 "
-            f"-dp data/Cifar10/server --arch alexnet "
             f"-nc {NO_CLIENTS}"
         )
         

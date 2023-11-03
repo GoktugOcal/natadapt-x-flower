@@ -3,18 +3,17 @@ import ujson
 import numpy as np
 import gc
 from sklearn.model_selection import train_test_split
-from non_iid_generator.customDataset import CustomDataset
-import pickle
-from torchvision.transforms import transforms
+from tqdm import tqdm
+
+import torch
 from PIL import Image
-import h5py
 
 batch_size = 10
 train_size = 0.75 # merge original training set and test set, then split it manually. 
 least_samples = batch_size / (1-train_size) # least samples for each client
-alpha = 0.5 # for Dirichlet distribution
+alpha = 0.1 # for Dirichlet distribution
 
-def check(config_path, train_path, test_path, server_path, num_clients, num_classes, niid=False, 
+def check(config_path, train_path, test_path, num_clients, num_classes, niid=False, 
         balance=True, partition=None):
     # check existing dataset
     if os.path.exists(config_path):
@@ -34,9 +33,6 @@ def check(config_path, train_path, test_path, server_path, num_clients, num_clas
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
     dir_path = os.path.dirname(test_path)
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-    dir_path = os.path.dirname(server_path)
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
@@ -67,7 +63,7 @@ def separate_data(data, num_clients, num_classes, niid=False, balance=False, par
             for client in range(num_clients):
                 if class_num_per_client[client] > 0:
                     selected_clients.append(client)
-                selected_clients = selected_clients[:int(np.ceil((num_clients/num_classes)*class_per_client))]
+            selected_clients = selected_clients[:int(np.ceil((num_clients/num_classes)*class_per_client))]
 
             num_all_samples = len(idx_for_each_class[i])
             num_selected_clients = len(selected_clients)
@@ -93,9 +89,10 @@ def separate_data(data, num_clients, num_classes, niid=False, balance=False, par
         K = num_classes
         N = len(dataset_label)
 
-        while min_size < num_classes:
+        while min_size < least_samples:
             idx_batch = [[] for _ in range(num_clients)]
             for k in range(K):
+                print(k, min_size, least_samples)
                 idx_k = np.where(dataset_label == k)[0]
                 np.random.shuffle(idx_k)
                 proportions = np.random.dirichlet(np.repeat(alpha, num_clients))
@@ -155,7 +152,7 @@ def split_data(X, y):
     return train_data, test_data
 
 def save_file(config_path, train_path, test_path, train_data, test_data, num_clients, 
-                num_classes, statistic, niid=False, balance=True, partition=None):
+                num_classes, statistic, transform, niid=False, balance=True, partition=None):
     config = {
         'num_clients': num_clients, 
         'num_classes': num_classes, 
@@ -170,53 +167,12 @@ def save_file(config_path, train_path, test_path, train_data, test_data, num_cli
     # gc.collect()
     print("Saving to disk.\n")
 
-    transform=transforms.Compose([
-        transforms.RandomCrop(32, padding=4), 
-        transforms.Resize(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    ])
-
-    for idx, train_dict in enumerate(train_data):        
-        data = train_dict["x"]
-        labels = train_dict["y"]
-        custom_dataset = CustomDataset(data, labels, transform=transform)
-        with open(train_path + str(idx) + '.pkl', 'wb') as f:
-            pickle.dump(custom_dataset, f)
-
-    for idx, test_dict in enumerate(test_data):
-        data = test_dict["x"]
-        labels = test_dict["y"]
-        custom_dataset = CustomDataset(data, labels, transform=transform)
-        with open(test_path + str(idx) + '.pkl', 'wb') as f:
-            pickle.dump(custom_dataset, f)
-            
-    with open(config_path, 'w') as f:
-        ujson.dump(config, f)
-
-    print("Finish generating dataset.\n")
-
-def save_file_org(config_path, train_path, test_path, train_data, test_data, num_clients, 
-                num_classes, statistic, niid=False, balance=True, partition=None):
-    config = {
-        'num_clients': num_clients, 
-        'num_classes': num_classes, 
-        'non_iid': niid, 
-        'balance': balance, 
-        'partition': partition, 
-        'Size of samples for labels in clients': statistic, 
-        'alpha': alpha, 
-        'batch_size': batch_size, 
-    }
-
-    # gc.collect()
-    print("Saving to disk.\n")
-
-    for idx, train_dict in enumerate(train_data):
+    for idx, train_dict in enumerate(tqdm(train_data)):
+        train_dict = file_to_tensor_formatter(train_dict, transform)
         with open(train_path + str(idx) + '.npz', 'wb') as f:
             np.savez_compressed(f, data=train_dict)
-    for idx, test_dict in enumerate(test_data):
+    for idx, test_dict in enumerate(tqdm(test_data)):
+        test_dict = file_to_tensor_formatter(test_dict, transform)
         with open(test_path + str(idx) + '.npz', 'wb') as f:
             np.savez_compressed(f, data=test_dict)
     with open(config_path, 'w') as f:
@@ -224,73 +180,17 @@ def save_file_org(config_path, train_path, test_path, train_data, test_data, num
 
     print("Finish generating dataset.\n")
 
-def split_server_data(initial_train_image, initial_train_label, split_idx, transform):
+def file_to_tensor_formatter(dataset, transform=None):
 
-    X_train, X_test, y_train, y_test = train_test_split(
-            initial_train_image,
-            initial_train_label,
-            train_size=0.75,
-            shuffle=True)
+    new_set = []
 
-    train_dataset = CustomDataset(X_train, y_train, transform=transform)
-    test_dataset = CustomDataset(X_test, y_test, transform=transform)
+    for i in tqdm(range(len(dataset["x"]))):
+        img = Image.open(dataset["x"][i]).convert('RGB')
+        if transform:
+            new_set.append(transform(img).numpy())
+        else:
+            new_set.append(img)
     
-    # train_data = {'x': X_train, 'y': y_train}
-    # test_data = {'x': X_test, 'y': y_test}
+    dataset["x"] = np.array(new_set)
 
-    print("Initial training dataset for server have been created.")
-    return train_dataset, test_dataset
-    
-def server_data_save(server_path, train_dataset, test_dataset):
-
-    with open(server_path + "train" + '.pkl', 'wb') as f:
-        pickle.dump(train_dataset, f)
-    
-    with open(server_path + "test" + '.pkl', 'wb') as f:
-        pickle.dump(test_dataset, f)
-
-    # with open(server_path + "train" + '.npz', 'wb') as f:
-    #     np.savez_compressed(f, data=train_dataset)
-    # with open(server_path + "train" + '.npy', 'wb') as f:
-    #     np.save(f, train_dataset, allow_pickle=True)
-    # with h5py.File(server_path + "train" + '.hdf5', 'w') as f:
-    #     f.create_dataset("x", train_dataset["x"], dtype="int8")
-    #     f.create_dataset("y", train_dataset["y"], dtype="int8")
-
-    # with open(server_path + "test" + '.npz', 'wb') as f:
-    #     np.savez_compressed(f, data=test_dataset)
-    # with open(server_path + "test" + '.npy', 'wb') as f:
-    #     np.save(f, test_dataset, allow_pickle=True)
-    # with h5py.File(server_path + "test" + '.hdf5', 'w') as f:
-    #     f.create_dataset("data", test_dataset)
-    
-
-    
-    print("Initial training dataset for server have been saved.")
-
-# def save_file(config_path, train_path, test_path, train_data, test_data, num_clients, 
-#                 num_classes, statistic, niid=False, balance=True, partition=None):
-#     config = {
-#         'num_clients': num_clients, 
-#         'num_classes': num_classes, 
-#         'non_iid': niid, 
-#         'balance': balance, 
-#         'partition': partition, 
-#         'Size of samples for labels in clients': statistic, 
-#         'alpha': alpha, 
-#         'batch_size': batch_size, 
-#     }
-
-#     # gc.collect()
-#     print("Saving to disk.\n")
-
-#     for idx, train_dict in enumerate(train_data):
-#         with open(train_path + str(idx) + '.npz', 'wb') as f:
-#             np.savez_compressed(f, data=train_dict)
-#     for idx, test_dict in enumerate(test_data):
-#         with open(test_path + str(idx) + '.npz', 'wb') as f:
-#             np.savez_compressed(f, data=test_dict)
-#     with open(config_path, 'w') as f:
-#         ujson.dump(config, f)
-
-#     print("Finish generating dataset.\n")
+    return dataset

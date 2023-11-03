@@ -11,13 +11,17 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torch.backends.cudnn as cudnn
 import pickle
+import numpy as np
 
 import nets as models
 import functions as fns
 from non_iid_generator.customDataset import CustomDataset
+from utils import imagenet_loader
 
 _NUM_CLASSES = 10
-DEVICE = os.environ["TORCH_DEVICE"]
+# DEVICE = os.environ["TORCH_DEVICE"]
+DEVICE = "cuda"
+
 
 
 model_names = sorted(name for name in models.__dict__
@@ -237,13 +241,47 @@ if __name__ == '__main__':
         batch_size=args.batch_size,
         shuffle=True)
 
+    # transform = transforms.Compose(
+    #     [
+    #         # transforms.RandomCrop(32, padding=4), 
+    #         # transforms.Resize(224),
+    #         # transforms.RandomHorizontalFlip(),
+    #         transforms.Resize(256),
+    #         transforms.CenterCrop(224),
+    #         transforms.ToTensor(),
+    #         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    #         # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    #         # transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    #         ])
     
+    # args.batch_size = 32
+    # args.lr = 0.001
+
+    # train_dataset_path = os.path.join(args.data, "timagenet/server/train.npz")
+    # train_data = np.load(train_dataset_path, allow_pickle=True)["data"].tolist()
+    # train_dataset = CustomDataset(train_data["x"], train_data["y"], transform=transform)
+    # train_loader = torch.utils.data.DataLoader(
+    #     train_dataset,
+    #     args.batch_size,
+    #     shuffle=True)
+    
+    # test_dataset_path = os.path.join(args.data, "timagenet/server/test.npz")
+    # test_data = np.load(test_dataset_path, allow_pickle=True)["data"].tolist()
+    # test_dataset = CustomDataset(test_data["x"], test_data["y"], transform=transform)
+    # test_loader = torch.utils.data.DataLoader(
+    #     test_dataset,
+    #     args.batch_size,
+    #     shuffle=True)
+
     # Network
     cudnn.benchmark = True
     num_classes = _NUM_CLASSES
     model_arch = args.arch
     model = models.__dict__[model_arch](num_classes=num_classes)
     criterion = nn.BCEWithLogitsLoss()
+    optimizer = torch.optim.SGD(model.parameters(), args.lr,
+                                momentum=args.momentum,
+                                weight_decay=args.weight_decay)
 
     
     model = model.to(DEVICE)
@@ -258,9 +296,7 @@ if __name__ == '__main__':
         else:
             print("No checkpoint found at '{}'".format(args.resume))
             
-    optimizer = torch.optim.SGD(model.parameters(), args.lr,
-                                momentum=args.momentum,
-                                weight_decay=args.weight_decay)
+    
 
     # Train & evaluation
     best_acc = 0

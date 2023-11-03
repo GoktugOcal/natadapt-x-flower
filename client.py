@@ -243,7 +243,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.log_file = log_file
 
         self.trainLoader, self.testLoader = train_loader, test_loader
-        
+
     def get_parameters(self, config):
         if hasattr(self, "model"):
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
@@ -262,6 +262,8 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         self.netadapt_config = config
 
+        logging.debug(config)
+
         if "network_arch" in list(config.keys()):
             ## Receive the model
             buffer = io.BytesIO(config["network_arch"])
@@ -269,6 +271,7 @@ class FlowerClient(fl.client.NumPyClient):
             self.model = torch.jit.load(buffer)
             buffer.close()
         else:
+            logging.debug(f"here")
             self.set_parameters(parameters=parameters)
         
         ## Check the received model 
@@ -372,7 +375,8 @@ if __name__ == '__main__':
             if(e.__class__.__name__ == "_MultiThreadedRendezvous"):
                 print("Waiting for server connnection...")
             else:
-                logging.warning(e)
-                print_exc()
+                # logging.warning(e)
+                # print_exc()
+                logging.error("Something went wrong", exc_info=sys.exc_info())
 
             sleep(3)

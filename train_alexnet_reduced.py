@@ -7,18 +7,19 @@ import time
 import math
 import torch
 import torch.nn as nn
+import torchvision
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torch.backends.cudnn as cudnn
 import pickle
 
-import nets as models
+# import nets as models
 import functions as fns
-from non_iid_generator.customDataset import CustomDataset
+# from non_iid_generator.customDataset import CustomDataset
 
 _NUM_CLASSES = 10
 DEVICE = os.environ["TORCH_DEVICE"]
-DEVICE = "cuda"
+
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -241,16 +242,18 @@ if __name__ == '__main__':
     # Network
     cudnn.benchmark = True
     num_classes = _NUM_CLASSES
-    model_arch = args.arch
-    model = models.__dict__[model_arch](reducing_rate=0.5,num_classes=num_classes)
+    # model_arch = args.arch
+    # model = models.__dict__[model_arch](num_classes=num_classes)
+    model = torchvision.models.alexnet(pretrained=False, progress=True)
+    # model = torchvision.models.mobilenetv3.mobilenet_v3_small(pretrained=False, progress=True)
+    num_in_feature = model.classifier[6].in_features
+    model.classifier[6] = nn.Linear(num_in_feature, num_classes)
+    print(model)
+    
     criterion = nn.BCEWithLogitsLoss()
-
     
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
-
-    params_count = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f"Total number of trainable params {params_count}")
 
     # optionally resume from a checkpoint
     if args.resume:

@@ -528,7 +528,6 @@ def build_latency_lookup_table(network_def_full, lookup_table_path, min_conv_fea
         pickle.dump(lookup_table, file_id)      
     return 
 
-
 def simplify_network_def_based_on_constraint(network_def, block, constraint, resource_type,
                                              lookup_table_path=None, skip_connection_block_sets=[], 
                                              min_feature_size=8):
@@ -679,6 +678,172 @@ def simplify_network_def_based_on_constraint(network_def, block, constraint, res
             return_with_constraint_satisfied = True
             print('    simplify_def> constraint {} met when trying num of output channel: {}'.format(constraint, current_num_out_channels))
             break
+
+    if not return_with_constraint_satisfied:
+        warnings.warn(
+            'Constraint not satisfied: constraint = {}, simplified_resource = {}'.format(constraint,
+                                                                                         simplified_resource))
+    return simplified_network_def, simplified_resource
+
+
+def simplify_network_def_based_on_constraint_test(network_def, block, constraint, resource_type, iteration, log_path,
+                                             lookup_table_path=None, skip_connection_block_sets=[], 
+                                             min_feature_size=8):
+    '''
+        Derive how much a certain block of layers ('block') should be simplified 
+        based on resource constraints.
+            
+        Here we treat one block as one layer although a block can contain several layers.
+            
+        Input:
+            `network_def`: simplifiable network definition (conv & fc). defined in self.get_network_def_from_model(...)
+            `block`: (int) index of block to simplify
+            `constraint`: (float) representing the FLOPs/weights/latency constraint the simplied model should satisfy
+            `resource_type`: (string) `FLOPS`, `WEIGHTS`, or `LATENCY`
+            `lookup_table_path`: (string) path to latency lookup table. Needed only when resource_type == 'LATENCY'
+            `skip_connection_block_sets`: (list or tuple) the list of sets of blocks. Blocks in the same sets will have the 
+                same number of output channels as the corresponding feature maps will be summed later. 
+                (default: [])
+                For example, if the outputs of block 0 and block 4 are summed and 
+                the outputs of block 1 and block 5 are summed, then
+                skip_connection_block_sets = [(0, 4), (1, 5)] or ((0, 4), (1, 5)).
+                Note that we currently support addition.
+                
+            `min_feature_size`: (int) the number of output channels of simplified (pruned) layer would be 
+                multiples of min_feature_size. (defulat: 8)
+        Output:
+            `simplified_network_def`: simplified network definition. Indicates how much the network should
+                be simplified/pruned.
+            `simplified_resource`: (float) the estimated resource consumption of simplified models.
+    '''
+    # Check whether the block has a skip connection.
+    block = [block]
+    for skip_connection_block_set in skip_connection_block_sets:
+        if block[0] in skip_connection_block_set:
+            block = list(skip_connection_block_set)
+            block.sort()
+            break
+    print('    simplify_def> constraint: ', constraint)
+    print('    simplify_def> target block:', block)
+    my_block = block[0]
+    # Find the target layer and other layers whose output would later be added to that of target layer
+    # (i.e. skip connection)
+    # (contains layer index) 
+    target_layer_indices = []
+    max_num_out_channels = None
+    block_counter = 0
+    for layer_idx, (layer_name, layer_properties) in enumerate(network_def.items()):
+        # Neglect the depthwise layers.
+        if layer_properties[KEY_IS_DEPTHWISE]:
+            continue
+        if block_counter == block[0]:
+            target_layer_indices.append(layer_idx)
+            if max_num_out_channels is not None:
+                if max_num_out_channels != layer_properties[KEY_NUM_OUT_CHANNELS]:
+                    print('The blocks involved in this skip connection do not have compatible numbers of output '
+                          'channels.')
+                    sys.stdout.flush()
+            max_num_out_channels = layer_properties[KEY_NUM_OUT_CHANNELS]
+            print('    simplify_def> target layer: {}, layer index: {}'.format(layer_name, layer_idx))
+            del block[0]
+            if not block:
+                break
+        block_counter += 1
+
+    # Check target_layer_idx.
+    if target_layer_indices is None:
+        raise ValueError('`Block` seems out of bound.')
+
+    # Determine the number of filters and the resource consumption.
+    simplified_network_def = copy.deepcopy(network_def)
+    simplified_resource = None
+    return_with_constraint_satisfied = False
+    if max_num_out_channels >= min_feature_size:
+        # Try numbers of channels that are multiples of '_MIN_FEATURE_SIZE'.
+        num_out_channels_try = list(range(max_num_out_channels // min_feature_size * min_feature_size, 
+                                          min_feature_size - 1, -min_feature_size*2))
+    else:
+        num_out_channels_try = [max_num_out_channels]
+
+    '''   
+        Update # of output channels of target layers.
+           
+        Update # of input/output channels of all depthwise layers between target layers and 
+        other subsequent non-depthwise layers (assuming # of groups == # of input channels)
+            
+        Update # of input channels of one non-depthwise layer following the target layers.
+    '''
+    for current_num_out_channels in num_out_channels_try:  # Only allow multiple of '_MIN_FEATURE_SIZE'.
+        for target_layer_index in target_layer_indices:
+            update_num_out_channels = True
+            current_num_out_channels_after_pixel_shuffle = current_num_out_channels
+            for layer_idx, (layer_name, layer_properties) in enumerate(simplified_network_def.items()):
+                if layer_idx < target_layer_index:
+                    continue
+                
+                # for the block to be simplified (# of output channels is simplified)
+                if update_num_out_channels:
+                    if not layer_properties[KEY_IS_DEPTHWISE]:
+                        layer_properties[KEY_NUM_OUT_CHANNELS] = current_num_out_channels
+                        update_num_out_channels = False
+                        
+                        print('    simplify_def>     layer {}: num of output channel changed to {}'.format(layer_name, str(current_num_out_channels)))
+                    else:
+                        raise ValueError('Expected a non-depthwise layer but got a depthwise layer.')
+                # for blocks following the target blocks (# of input channels is simplified)
+                else:
+                    if current_num_out_channels_after_pixel_shuffle % layer_properties[
+                        KEY_BEFORE_SQUARED_PIXEL_SHUFFLE_FACTOR] != 0:
+                        raise ValueError('current_num_out_channels or current_num_out_channels_after_pixel_shuffle is '
+                                         'not divisible by the scaling factor of pixel shuffling.')
+                    current_num_out_channels_after_pixel_shuffle = (
+                            current_num_out_channels_after_pixel_shuffle / layer_properties[
+                        KEY_BEFORE_SQUARED_PIXEL_SHUFFLE_FACTOR])
+                    layer_properties[KEY_NUM_IN_CHANNELS] = current_num_out_channels_after_pixel_shuffle
+                    print('    simplify_def>     layer {}: num of input channel changed to {}'.format(layer_name, str(current_num_out_channels_after_pixel_shuffle)))
+
+                    '''
+                        Consider the case that a FC layer is placed after a Conv and Flatten:
+                            FC: input feature size: Cin
+                                output feature size: Cout
+                            Conv: output feature map size: H x W x C
+                            So Cin = H x W x C.
+                            If C -> C' based on constraints, then Cin -> H x W x C'
+                    '''
+                    if layer_properties[KEY_BEFORE_SQUARED_PIXEL_SHUFFLE_FACTOR] == 1:
+                        if network_def[layer_name][KEY_NUM_IN_CHANNELS] > max_num_out_channels:
+                            assert network_def[layer_name][KEY_NUM_IN_CHANNELS] % max_num_out_channels == 0
+                            # H x W here
+                            spatial_factor = network_def[layer_name][KEY_NUM_IN_CHANNELS] // max_num_out_channels
+                            layer_properties[KEY_NUM_IN_CHANNELS] = spatial_factor*current_num_out_channels
+                            print('    simplify_def>     [Update] layer {}: num of input channel changed to {}'.format(layer_name, str(spatial_factor*current_num_out_channels)))
+
+                    if not layer_properties[KEY_IS_DEPTHWISE]:
+                        break
+                    else:
+                        layer_properties[KEY_NUM_OUT_CHANNELS] = current_num_out_channels_after_pixel_shuffle
+                        layer_properties[KEY_GROUPS] = current_num_out_channels_after_pixel_shuffle
+                        print('    simplify_def>     depthwise layer {}: num of output channel changed to {}'.format(layer_name, str(current_num_out_channels_after_pixel_shuffle)))
+
+
+        # Get the current resource consumption
+        simplified_resource = compute_resource(simplified_network_def, resource_type, 
+                                               lookup_table_path)
+        print('    simplify_def> finish trying num of output channel: {}, resource: {}'.format(current_num_out_channels, simplified_resource))
+        
+        
+
+        # Terminate the simplification when the constraint has been satisfied.
+        if simplified_resource < constraint:
+            return_with_constraint_satisfied = True
+            print('    simplify_def> constraint {} met when trying num of output channel: {}'.format(constraint, current_num_out_channels))
+            with open(log_path, "a") as f:
+                f.write(f"{iteration},{my_block},{current_num_out_channels},{constraint},{simplified_resource},OK\n")
+            break
+
+        with open(log_path, "a") as f:
+            f.write(f"{iteration},{my_block},{current_num_out_channels},{constraint},{simplified_resource},Not\n")
+            
 
     if not return_with_constraint_satisfied:
         warnings.warn(
