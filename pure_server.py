@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
         logging.info("Model")
         # model = torch.load("models/alexnet/model_cuda.pth.tar", map_location=torch.device(DEVICE))
-        model = torch.load("models/alexnet/test/test-6/master/iter_6_best_model.pth.tar", map_location=torch.device(DEVICE))
+        model = torch.load("/home/goktug.ocal/thesis/netadapt-x-flower/models/alexnet/model_cpu_2.pth.tar", map_location=torch.device(DEVICE))
         logging.info("Model loaded")
 
         ### TORCHSCRIPT
