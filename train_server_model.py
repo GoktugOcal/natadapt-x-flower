@@ -79,7 +79,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     for i, (images, target) in enumerate(train_loader):
         
         # # Ensure the target shape is sth like torch.Size([batch_size])
-        # if len(target.shape) > 1: target = target.reshape(len(target))
+        if len(target.shape) > 1: target = target.reshape(len(target))
 
         target.unsqueeze_(1)
         target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
