@@ -125,7 +125,8 @@ def fine_tune(model, no_epoch, train_loader, print_frequency=100):
 
     # train_loader, val_loader = load_data(train_dataset_path, test_dataset_path)
 
-    criterion = torch.nn.BCEWithLogitsLoss()
+    # criterion = torch.nn.BCEWithLogitsLoss()
+    criterion = torch.nn.CrossEntropyLoss()
     
     _NUM_CLASSES = 10
     optimizer = torch.optim.SGD(
@@ -282,7 +283,7 @@ class FlowerClient(fl.client.NumPyClient):
         train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
         test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"
         
-        self.model = fine_tune(self.model, 5, self.trainLoader, print_frequency=1)
+        self.model = fine_tune(self.model, 10, self.trainLoader, print_frequency=1)
         logging.info("Fine tuning ended.")
 
         # train(net, trainloader, epochs=1)

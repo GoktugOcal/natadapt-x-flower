@@ -17,9 +17,9 @@ from custom_nodes.dockerclient import DockerClient
 
 logging.basicConfig(level=logging.DEBUG)
 
-WORKING_PATH = "models/alexnet/fed/pure-test-1"
+WORKING_PATH = "models/alexnet/fed/pure-test-0"
 MAX_ITER = 5
-NO_CLIENTS = 5
+NO_CLIENTS = 10
 CPU_PER_CLIENT = 8
 MEM_LIMIT_PER_CLIENT = "4g"
 
@@ -74,12 +74,13 @@ def main():
         servernode.host_cmd(
             f"docker exec -td DockerServer2 python pure_server.py "
             f"{WORKING_PATH} "
-            f"-nc {NO_CLIENTS}"
+            f"-nc {NO_CLIENTS}",
+            wait=True
         )
         
-        time.sleep(5)  # Give server enough time to start
+        # time.sleep(5)  # Give server enough time to start
 
-        for i, client in enumerate(clients[:-1]):
+        for i, client in enumerate(clients):
             # DockerClient starts from 3 because 1 is switch and 2 is server
             client.host_cmd(
                 f"docker exec -td DockerClient{3 + i} python client.py "
@@ -87,15 +88,35 @@ def main():
                 f"--server_ip {iface1_data.ip4} "
                 f"--no {i} "
             )
+        
+        time.sleep(5)
+
+        temp_line = ""
+        while(True):
+            with open(os.path.join(WORKING_PATH,"logs.txt"), "r") as f:
+                last_line = f.readlines()[-1]
+                if temp_line != last_line:
+                    logging.debug(last_line)
+                    temp_line = last_line
+                if "DONE" in last_line:
+                    raise KeyboardInterrupt
+
+        # servernode.host_cmd(
+        #     f"docker exec -td DockerServer2 python pure_server.py "
+        #     f"{WORKING_PATH} "
+        #     f"-nc {NO_CLIENTS}",
+        #     wait=False
+        # )
+
 
         # Wait for the last client process to end
-        clients[-1].host_cmd(
-            f"docker exec -t DockerClient{2 + len(clients)} python client.py "
-            f"{WORKING_PATH} "
-            f"--server_ip {iface1_data.ip4} "
-            f"--no {len(clients) - 1} ",
-            wait=True,
-        )
+        # clients[-1].host_cmd(
+        #     f"docker exec -t DockerClient{2 + len(clients)} python client.py "
+        #     f"{WORKING_PATH} "
+        #     f"--server_ip {iface1_data.ip4} "
+        #     f"--no {len(clients) - 1} ",
+        #     wait=True,
+        # )
 
     except KeyboardInterrupt:
         coreemu.shutdown()

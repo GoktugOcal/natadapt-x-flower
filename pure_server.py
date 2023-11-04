@@ -8,13 +8,17 @@ import base64
 
 import json
 import pickle
-import time
+from time import time
 import torch
+import torchvision
+from torchvision import transforms
+
 from shutil import copyfile
 import subprocess
 import sys
 import warnings
 import common
+from traceback import print_exc
 
 from server import flower_server_execute, NetStrategy
 
@@ -22,6 +26,10 @@ from copy import deepcopy
 from collections import OrderedDict
 
 import logging
+from tqdm import tqdm
+
+DEVICE = os.getenv("TORCH_DEVICE")
+DEVUCE = "cuda"
 
 _MASTER_FOLDER_FILENAME = 'master'
 _WORKER_FOLDER_FILENAME = 'worker'
@@ -55,6 +63,9 @@ def test(net, testloader):
     latency_measurements = []
     with torch.no_grad():
         for images, labels in tqdm(testloader):
+
+            labels = labels.reshape(-1,1)
+            # if len(labels.shape) > 1: labels = labels.reshape(len(labels))
             
             target_onehot = torch.FloatTensor(labels.shape[0], _NUM_CLASSES)
             target_onehot.zero_()
@@ -75,6 +86,28 @@ def test(net, testloader):
 
 def federated_eval(model, args):
 
+    # Define data transformations
+    transform = transforms.Compose([
+        transforms.RandomCrop(32, padding=4), 
+        transforms.Resize(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    ])
+
+    # Download and load the CIFAR-10 dataset
+    train_dataset = torchvision.datasets.CIFAR10(root='./data', train=True, transform=transform, download=True)
+    test_dataset = torchvision.datasets.CIFAR10(root='./data', train=False, transform=transform, download=True)
+
+    # Create data loaders for training and testing
+    batch_size = 128
+    trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    testloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    _, accuracy, _ = test(net=model,testloader=trainloader)
+    logging.info(f"Overall | Train Acc: {round(accuracy, 2)}")
+    _, accuracy, _ = test(net=model,testloader=testloader)
+    logging.info(f"Overall | Test Acc: {round(accuracy, 2)}")
+
     train_dataset_path = f"./data/Cifar10/server/train.pkl"
     test_dataset_path = f"./data/Cifar10/server/test.pkl"
     trainloader, testloader = load_data(train_dataset_path, test_dataset_path)
@@ -87,8 +120,6 @@ def federated_eval(model, args):
         trainloader, testloader = load_data(train_dataset_path, test_dataset_path)
         _, accuracy, _ = test(net=model,testloader=testloader)
         logging.info(f"Client {client_id} | Acc: {round(accuracy, 2)}")
-
-
 
 def folder_things(args):
     master_folder = os.path.join(args.working_folder, _MASTER_FOLDER_FILENAME)
@@ -104,21 +135,21 @@ def folder_things(args):
         print('Create directory', master_folder)
     elif os.listdir(master_folder):
         errMsg = 'Find previous files in the master directory {}. Please use `--resume` or delete those files'.format(master_folder)
-        raise ValueError(errMsg)
+        logging.info(errMsg)
         
     if not os.path.exists(worker_folder):
         os.mkdir(worker_folder)
         print('Create directory', worker_folder)
     elif os.listdir(worker_folder):
         errMsg = 'Find previous files in the worker directory {}. Please use `--resume` or delete those files'.format(worker_folder)
-        raise ValueError(errMsg)
+        logging.info(errMsg)
 
     if not os.path.exists(server_folder):
         os.mkdir(server_folder)
         print('Create directory', server_folder)
     elif os.listdir(server_folder):
         errMsg = 'Find previous files in the server directory {}. Please use `--resume` or delete those files'.format(server_folder)
-        raise ValueError(errMsg)
+        logging.info(errMsg)
     
     for cn in range(args.nc):
         client_folder_name = os.path.join(args.working_folder, _CLIENT_FOLDER_FILENAME + "_" + str(cn))
@@ -129,7 +160,7 @@ def folder_things(args):
                 f.write("Iteration,Block,Round,Accuracy,Loss\n")
         elif os.listdir(client_folder_name):
             errMsg = 'Find previous files in the client directory {}. Please use `--resume` or delete those files'.format(client_folder_name)
-            raise ValueError(errMsg)
+            logging.info(errMsg)
 
 
 
@@ -154,7 +185,8 @@ if __name__ == "__main__":
         no_clients = args.nc
 
         logging.info("Model")
-        model = torch.load("models/alexnet/model_cuda.pth.tar", map_location=torch.device('cpu'))
+        # model = torch.load("models/alexnet/model_cuda.pth.tar", map_location=torch.device(DEVICE))
+        model = torch.load("models/alexnet/test/test-6/master/iter_6_best_model.pth.tar", map_location=torch.device(DEVICE))
         logging.info("Model loaded")
 
         ### TORCHSCRIPT
@@ -192,5 +224,8 @@ if __name__ == "__main__":
 
         federated_eval(fine_tuned_model, args)
 
+        logging.info("DONE")
+
     except Exception as e:
+        print_exc()
         logging.error(e)
