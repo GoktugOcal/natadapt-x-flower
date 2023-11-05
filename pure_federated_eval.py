@@ -28,6 +28,10 @@ from collections import OrderedDict
 import logging
 from tqdm import tqdm
 
+DEVICE = os.getenv("TORCH_DEVICE")
+_MASTER_FOLDER_FILENAME = 'master'
+
+
 
 def load_data(train_dataset_path, test_dataset_path):
     """Load CIFAR-10 (training and test set)."""
