@@ -19,10 +19,8 @@ from non_iid_generator.customDataset import CustomDataset
 from utils import imagenet_loader
 
 _NUM_CLASSES = 10
-DEVICE = os.environ["TORCH_DEVICE"]
-# DEVICE = "cuda"
-
-
+# DEVICE = os.environ["TORCH_DEVICE"]
+DEVICE = "cuda"
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -166,7 +164,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('data', metavar='DIR', help='path to dataset')
     arg_parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-    arg_parser.add_argument('--epochs', default=150, type=int, metavar='N',
+    arg_parser.add_argument('--epochs', default=100, type=int, metavar='N',
                     help='number of total epochs to run (default: 150)')
     arg_parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -226,14 +224,14 @@ if __name__ == '__main__':
     #     test_dataset, batch_size=args.batch_size, shuffle=True,
     #     num_workers=args.workers, pin_memory=True)
 
-    train_dataset_path = os.path.join(args.data, "Cifar10", "server", "train.pkl")
+    train_dataset_path = os.path.join(args.data, "Cifar10_2", "server", "train.pkl")
     train_data = pickle.load(open(train_dataset_path, "rb"))
     train_loader = torch.utils.data.DataLoader(
         train_data,
         batch_size=args.batch_size,
         shuffle=True)
 
-    test_dataset_path = os.path.join(args.data, "Cifar10", "server", "test.pkl")
+    test_dataset_path = os.path.join(args.data, "Cifar10_2", "server", "test.pkl")
     test_data = pickle.load(open(test_dataset_path, "rb"))
     test_loader = torch.utils.data.DataLoader(
         test_data,

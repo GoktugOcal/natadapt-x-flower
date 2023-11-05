@@ -15,7 +15,7 @@ random.seed(1)
 np.random.seed(1)
 # num_clients = 20
 # num_classes = 10
-dir_path = "./data/Cifar10/"
+dir_path = "./data/Cifar10_2/"
 
 
 # Allocate data to users
@@ -66,7 +66,7 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
     ###############################################
 
     ######## FOR SERVER'S INITIAL TRAINING ########
-    split_idx = int(len(dataset_label)/3)
+    split_idx = int(len(dataset_label)/(num_clients+1))
     initial_train_image = dataset_image[:split_idx]
     initial_train_label = dataset_label[:split_idx]
 
