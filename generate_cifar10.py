@@ -15,7 +15,7 @@ random.seed(1)
 np.random.seed(1)
 # num_clients = 20
 # num_classes = 10
-dir_path = "./data/Cifar10_2/"
+dir_path = "./data/Cifar10_NIID_20c/"
 
 
 # Allocate data to users
