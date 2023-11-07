@@ -217,7 +217,7 @@ if __name__ == "__main__":
         logging.info("> Strategy defined")
         hist = flower_server_execute(
             strategy=strategy,
-            no_rounds=5)
+            no_rounds=20)
         logging.info("> Server Closed")
         print("########## FLOWER ##########")
 
