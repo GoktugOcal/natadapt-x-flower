@@ -87,7 +87,7 @@ def main():
                 f"docker exec -td DockerClient{3 + i} python client.py "
                 f"{WORKING_PATH} "
                 f"--server_ip {iface1_data.ip4} "
-                f"-dn Cifar10_IID_5c "
+                f"-dn Cifar10_NIID_20c "
                 f"--no {i} "
             )
         
