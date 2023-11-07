@@ -4,3 +4,4 @@
 /models/mobilenet/
 /temp_models/*
 /data/
+*.pyc
