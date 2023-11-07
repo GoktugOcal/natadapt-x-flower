@@ -122,6 +122,9 @@ def main():
 
     except KeyboardInterrupt:
         coreemu.shutdown()
+    
+    except:
+        coreemu.shutdown()
         
     finally:
         coreemu.shutdown()
