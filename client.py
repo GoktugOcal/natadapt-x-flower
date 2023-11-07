@@ -37,6 +37,7 @@ from non_iid_generator.customDataset import CustomDataset
 warnings.filterwarnings("ignore", category=UserWarning)
 # DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 DEVICE = os.environ["TORCH_DEVICE"]
+# DEVICE = "cuda"
 
 
 class Net(nn.Module):
@@ -331,6 +332,8 @@ if __name__ == '__main__':
     arg_parser.add_argument("--server_ip", type=str, required=True,
                             help="Ipv4 address of the Federated Learning Server.",
     )
+    arg_parser.add_argument("-dn", "--dataset_name", type=str, required=True,
+                            help="folder name of dataset")
     args = arg_parser.parse_args()
     client_id = args.no
 
@@ -347,8 +350,8 @@ if __name__ == '__main__':
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S')
 
-    train_dataset_path = f"./data/Cifar10/train/{client_id}.pkl"
-    test_dataset_path = f"./data/Cifar10/test/{client_id}.pkl"
+    train_dataset_path = f"./data/{args.dataset_name}/train/{client_id}.pkl"
+    test_dataset_path = f"./data/{args.dataset_name}/test/{client_id}.pkl"
     trainloader, testloader = load_data(train_dataset_path, test_dataset_path)
 
     if not os.path.exists(logfilename):

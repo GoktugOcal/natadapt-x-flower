@@ -17,11 +17,11 @@ from custom_nodes.dockerclient import DockerClient
 
 logging.basicConfig(level=logging.DEBUG)
 
-WORKING_PATH = "models/alexnet/fed/pure-test-0"
+WORKING_PATH = "models/mobilenet/fed/pure_test_NIID_a1_20c_alexnet"
 MAX_ITER = 5
-NO_CLIENTS = 10
-CPU_PER_CLIENT = 8
-MEM_LIMIT_PER_CLIENT = "4g"
+NO_CLIENTS = 20
+CPU_PER_CLIENT = 4
+MEM_LIMIT_PER_CLIENT = "6g"
 
 def main():
     parser = argparse.ArgumentParser(description="Core")
@@ -74,7 +74,8 @@ def main():
         servernode.host_cmd(
             f"docker exec -td DockerServer2 python pure_server.py "
             f"{WORKING_PATH} "
-            f"-nc {NO_CLIENTS}",
+            f"-nc {NO_CLIENTS} "
+            f"-m models/mobilenet/model_cpu_NIID_a1_20c.pth.tar",
             wait=True
         )
         
@@ -86,6 +87,7 @@ def main():
                 f"docker exec -td DockerClient{3 + i} python client.py "
                 f"{WORKING_PATH} "
                 f"--server_ip {iface1_data.ip4} "
+                f"-dn Cifar10_IID_5c "
                 f"--no {i} "
             )
         

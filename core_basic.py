@@ -1,7 +1,3 @@
-
-
-
-
 import logging
 import time
 import os
@@ -18,7 +14,7 @@ from core.emulator.data import LinkOptions
 
 logging.basicConfig(level=logging.DEBUG)
 
-TEST_NAME = "test-cpu-10nc-mac"
+TEST_NAME = "test-cpu-10nc-mac-zzzz"
 
 def main():
     parser = argparse.ArgumentParser(description="Core")
@@ -30,8 +26,8 @@ def main():
     session.set_state(EventTypes.CONFIGURATION_STATE)
 
     try:
-        # prefixes = IpPrefixes(ip4_prefix="10.83.0.0/16")
-        prefixes = IpPrefixes(ip4_prefix="10.0.0.0/24")
+        prefixes = IpPrefixes(ip4_prefix="10.83.0.0/16")
+        # prefixes = IpPrefixes(ip4_prefix="10.0.0.0/24")
 
         # create switch
         switch = session.add_node(SwitchNode)

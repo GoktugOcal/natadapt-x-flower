@@ -7,6 +7,7 @@ import time
 import math
 import torch
 import torch.nn as nn
+import torchvision
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torch.backends.cudnn as cudnn
@@ -21,8 +22,6 @@ from utils import imagenet_loader
 _NUM_CLASSES = 10
 # DEVICE = os.environ["TORCH_DEVICE"]
 DEVICE = "cuda"
-
-
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -79,7 +78,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     for i, (images, target) in enumerate(train_loader):
         
         # # Ensure the target shape is sth like torch.Size([batch_size])
-        # if len(target.shape) > 1: target = target.reshape(len(target))
+        if len(target.shape) > 1: target = target.reshape(len(target))
 
         target.unsqueeze_(1)
         target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
@@ -166,7 +165,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('data', metavar='DIR', help='path to dataset')
     arg_parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-    arg_parser.add_argument('--epochs', default=150, type=int, metavar='N',
+    arg_parser.add_argument('--epochs', default=100, type=int, metavar='N',
                     help='number of total epochs to run (default: 150)')
     arg_parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -193,12 +192,6 @@ if __name__ == '__main__':
                     help='disables training on GPU')
     args = arg_parser.parse_args()
     print(args)
-
-    # if not args.no_cuda:
-    #     os.environ["TORCH_DEVICE"] = "cpu"
-    # else:
-    #     os.environ["TORCH_DEVICE"] = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
     
     path = os.path.dirname(args.save_dir)
     if not os.path.exists(path):
@@ -210,73 +203,29 @@ if __name__ == '__main__':
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-        # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
-    # Data loader
-    train_dataset = datasets.CIFAR10(root=args.data, train=True, download=True,
-        transform=transform)
-        
+    train_dataset_path = os.path.join(args.data, "server", "train.pkl")
+    train_data = pickle.load(open(train_dataset_path, "rb"))
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=True)
-    test_dataset = datasets.CIFAR10(root=args.data, train=False, download=True,
-        transform=transform)
+        train_data,
+        batch_size=args.batch_size,
+        shuffle=True)
+
+    test_dataset_path = os.path.join(args.data, "server", "test.pkl")
+    test_data = pickle.load(open(test_dataset_path, "rb"))
     test_loader = torch.utils.data.DataLoader(
-        test_dataset, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=True)
-
-    # train_dataset_path = os.path.join(args.data, "Cifar10", "server", "train.pkl")
-    # train_data = pickle.load(open(train_dataset_path, "rb"))
-    # train_loader = torch.utils.data.DataLoader(
-    #     train_data,
-    #     batch_size=args.batch_size,
-    #     shuffle=True)
-
-    # test_dataset_path = os.path.join(args.data, "Cifar10", "server", "test.pkl")
-    # test_data = pickle.load(open(test_dataset_path, "rb"))
-    # test_loader = torch.utils.data.DataLoader(
-    #     test_data,
-    #     batch_size=args.batch_size,
-    #     shuffle=True)
-
-    # transform = transforms.Compose(
-    #     [
-    #         # transforms.RandomCrop(32, padding=4), 
-    #         # transforms.Resize(224),
-    #         # transforms.RandomHorizontalFlip(),
-    #         transforms.Resize(256),
-    #         transforms.CenterCrop(224),
-    #         transforms.ToTensor(),
-    #         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    #         # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    #         # transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    #         ])
-    
-    # args.batch_size = 32
-    # args.lr = 0.001
-
-    # train_dataset_path = os.path.join(args.data, "timagenet/server/train.npz")
-    # train_data = np.load(train_dataset_path, allow_pickle=True)["data"].tolist()
-    # train_dataset = CustomDataset(train_data["x"], train_data["y"], transform=transform)
-    # train_loader = torch.utils.data.DataLoader(
-    #     train_dataset,
-    #     args.batch_size,
-    #     shuffle=True)
-    
-    # test_dataset_path = os.path.join(args.data, "timagenet/server/test.npz")
-    # test_data = np.load(test_dataset_path, allow_pickle=True)["data"].tolist()
-    # test_dataset = CustomDataset(test_data["x"], test_data["y"], transform=transform)
-    # test_loader = torch.utils.data.DataLoader(
-    #     test_dataset,
-    #     args.batch_size,
-    #     shuffle=True)
+        test_data,
+        batch_size=args.batch_size,
+        shuffle=True)
 
     # Network
     cudnn.benchmark = True
     num_classes = _NUM_CLASSES
     model_arch = args.arch
-    model = models.__dict__[model_arch](num_classes=num_classes)
+    # model = models.__dict__[model_arch](num_classes=num_classes)
+    model = torchvision.models.mobilenet_v3_small(pretrained=False)
+    model.classifier[3] = nn.Linear(model.classifier[3].in_features, 10)
     # criterion = nn.BCEWithLogitsLoss()
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), args.lr,

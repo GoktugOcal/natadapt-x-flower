@@ -29,7 +29,7 @@ import logging
 from tqdm import tqdm
 
 DEVICE = os.getenv("TORCH_DEVICE")
-DEVUCE = "cuda"
+# DEVICE = "cuda"
 
 _MASTER_FOLDER_FILENAME = 'master'
 _WORKER_FOLDER_FILENAME = 'worker'
@@ -170,6 +170,9 @@ if __name__ == "__main__":
                             help='Root folder where models, related files and history information are saved.')
     arg_parser.add_argument('-nc', '--nc', type=int,
                             help="Number of clients for federated learning.")
+    arg_parser.add_argument('-m', '--model_path', type=str,
+                            help="Model path")
+    
     args = arg_parser.parse_args()
     
     folder_things(args)
@@ -186,7 +189,8 @@ if __name__ == "__main__":
 
         logging.info("Model")
         # model = torch.load("models/alexnet/model_cuda.pth.tar", map_location=torch.device(DEVICE))
-        model = torch.load("/home/goktug.ocal/thesis/netadapt-x-flower/models/alexnet/model_cpu_2.pth.tar", map_location=torch.device(DEVICE))
+        # model = torch.load("/home/goktug.ocal/thesis/netadapt-x-flower/models/alexnet/model_cpu_2.pth.tar", map_location=torch.device(DEVICE))
+        model = torch.load(args.model_path, map_location=torch.device(DEVICE))
         logging.info("Model loaded")
 
         ### TORCHSCRIPT
@@ -213,11 +217,11 @@ if __name__ == "__main__":
         logging.info("> Strategy defined")
         hist = flower_server_execute(
             strategy=strategy,
-            no_rounds=10)
+            no_rounds=5)
         logging.info("> Server Closed")
         print("########## FLOWER ##########")
 
-        fine_tuned_model = deepcopy(simplified_model)
+        fine_tuned_model = deepcopy(model)
         params_dict = zip(fine_tuned_model.state_dict().keys(), strategy.parameters_aggregated)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         fine_tuned_model.load_state_dict(state_dict, strict=True)

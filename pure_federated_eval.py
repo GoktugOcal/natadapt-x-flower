@@ -29,6 +29,7 @@ import logging
 from tqdm import tqdm
 
 DEVICE = os.getenv("TORCH_DEVICE")
+DEVICE = "cuda"
 _MASTER_FOLDER_FILENAME = 'master'
 
 
@@ -148,7 +149,8 @@ if __name__ == "__main__":
 
         logging.info("Model")
         # model = torch.load("models/alexnet/model_cuda.pth.tar", map_location=torch.device(DEVICE))
-        model = torch.load("/home/goktug.ocal/thesis/netadapt-x-flower/models/alexnet/model_cpu_2.pth.tar", map_location=torch.device(DEVICE))
+        # model = torch.load("models/alexnet/model_cpu_2.pth.tar", map_location=torch.device(DEVICE))
+        model = torch.load("models/alexnet/iter_6_best_model.pth.tar", map_location=torch.device(DEVICE))
         logging.info("Model loaded")
 
         federated_eval(model, args)
