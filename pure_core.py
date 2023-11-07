@@ -91,7 +91,7 @@ def main():
                 f"--no {i} "
             )
         
-        time.sleep(5)
+        time.sleep(10)
 
         temp_line = ""
         while(True):
