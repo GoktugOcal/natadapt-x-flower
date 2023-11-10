@@ -15,7 +15,6 @@ random.seed(1)
 np.random.seed(1)
 # num_clients = 20
 # num_classes = 10
-dir_path = "./data/Cifar10_NIID_20c/"
 
 
 # Allocate data to users
@@ -97,6 +96,8 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
 if __name__ == "__main__":
 
     arg_parser = ArgumentParser()
+    arg_parser.add_argument("-dir", "--dir_path", type=str,
+                            help="Directory to save the generated data.")
     arg_parser.add_argument("-nc", "--nc", type=int,
                             help="Number of clients.")
     arg_parser.add_argument("-c", "--c", type=int,
@@ -109,6 +110,9 @@ if __name__ == "__main__":
                             help="Pathological or Practical(Dirichlet) scenerio . (pat/dir)")
 
     args = arg_parser.parse_args()
+
+    dir_path = "./data/Cifar10_NIID_20c/"
+    dir_path = args.dir_path
 
     print(args)
 

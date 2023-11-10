@@ -23,3 +23,5 @@ sudop python core_up.py
 ```bash
 source /home/goktug/python_envs/easyfl/bin/activate; cd /home/goktug/Desktop/thesis/netadapt-x-flower/
 ```
+
+sudop nohup python pure_core.py > logs/core_NIID_a1_20c_alexnet.log &
