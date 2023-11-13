@@ -194,14 +194,12 @@ def load_data(train_dataset_path, test_dataset_path):
     train_data = pickle.load(open(train_dataset_path, "rb"))
     train_loader = torch.utils.data.DataLoader(
         train_data,
-        num_workers=2,
         batch_size=batch_size,
         shuffle=True)
 
     test_data = pickle.load(open(test_dataset_path, "rb"))
     test_loader = torch.utils.data.DataLoader(
         test_data,
-        num_workers=2,
         batch_size=batch_size,
         shuffle=True)
 
