@@ -32,10 +32,10 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
         return
     
     transform = transforms.Compose([
+        transforms.ToTensor(),
         transforms.RandomCrop(32, padding=4), 
         transforms.Resize(224),
         transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
     ])
 
@@ -65,7 +65,8 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
     ###############################################
 
     ######## FOR SERVER'S INITIAL TRAINING ########
-    split_idx = int(len(dataset_label)/(num_clients+1))
+    # split_idx = int(len(dataset_label)/(num_clients+1))
+    split_idx = int(len(dataset_label)/5)
     initial_train_image = dataset_image[:split_idx]
     initial_train_label = dataset_label[:split_idx]
 
@@ -90,7 +91,7 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
     train_data, test_data = split_data(X, y)
 
     save_file(config_path, train_path, test_path, train_data, test_data, num_clients, num_classes, 
-        statistic, niid, balance, partition)
+        statistic, transform, niid, balance, partition)
 
 
 if __name__ == "__main__":

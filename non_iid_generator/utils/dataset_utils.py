@@ -12,7 +12,7 @@ import h5py
 batch_size = 10
 train_size = 0.75 # merge original training set and test set, then split it manually. 
 least_samples = batch_size / (1-train_size) # least samples for each client
-alpha = 0.1 # for Dirichlet distribution
+alpha = 0.5 # for Dirichlet distribution
 # alpha = 1.0 # for Dirichlet distribution
 
 def check(config_path, train_path, test_path, server_path, num_clients, num_classes, niid=False, 
@@ -156,7 +156,7 @@ def split_data(X, y):
     return train_data, test_data
 
 def save_file(config_path, train_path, test_path, train_data, test_data, num_clients, 
-                num_classes, statistic, niid=False, balance=True, partition=None):
+                num_classes, statistic, transform, niid=False, balance=True, partition=None):
     config = {
         'num_clients': num_clients, 
         'num_classes': num_classes, 
@@ -171,13 +171,13 @@ def save_file(config_path, train_path, test_path, train_data, test_data, num_cli
     # gc.collect()
     print("Saving to disk.\n")
 
-    transform=transforms.Compose([
-        transforms.RandomCrop(32, padding=4), 
-        transforms.Resize(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    ])
+    # transform=transforms.Compose([
+    #     transforms.RandomCrop(32, padding=4), 
+    #     transforms.Resize(224),
+    #     transforms.RandomHorizontalFlip(),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    # ])
 
     for idx, train_dict in enumerate(train_data):        
         data = train_dict["x"]

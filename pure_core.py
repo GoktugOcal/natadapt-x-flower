@@ -17,7 +17,7 @@ from custom_nodes.dockerclient import DockerClient
 
 logging.basicConfig(level=logging.DEBUG)
 
-WORKING_PATH = "models/alexnet/fed/pure_test_NIID_a1_20c_alexnet"
+WORKING_PATH = "models/alexnet/fed/fast_pure_test_NIID_a1_20c_alexnet"
 MAX_ITER = 5
 NO_CLIENTS = 20
 CPU_PER_CLIENT = 4

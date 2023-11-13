@@ -15,12 +15,11 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         img = self.data[idx]
-        np_img = np.array(img, dtype = np.uint8)
-        img = Image.fromarray(np_img, "RGB")
+        # np_img = np.array(img, dtype = np.uint8)
+        # img = Image.fromarray(np_img, "L")
 
         if self.transform is not None:
             img = self.transform(img)
-            # print(type(img))
 
         class_id = torch.tensor([self.labels[idx]])
 

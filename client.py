@@ -40,6 +40,11 @@ DEVICE = os.environ["TORCH_DEVICE"]
 # DEVICE = "cuda"
 
 
+
+def timer(start=None, mess=None):
+    if mess: logging.info(f"{mess} - {time() - start}")
+    return time()
+
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
 
@@ -144,9 +149,10 @@ def fine_tune(model, no_epoch, train_loader, print_frequency=100):
         if i % print_frequency == 0:
             logging.info('Fine-tuning Epoch {}'.format(i))
             sys.stdout.flush()
+        s = time()
         for i, (input, target) in enumerate(tqdm(train_loader)):
             
-            logging.info(f"\tBatch no: {i}")
+            logging.info(f"\tBatch no: {i} | loaded in {round(time()-s,4)} seconds.")
             # (input, target) = next(dataloader_iter)
             
             # Ensure the target shape is sth like torch.Size([batch_size])
@@ -160,11 +166,13 @@ def fine_tune(model, no_epoch, train_loader, print_frequency=100):
             input, target = input.to(DEVICE), target.to(DEVICE)
             target_onehot = target_onehot.to(DEVICE)
 
+            s = time()
             pred = model(input)
             loss = criterion(pred, target_onehot)
             optimizer.zero_grad()
             loss.backward()  # compute gradient and do SGD step
             optimizer.step()
+            logging.info(f"\tCalculated in {round(time()-s,4)} seconds.")
 
             del loss, pred
 
