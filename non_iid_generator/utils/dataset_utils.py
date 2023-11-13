@@ -12,8 +12,8 @@ import h5py
 batch_size = 10
 train_size = 0.75 # merge original training set and test set, then split it manually. 
 least_samples = batch_size / (1-train_size) # least samples for each client
-alpha = 0.5 # for Dirichlet distribution
-# alpha = 1.0 # for Dirichlet distribution
+# alpha = 0.5 # for Dirichlet distribution
+alpha = 1.0 # for Dirichlet distribution
 
 def check(config_path, train_path, test_path, server_path, num_clients, num_classes, niid=False, 
         balance=True, partition=None):
