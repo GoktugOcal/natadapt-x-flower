@@ -18,7 +18,7 @@ np.random.seed(1)
 
 
 # Allocate data to users
-def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partition):
+def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partition, alpha):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
         
@@ -87,11 +87,11 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
     dataset_label = dataset_label[split_idx:]
 
     X, y, statistic = separate_data((dataset_image, dataset_label), num_clients, num_classes, 
-                                    niid, balance, partition)
+                                    alpha, niid, balance, partition)
     train_data, test_data = split_data(X, y)
 
     save_file(config_path, train_path, test_path, train_data, test_data, num_clients, num_classes, 
-        statistic, transform, niid, balance, partition)
+        statistic, transform, alpha, niid, balance, partition)
 
 
 if __name__ == "__main__":
@@ -123,5 +123,6 @@ if __name__ == "__main__":
 
     num_clients = args.nc
     num_classes = args.c
+    alpha = 0.5
 
-    generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partition)
+    generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partition, alpha)

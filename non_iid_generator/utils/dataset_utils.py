@@ -13,7 +13,7 @@ batch_size = 10
 train_size = 0.75 # merge original training set and test set, then split it manually. 
 least_samples = batch_size / (1-train_size) # least samples for each client
 # alpha = 0.5 # for Dirichlet distribution
-alpha = 1.0 # for Dirichlet distribution
+# alpha = 1.0 # for Dirichlet distribution
 
 def check(config_path, train_path, test_path, server_path, num_clients, num_classes, niid=False, 
         balance=True, partition=None):
@@ -43,7 +43,7 @@ def check(config_path, train_path, test_path, server_path, num_clients, num_clas
 
     return False
 
-def separate_data(data, num_clients, num_classes, niid=False, balance=False, partition=None, class_per_client=2):
+def separate_data(data, num_clients, num_classes, alpha, niid=False, balance=False, partition=None, class_per_client=2):
     X = [[] for _ in range(num_clients)]
     y = [[] for _ in range(num_clients)]
     statistic = [[] for _ in range(num_clients)]
@@ -156,7 +156,7 @@ def split_data(X, y):
     return train_data, test_data
 
 def save_file(config_path, train_path, test_path, train_data, test_data, num_clients, 
-                num_classes, statistic, transform, niid=False, balance=True, partition=None):
+                num_classes, statistic, transform, alpha, niid=False, balance=True, partition=None):
     config = {
         'num_clients': num_clients, 
         'num_classes': num_classes, 
