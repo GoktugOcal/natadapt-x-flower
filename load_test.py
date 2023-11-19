@@ -44,67 +44,74 @@ def load_time_test(train_loader):
         if i == 10: break
     return durations
 
+if __name__ == "__main__":
 
-logging.basicConfig(
-    filename="./logs/load_test.log",
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S')
+    logging.basicConfig(
+        filename="./logs/load_test.log",
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S')
 
-# Cifar default w/ transform
-transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.RandomCrop(32, padding=4), 
-        transforms.Resize(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    ])
-train_dataset = datasets.CIFAR10(root="./data", train=True, download=True,
-    transform=transform
+    # Cifar default w/ transform
+    transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.RandomCrop(32, padding=4), 
+            transforms.Resize(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+        ])
+    train_dataset = datasets.CIFAR10(root="./data", train=True, download=True,
+        transform=transform
+        )
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset,
+        batch_size=batch_size)
+    logging.info("Cifar default w/ transform")
+    load_time_test(train_loader)
+
+    # Cifar default w/o transform
+    transform = transforms.Compose([
+            transforms.ToTensor()
+            ])
+    train_dataset = datasets.CIFAR10(root="./data", train=True, download=True, transform=transform)
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset,
+        batch_size=batch_size)
+    logging.info("Cifar default w/o transform")
+    load_time_test(train_loader)
+
+    # Cifar pickle
+    train_dataset_path = "/home/goktug.ocal/thesis/netadapt-x-flower/data/Cifar10_NIID_20c/train/2.pkl"
+    train_data = pickle.load(open(train_dataset_path, "rb"))
+    train_loader = torch.utils.data.DataLoader(
+        train_data,
+        batch_size=batch_size,
+        shuffle=True)
+    logging.info("Cifar pickle")
+    load_time_test(train_loader)
+
+    # MNIST default w/ transform
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Resize((227,227)),
+            transforms.Normalize([0.5], [0.5])
+        ]
     )
-train_loader = torch.utils.data.DataLoader(
-    train_dataset,
-    batch_size=batch_size)
-logging.info("Cifar default w/ transform")
-load_time_test(train_loader)
+    train_dataset = torchvision.datasets.MNIST(
+        root="./data", train=True, download=True, transform=transform)
+    train_loader = torch.utils.data.DataLoader(
+        trainset, batch_size=batch_size, shuffle=False)
+    logging.info("MNIST default w/ transform")
+    load_time_test(train_loader)
 
-# Cifar default w/o transform
-train_dataset = datasets.CIFAR10(root="./data", train=True, download=True)
-train_loader = torch.utils.data.DataLoader(
-    train_dataset,
-    batch_size=batch_size)
-logging.info("Cifar default w/o transform")
-load_time_test(train_loader)
-
-# Cifar pickle
-train_dataset_path = "/home/goktug.ocal/thesis/netadapt-x-flower/data/Cifar10_NIID_20c/train/2.pkl"
-train_data = pickle.load(open(train_dataset_path, "rb"))
-train_loader = torch.utils.data.DataLoader(
-    train_data,
-    batch_size=batch_size,
-    shuffle=True)
-logging.info("Cifar pickle")
-load_time_test(train_loader)
-
-# MNIST default w/ transform
-transform = transforms.Compose(
-    [
-        transforms.ToTensor(),
-        transforms.Resize((227,227)),
-        transforms.Normalize([0.5], [0.5])
-    ]
-)
-train_dataset = torchvision.datasets.MNIST(
-    root="./data", train=True, download=True, transform=transform)
-train_loader = torch.utils.data.DataLoader(
-    trainset, batch_size=batch_size, shuffle=False)
-logging.info("MNIST default w/ transform")
-load_time_test(train_loader)
-
-# MNIST default w/o transform
-train_dataset = torchvision.datasets.MNIST(
-    root="./data", train=True, download=True)
-train_loader = torch.utils.data.DataLoader(
-    trainset, batch_size=batch_size, shuffle=False)
-logging.info("MNIST default w/o transform")
-load_time_test(train_loader)
+    # MNIST default w/o transform
+    transform = transforms.Compose([
+            transforms.ToTensor()
+            ])
+    train_dataset = torchvision.datasets.MNIST(
+        root="./data", train=True, download=True, transform=transform)
+    train_loader = torch.utils.data.DataLoader(
+        trainset, batch_size=batch_size, shuffle=False)
+    logging.info("MNIST default w/o transform")
+    load_time_test(train_loader)
