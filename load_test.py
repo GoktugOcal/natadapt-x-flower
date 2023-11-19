@@ -18,6 +18,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+import torchvision
+import torchvision.transforms as transforms
 from torchvision.datasets import CIFAR10
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
