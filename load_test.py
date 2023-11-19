@@ -69,8 +69,7 @@ logging.info("Cifar default w/ transform")
 load_time_test(train_loader)
 
 # Cifar default w/o transform
-transform = transforms.Compose()
-train_dataset = datasets.CIFAR10(root="./data", train=True, download=True,)
+train_dataset = datasets.CIFAR10(root="./data", train=True, download=True)
 train_loader = torch.utils.data.DataLoader(
     train_dataset,
     batch_size=batch_size)
