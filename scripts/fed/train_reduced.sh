@@ -1,4 +1,4 @@
-python train_alexnet_reduced.py \
+python train.py \
     data/ \
-    --dir models/alexnet/torch_alexnet.pth.tar \
-    --arch alexnet
+    --dir models/alexnet/alexnet32.pth.tar \
+    --arch alexnet_reduced

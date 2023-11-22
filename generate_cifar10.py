@@ -33,9 +33,9 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
     
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.RandomCrop(32, padding=4), 
-        transforms.Resize(224),
-        transforms.RandomHorizontalFlip(),
+        # transforms.RandomCrop(32, padding=4), 
+        # transforms.Resize(224),
+        # transforms.RandomHorizontalFlip(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
     ])
 
@@ -83,6 +83,7 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
     )
 
     ######## REST OF THE DATA ########
+    split_idx = 0
     dataset_image = dataset_image[split_idx:]
     dataset_label = dataset_label[split_idx:]
 
@@ -109,10 +110,12 @@ if __name__ == "__main__":
                             help="Balanced scenario")
     arg_parser.add_argument("-p", "--p",
                             help="Pathological or Practical(Dirichlet) scenerio . (pat/dir)")
+    arg_parser.add_argument("-a", "--alpha", type=float,
+                            help="alpha value in Dirichlet distribution.")
 
     args = arg_parser.parse_args()
 
-    dir_path = "./data/Cifar10_NIID_20c/"
+    # dir_path = "./data/Cifar10_NIID_20c/"
     dir_path = args.dir_path
 
     print(args)
@@ -123,6 +126,6 @@ if __name__ == "__main__":
 
     num_clients = args.nc
     num_classes = args.c
-    alpha = 0.5
+    alpha = args.alpha
 
     generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partition, alpha)
