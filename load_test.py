@@ -48,7 +48,7 @@ def load_time_test(train_loader):
 if __name__ == "__main__":
 
     logging.basicConfig(
-        filename="./logs/load_test.log",
+        filename="./logs/load_test_2.log",
         format='%(asctime)s %(levelname)-8s %(message)s',
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S')
