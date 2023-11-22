@@ -102,7 +102,7 @@ if __name__ == "__main__":
     train_dataset = torchvision.datasets.MNIST(
         root="./data", train=True, download=True, transform=transform)
     train_loader = torch.utils.data.DataLoader(
-        trainset, batch_size=batch_size, shuffle=False)
+        train_dataset, batch_size=batch_size, shuffle=False)
     logging.info("MNIST default w/ transform")
     load_time_test(train_loader)
 
@@ -113,6 +113,6 @@ if __name__ == "__main__":
     train_dataset = torchvision.datasets.MNIST(
         root="./data", train=True, download=True, transform=transform)
     train_loader = torch.utils.data.DataLoader(
-        trainset, batch_size=batch_size, shuffle=False)
+        train_dataset, batch_size=batch_size, shuffle=False)
     logging.info("MNIST default w/o transform")
     load_time_test(train_loader)
