@@ -41,7 +41,8 @@ def load_time_test(train_loader):
         duration = round(time()-s,4)
         durations.append(duration)
         logging.info(f"\tBatch no: {i} | loaded in {duration} seconds.")
-        if i == 10: break
+        if i == 1: break
+        s = time()
     return durations
 
 if __name__ == "__main__":
