@@ -82,7 +82,7 @@ if __name__ == "__main__":
     load_time_test(train_loader)
 
     # Cifar pickle
-    train_dataset_path = "./data/Cifar10_NIID_20c/train/2.pkl"
+    train_dataset_path = "./data/32_Cifar10_NIID_20c_a01/train/2.pkl"
     train_data = pickle.load(open(train_dataset_path, "rb"))
     train_loader = torch.utils.data.DataLoader(
         train_data,
