@@ -108,7 +108,7 @@ class networkUtils_alexnet(NetworkUtilsAbstract):
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
         ]))
     
-        train_loader = torch.utils.data.DataLoader(
+        self.train_loader = torch.utils.data.DataLoader(
             train_dataset, batch_size=self.batch_size, 
             num_workers=self.num_workers, pin_memory=True, shuffle=True)#, sampler=train_sampler)
         # train_data = pickle.load(open(os.path.join(dataset_path,"train.pkl"), "rb"))
@@ -124,7 +124,7 @@ class networkUtils_alexnet(NetworkUtilsAbstract):
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
         ]))
-        val_loader = torch.utils.data.DataLoader(
+        self.val_loader = torch.utils.data.DataLoader(
             val_dataset, batch_size=self.batch_size, shuffle=False,
             num_workers=self.num_workers, pin_memory=True) #, sampler=valid_sampler)
         # val_dataset = pickle.load(open(os.path.join(dataset_path,"test.pkl"), "rb"))
