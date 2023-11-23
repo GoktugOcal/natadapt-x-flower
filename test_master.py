@@ -690,6 +690,7 @@ if __name__ == '__main__':
     try:
         master(args)
     except Exception as e:
-        logging.warning(e)
+
+        logging.critical(e, exc_info=True)
     
     logging.info("DONE.")
