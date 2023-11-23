@@ -25,7 +25,8 @@ from flwr.common.typing import Parameters, Scalar, FitIns, FitRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.client_manager import ClientManager
 
-from logging import WARNING
+import logging
+from datetime import datetime
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 # Define metric aggregation function
@@ -44,6 +45,7 @@ class NetStrategy(FedAvg):
         self,
         network_arch,
         netadapt_info,
+        log_file,
         min_available_clients,
         min_fit_clients,
         min_evaluate_clients,
@@ -58,6 +60,7 @@ class NetStrategy(FedAvg):
         self.network_arch = network_arch
         self.network_arch_str = self.network_arch
         self.netadapt_info = netadapt_info
+        self.log_file = log_file
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -72,6 +75,18 @@ class NetStrategy(FedAvg):
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
+
+        with open(self.log_file, "a") as f:
+            line = ",".join(
+                [
+                    str(server_round),
+                    "Fit",
+                    "Send",
+                    datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+                ]
+            )
+            line += "\n"
+            f.write(line)
 
         cfg_fit = []
         for cli in clients:
@@ -102,6 +117,18 @@ class NetStrategy(FedAvg):
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
 
+        with open(self.log_file, "a") as f:
+            line = ",".join(
+                [
+                    str(server_round),
+                    "Aggregate",
+                    "Received",
+                    datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+                ]
+            )
+            line += "\n"
+            f.write(line)
+
         if not results:
             return None, {}
 
@@ -125,11 +152,36 @@ class NetStrategy(FedAvg):
             # No evaluation function provided
             return None
         parameters_ndarrays = parameters_to_ndarrays(parameters)
+        
+        with open(self.log_file, "a") as f:
+            line = ",".join(
+                [
+                    str(server_round),
+                    "Evaluation",
+                    "Send",
+                    datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+                ]
+            )
+            line += "\n"
+            f.write(line)
+
         eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {})
         if eval_res is None:
             return None
         loss, metrics = eval_res
         logging.info(f"Evaluation done, {metrics}")
+
+        with open(self.log_file, "a") as f:
+            line = ",".join(
+                [
+                    str(server_round),
+                    "Aggregate",
+                    "Received",
+                    datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+                ]
+            )
+            line += "\n"
+            f.write(line)
 
         return loss, metrics
 

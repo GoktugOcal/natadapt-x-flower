@@ -17,7 +17,7 @@ from custom_nodes.dockerclient import DockerClient
 
 logging.basicConfig(level=logging.DEBUG)
 
-WORKING_PATH = "models/alexnet/fed/fast_pure_test_NIID_a1_20c_alexnet"
+WORKING_PATH = "models/alexnet/fed/32_pure_test_NIID_a01_20c_alexnet"
 MAX_ITER = 5
 NO_CLIENTS = 20
 CPU_PER_CLIENT = 4
@@ -75,7 +75,7 @@ def main():
             f"docker exec -td DockerServer2 python pure_server.py "
             f"{WORKING_PATH} "
             f"-nc {NO_CLIENTS} "
-            f"-m models/alexnet/model_cpu_NIID_a1_20c.pth.tar",
+            f"-m /models/alexnet/test/test-32-NIID-20c/worker/iter_8_block_0_model.pth.tar",
             wait=True
         )
         
@@ -87,7 +87,7 @@ def main():
                 f"docker exec -td DockerClient{3 + i} python client.py "
                 f"{WORKING_PATH} "
                 f"--server_ip {iface1_data.ip4} "
-                f"-dn Cifar10_NIID_20c "
+                f"-dn 32_Cifar10_NIID_20c_a01 "
                 f"--no {i} "
             )
         

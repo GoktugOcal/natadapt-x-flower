@@ -178,11 +178,14 @@ if __name__ == "__main__":
     folder_things(args)
 
     logfilename = os.path.join(args.working_folder,"logs.txt")
+    debug_logfilename = os.path.join(args.working_folder,"logs_debug.txt")
+    
     os.makedirs(os.path.dirname(logfilename), exist_ok=True)
+    os.makedirs(os.path.dirname(debug_logfilename), exist_ok=True)
     logging.basicConfig(
-        filename=logfilename,
+        filename=debug_logfilename,
         format='%(asctime)s %(levelname)-8s %(message)s',
-        level=logging.INFO,
+        level=logging.DEBUG,
         datefmt='%Y-%m-%d %H:%M:%S')
     try:
         no_clients = args.nc
@@ -210,6 +213,7 @@ if __name__ == "__main__":
         strategy = NetStrategy(
             model_bytes,
             netadapt_info,
+            log_file = logfilename,
             min_fit_clients = no_clients,
             min_available_clients = no_clients,
             min_evaluate_clients = no_clients

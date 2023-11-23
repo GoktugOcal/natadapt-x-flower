@@ -13,6 +13,7 @@ import base64
 from traceback import print_exc
 
 import numpy as np
+from datetime import datetime
 import flwr as fl
 import torch
 import torch.nn as nn
@@ -283,14 +284,28 @@ class FlowerClient(fl.client.NumPyClient):
         else:
             logging.debug(f"here")
             self.set_parameters(parameters=parameters)
+
+        with open(self.log_file, "a") as f:
+            line = ",".join(
+                [
+                    str(self.netadapt_config["netadapt_iteration"]),
+                    str(self.netadapt_config["block_id"]),
+                    str(self.netadapt_config["server_round"]),
+                    "0.0",
+                    "0.0",
+                    datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+                ]
+            )
+            line += "\n"
+            f.write(line)
         
         ## Check the received model 
-        self.model.eval()
+        # self.model.eval()
         # print(type(self.model))
         # print(self.model)
 
-        train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
-        test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"
+        # train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
+        # test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"
         
         self.model = fine_tune(self.model, 10, self.trainLoader, print_frequency=1)
         logging.info("Fine tuning ended.")
@@ -321,7 +336,8 @@ class FlowerClient(fl.client.NumPyClient):
                     str(self.netadapt_config["block_id"]),
                     str(self.netadapt_config["server_round"]),
                     str(accuracy),
-                    str(loss)
+                    str(loss),
+                    datetime.now().strftime("%m/%d/%Y %H:%M:%S")
                 ]
             )
             line += "\n"
@@ -364,7 +380,7 @@ if __name__ == '__main__':
 
     if not os.path.exists(logfilename):
         with open(logfilename, "w") as f:
-            f.write("Iteration,Block,Round,Accuracy,Loss\n")
+            f.write("Iteration,Block,Round,Accuracy,Loss,DateTime\n")
 
     while True:
         try:
