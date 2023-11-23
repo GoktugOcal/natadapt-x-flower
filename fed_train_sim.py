@@ -7,6 +7,7 @@ import time
 import math
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torch.backends.cudnn as cudnn
@@ -27,12 +28,60 @@ from non_iid_generator.customDataset import CustomDataset
 from utils import imagenet_loader
 
 from generate_cifar10 import generate_cifar10
+from generate_mnist import generate_mnist
 
 _NUM_CLASSES = 10
 # DEVICE = os.environ["TORCH_DEVICE"]
 # DEVICE = "cuda"
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+class AlexNet_MNIST(nn.Module):  
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=96, kernel_size=11, stride=4, padding=0),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=3, stride=2)
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(96, 256, 5, 1, 2),
+            nn.ReLU(),
+            nn.MaxPool2d(3, 2)
+        )
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(256, 384, 3, 1, 1),
+            nn.ReLU()
+        )
+        self.conv4 = nn.Sequential(
+            nn.Conv2d(384, 384, 3, 1, 1),
+            nn.ReLU()
+        )
+        self.conv5 = nn.Sequential(
+            nn.Conv2d(384, 256, 3, 1, 1),
+            nn.ReLU(),
+            nn.MaxPool2d(3, 2)
+        )
+
+        self.fc1 = nn.Linear(256 * 6 * 6, 4096)
+        self.fc2 = nn.Linear(4096, 4096)
+        self.fc3 = nn.Linear(4096, 10)
+
+    def forward(self, x):
+        out = self.conv1(x)
+        out = self.conv2(out)
+        out = self.conv3(out)
+        out = self.conv4(out)
+        out = self.conv5(out)
+        out = out.view(out.size(0), -1)
+
+        out = F.relu(self.fc1(out))  # 256*6*6 -> 4096
+        out = F.dropout(out, 0.5)
+        out = F.relu(self.fc2(out))
+        out = F.dropout(out, 0.5)
+        out = self.fc3(out)
+        out = F.log_softmax(out, dim=1)
+
+        return out
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -72,6 +121,75 @@ def compute_accuracy(output, target):
     return acc
     
 def train(train_loader, model, criterion, optimizer, epoch, args):
+    batch_time = AverageMeter()
+    losses = AverageMeter()
+    acc = AverageMeter()
+
+    if args.fedprox: global_model = deepcopy(model)
+
+    # switch to train mode
+    model.train()
+    
+    print('===================================================================')
+    end = time.time()
+    
+    for i, (images, target) in enumerate(train_loader):
+        
+        # # Ensure the target shape is sth like torch.Size([batch_size])
+        if len(target.shape) > 1: target = target.reshape(len(target))
+
+        target.unsqueeze_(1)
+        target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
+        target_onehot.zero_()
+        target_onehot.scatter_(1, target, 1)
+        target.squeeze_(1)
+        
+        images = images.to(DEVICE)
+        target_onehot = target_onehot.to(DEVICE)
+        target = target.to(DEVICE)
+
+        output = model(images)
+        
+        if args.fedprox:
+            proximal_term = 0.0
+            for local_weights, global_weights in zip(model.parameters(), global_model.parameters()):
+                proximal_term += (local_weights - global_weights).norm(2)
+            loss = criterion(output, target_onehot) + (1.0 / 2) * proximal_term
+        
+        else:
+            loss = criterion(output, target_onehot)
+        
+        # measure accuracy and record loss
+        batch_acc = compute_accuracy(output, target)
+        
+        losses.update(loss.item(), images.size(0))
+        acc.update(batch_acc, images.size(0))
+
+        # compute gradient and do SGD step
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        # measure elapsed time
+        batch_time.update(time.time() - end)
+        end = time.time()
+        
+        # Update statistics
+        estimated_time_remained = batch_time.get_avg()*(len(train_loader)-i-1)
+        fns.update_progress(i, len(train_loader), 
+            ESA='{:8.2f}'.format(estimated_time_remained)+'s',
+            loss='{:4.2f}'.format(loss.item()),
+            acc='{:4.2f}%'.format(float(batch_acc))
+            )
+
+    print()
+    print('Finish epoch {}: time = {:8.2f}s, loss = {:4.2f}, acc = {:4.2f}%'.format(
+            epoch+1, batch_time.get_avg()*len(train_loader), 
+            float(losses.get_avg()), float(acc.get_avg())))
+    print('===================================================================')
+    return
+
+def server_train(train_loader, model, criterion, optimizer, epoch, args):
     batch_time = AverageMeter()
     losses = AverageMeter()
     acc = AverageMeter()
@@ -181,6 +299,20 @@ def client(global_model, client_id, args):
         batch_size=args.batch_size,
         shuffle=True)
 
+    #Server dataset
+    if args.use_server_data:
+        server_train_dataset_path = os.path.join(args.data,"server","train.pkl")
+        server_train_data = pickle.load(open(server_train_dataset_path, "rb"))
+        server_test_dataset_path = os.path.join(args.data,"server","test.pkl")
+        server_test_data = pickle.load(open(server_test_dataset_path, "rb"))
+
+        train_data.data = np.concatenate((train_data.data, server_train_data.data))
+        train_data.labels = np.concatenate((train_data.labels, server_train_data.labels))
+
+        test_data.data = np.concatenate((test_data.data, server_test_data.data))
+        test_data.labels = np.concatenate((test_data.labels, server_test_data.labels))
+
+
     # Network
     cudnn.benchmark = True
     num_classes = _NUM_CLASSES
@@ -189,12 +321,13 @@ def client(global_model, client_id, args):
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
+
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
     # Train & evaluation
     best_acc = 0
     for epoch in range(args.fine_tuning_epochs):
-        print('Epoch [{}/{}]'.format(epoch+1, args.epochs))
+        print('Epoch [{}/{}]'.format(epoch+1, args.fine_tuning_epochs))
         adjust_learning_rate(optimizer, epoch, args)
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch, args)
@@ -319,6 +452,7 @@ def federated_learning(args):
         with open(args.logfilename, "a") as f:
             f.write(f"{args.round_no},server,train,{global_train_acc}\n")
             f.write(f"{args.round_no},server,test,{global_test_acc}\n")
+    return global_model
 
 if __name__ == '__main__':
     # Parse the input arguments.
@@ -331,6 +465,8 @@ if __name__ == '__main__':
     #FED
     arg_parser.add_argument('-nr', '--no_rounds', type=int)
     arg_parser.add_argument('--fine_tuning_epochs', default=10, type=int, metavar='N', help='number of total epochs to for fine tuning')
+    arg_parser.add_argument('--use_server_data', default=False, action="store_true")
+    arg_parser.add_argument('--fedprox', default=False, action="store_true")
     #NIID
     arg_parser.add_argument("-niid", "--niid", type=str, help="Non-IID format.")
     arg_parser.add_argument("-b", "--b", type=str, help="Balanced scenario")
@@ -355,6 +491,7 @@ if __name__ == '__main__':
     args = arg_parser.parse_args()
     print(args)
     print(json.dumps(vars(args), indent=2))
+    print()
 
     args.num_classes=10
     args.data=os.path.join(args.project_folder,"data/")
@@ -385,16 +522,33 @@ if __name__ == '__main__':
         partition=partition,
         alpha=args.alpha
     )
+    # generate_mnist(
+    #     dir_path=args.data,
+    #     num_clients=args.no_clients,
+    #     num_classes=args.num_classes,
+    #     niid=niid,
+    #     balance=balance,
+    #     partition=partition,
+    #     alpha=args.alpha
+    # )
     
     #Train Server Model
     model_arch = args.arch
-    model = models.__dict__[model_arch](num_classes=args.num_classes)
-    model = train_server_model(model, args)
+    # model = models.__dict__[model_arch](num_classes=args.num_classes)
+    # model = AlexNet_MNIST()
+    # model = train_server_model(model, args)
+    # args.global_model_path = os.path.join(args.project_folder, args.model_name)
+    # torch.save(model, args.global_model_path)
+    
     args.global_model_path = os.path.join(args.project_folder, args.model_name)
+    model = models.__dict__[model_arch](num_classes=args.num_classes)
     torch.save(model, args.global_model_path)
 
+    # args.global_model_path = "./projects/test_1_fed_sim_NIID_wServerData_alpha05_ft10/alexnet.pth.tar"
+
     #Federated Learning
-    federated_learning(args)
+    global_model = federated_learning(args)
+    torch.save(global_model, os.path.join(args.project_folder, "last_model.pth.tar"))
 
 
     

@@ -24,4 +24,19 @@ sudop python core_up.py
 source /home/goktug/python_envs/easyfl/bin/activate; cd /home/goktug/Desktop/thesis/netadapt-x-flower/
 ```
 
+
+docker run --rm -it --cpus=4 --name gocker -v /home/goktug.ocal/thesis/netadapt-x-flower/logs/:/app/logs/ -v /home/goktug.ocal/thesis/netadapt-x-flower/data/:/app/data/ pynode /bin/bash
+
+
+docker run --rm -it \
+    -v /home/goktug/Desktop/thesis/netadapt-x-flower/models/:/app/models/ \
+    -v /home/goktug/Desktop/thesis/netadapt-x-flower/data/:/app/data/ \
+    -v /home/goktug/Desktop/thesis/netadapt-x-flower/projects/:/app/projects/ \
+    pynode \
+    /bin/bash
+
+
+docker run -d --rm --cpus=4 --name gocker -v /home/goktug.ocal/thesis/netadapt-x-flower/logs/:/app/logs/ -v /home/goktug.ocal/thesis/netadapt-x-flower/data/:/app/data/ pynode python load_test.py
+
+
 sudop nohup python pure_core.py > logs/core_NIID_a1_20c_alexnet.log &

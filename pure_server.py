@@ -187,6 +187,11 @@ if __name__ == "__main__":
         format='%(asctime)s %(levelname)-8s %(message)s',
         level=logging.DEBUG,
         datefmt='%Y-%m-%d %H:%M:%S')
+
+    if not os.path.exists(logfilename):
+        with open(logfilename, "w") as f:
+            f.write("Round,Event,Type,DateTime\n")
+    
     try:
         no_clients = args.nc
 

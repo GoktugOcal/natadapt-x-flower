@@ -17,7 +17,7 @@ from custom_nodes.dockerclient import DockerClient
 
 logging.basicConfig(level=logging.DEBUG)
 
-WORKING_PATH = "models/alexnet/fed/32_pure_test_NIID_a01_20c_alexnet"
+WORKING_PATH = "projects/32_pure_test_NIID_a01_20c_alexnet"
 MAX_ITER = 5
 NO_CLIENTS = 20
 CPU_PER_CLIENT = 4
@@ -42,7 +42,11 @@ def main():
         # Server Node
         options = DockerNode.create_options()
         options.image = "pynode"
-        options.binds = [(os.getcwd() + "/models", "/app/models")]
+        options.binds = [
+            (os.getcwd() + "/models", "/app/models"),
+            (os.getcwd() + "/data", "/app/data"),
+            (os.getcwd() + "/projects", "/app/projects")
+            ]
         options.no_cpus = CPU_PER_CLIENT
         options.mem_limit = MEM_LIMIT_PER_CLIENT
         servernode = session.add_node(DockerServer, options=options)
@@ -75,7 +79,7 @@ def main():
             f"docker exec -td DockerServer2 python pure_server.py "
             f"{WORKING_PATH} "
             f"-nc {NO_CLIENTS} "
-            f"-m models/alexnet/test/test-32-NIID-20c/worker/iter_8_block_0_model.pth.tar",
+            f"-m models/alexnet/torch_alexnet.pth.tar",
             wait=True
         )
         
@@ -92,10 +96,9 @@ def main():
             )
         
         time.sleep(10)
-
         temp_line = ""
         while(True):
-            with open(os.path.join(WORKING_PATH,"logs.txt"), "r") as f:
+            with open(os.path.join(WORKING_PATH,"logs_debug.txt"), "r") as f:
                 last_line = f.readlines()[-1]
                 if temp_line != last_line:
                     logging.debug(last_line)
@@ -123,7 +126,9 @@ def main():
     except KeyboardInterrupt:
         coreemu.shutdown()
     
-    except:
+    except Exception as e:
+        logging.debug(e, exc_info=True)
+        print(">>>>>>>>>>>>>>>", e)
         coreemu.shutdown()
         
     finally:
