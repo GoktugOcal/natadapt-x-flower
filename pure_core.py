@@ -75,7 +75,7 @@ def main():
             f"docker exec -td DockerServer2 python pure_server.py "
             f"{WORKING_PATH} "
             f"-nc {NO_CLIENTS} "
-            f"-m /models/alexnet/test/test-32-NIID-20c/worker/iter_8_block_0_model.pth.tar",
+            f"-m models/alexnet/test/test-32-NIID-20c/worker/iter_8_block_0_model.pth.tar",
             wait=True
         )
         
