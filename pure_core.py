@@ -79,7 +79,7 @@ def main():
             f"docker exec -td DockerServer2 python pure_server.py "
             f"{WORKING_PATH} "
             f"-nc {NO_CLIENTS} "
-            f"-m models/alexnet/torch_alexnet.pth.tar",
+            f"-m models/alexnet/alexnet32_server.pth.tar",
             wait=True
         )
         
