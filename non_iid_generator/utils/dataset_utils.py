@@ -9,7 +9,7 @@ from torchvision.transforms import transforms
 from PIL import Image
 import h5py
 
-batch_size = 10
+batch_size = 128
 train_size = 0.75 # merge original training set and test set, then split it manually. 
 least_samples = batch_size / (1-train_size) # least samples for each client
 # alpha = 0.5 # for Dirichlet distribution
