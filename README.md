@@ -40,3 +40,5 @@ docker run -d --rm --cpus=4 --name gocker -v /home/goktug.ocal/thesis/netadapt-x
 
 
 sudop nohup python pure_core.py > logs/core_NIID_a1_20c_alexnet.log &
+
+srun --immediate --time=0 --ntasks=1 --cpus-per-task=1 --gpus-per-task=1 --container-name=d_sample0 --container-image=nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04 --pty bash

@@ -14,6 +14,7 @@ import torch.backends.cudnn as cudnn
 import pickle
 import numpy as np
 import json
+from datetime import datetime
 
 from copy import deepcopy
 import shutil
@@ -30,10 +31,14 @@ from utils import imagenet_loader
 from generate_cifar10 import generate_cifar10
 from generate_mnist import generate_mnist
 
+from client_selection import ClientSelector
+
 _NUM_CLASSES = 10
 # DEVICE = os.environ["TORCH_DEVICE"]
 # DEVICE = "cuda"
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DT_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 
 class AlexNet_MNIST(nn.Module):  
     def __init__(self):
@@ -283,6 +288,9 @@ def eval(test_loader, model, args):
             
 def client(global_model, client_id, args):
 
+    # with open(args.logfilename, "a") as f:
+    #     f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},{client_id},start,{0}\n")
+
     model = deepcopy(global_model)
 
     train_dataset_path = os.path.join(args.data, "train", f"{client_id}.pkl")
@@ -342,7 +350,7 @@ def client(global_model, client_id, args):
     print('Best accuracy:', best_acc)
 
     with open(args.logfilename, "a") as f:
-        f.write(f"{args.round_no},{client_id},test,{best_acc}\n")
+        f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},{client_id},test,{best_acc}\n")
 
     return model, len(train_data.data)
 
@@ -404,13 +412,13 @@ def train_server_model(model, args):
 def federated_learning(args):
     args.logfilename = os.path.join(args.project_folder, "federated.txt")
     with open(args.logfilename, "w") as f:
-        f.write("RoundNo,ClientNo,Dataset,Accuracy\n")
+        f.write("DateTime,RoundNo,ClientNo,Dataset,Accuracy\n")
 
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.RandomCrop(32, padding=4), 
-        transforms.Resize(224),
-        transforms.RandomHorizontalFlip(),
+        # transforms.RandomCrop(32, padding=4), 
+        # transforms.Resize(224),
+        # transforms.RandomHorizontalFlip(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
     ])
 
@@ -428,13 +436,27 @@ def federated_learning(args):
     global_model = torch.load(args.global_model_path, map_location=DEVICE)
     global_model = global_model.to(DEVICE)
 
+    #Client Selection
+    dataset_path = os.path.join(args.data)
+    no_clients = 140
+    no_groups = 10
+    no_classes = 10
+
+    if args.client_selection:
+        client_selector = ClientSelector(no_clients, no_groups, no_classes, dataset_path)
+        client_selector.find_groups()
+        selected_clients = client_selector.get_clients()
+    else: selected_clients = np.arange(args.no_clients)
+    print("Selected Clients:",selected_clients)
+
     for round_no in range(args.no_rounds):
         args.round_no = round_no
         print(f"Round No: {round_no}")
 
         weights = []
 
-        for client_id in range(args.no_clients):
+        # for client_id in range(args.no_clients):
+        for client_id in selected_clients:
             print(f"Client No: {client_id}")
             local_model, no_samples = client(global_model, client_id, args)
             weights.append((get_parameters(local_model), no_samples))
@@ -450,8 +472,8 @@ def federated_learning(args):
         global_test_acc = eval(test_loader, global_model, args)
 
         with open(args.logfilename, "a") as f:
-            f.write(f"{args.round_no},server,train,{global_train_acc}\n")
-            f.write(f"{args.round_no},server,test,{global_test_acc}\n")
+            f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},server,train,{global_train_acc}\n")
+            f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},server,test,{global_test_acc}\n")
     return global_model
 
 if __name__ == '__main__':
@@ -467,6 +489,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--fine_tuning_epochs', default=10, type=int, metavar='N', help='number of total epochs to for fine tuning')
     arg_parser.add_argument('--use_server_data', default=False, action="store_true")
     arg_parser.add_argument('--fedprox', default=False, action="store_true")
+    arg_parser.add_argument('--client_selection', default=False, action="store_true")
     #NIID
     arg_parser.add_argument("-niid", "--niid", type=str, help="Non-IID format.")
     arg_parser.add_argument("-b", "--b", type=str, help="Balanced scenario")
@@ -533,13 +556,14 @@ if __name__ == '__main__':
     # )
     
     #Train Server Model
-    model_arch = args.arch
+    # model_arch = args.arch
     # model = models.__dict__[model_arch](num_classes=args.num_classes)
-    # model = AlexNet_MNIST()
+    # # model = AlexNet_MNIST()
     # model = train_server_model(model, args)
     # args.global_model_path = os.path.join(args.project_folder, args.model_name)
     # torch.save(model, args.global_model_path)
     
+    model_arch = args.arch
     args.global_model_path = os.path.join(args.project_folder, args.model_name)
     model = models.__dict__[model_arch](num_classes=args.num_classes)
     torch.save(model, args.global_model_path)
