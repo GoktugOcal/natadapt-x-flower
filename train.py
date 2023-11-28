@@ -20,9 +20,8 @@ from utils import imagenet_loader
 
 _NUM_CLASSES = 10
 # DEVICE = os.environ["TORCH_DEVICE"]
-DEVICE = "cuda"
-
-
+# DEVICE = "cuda"
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
