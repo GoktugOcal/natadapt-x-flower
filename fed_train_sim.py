@@ -527,8 +527,12 @@ if __name__ == '__main__':
     if not os.path.exists(args.data):
         os.makedirs(args.data)
         print('Create directory', args.data)
-    shutil.copytree("./data/cifar-10-batches-py", os.path.join(args.data, "rawdata", "cifar-10-batches-py"))
-
+    
+    try:
+        shutil.copytree("./data/cifar-10-batches-py", os.path.join(args.data, "rawdata", "cifar-10-batches-py"))
+    except:
+        pass
+    
     with open(os.path.join(args.project_folder,"config.json"), "w") as f:
         f.write(json.dumps(vars(args), indent=2))
 
