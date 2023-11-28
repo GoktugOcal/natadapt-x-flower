@@ -166,7 +166,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('data', metavar='DIR', help='path to dataset')
     arg_parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-    arg_parser.add_argument('--epochs', default=150, type=int, metavar='N',
+    arg_parser.add_argument('--epochs', default=200, type=int, metavar='N',
                     help='number of total epochs to run (default: 150)')
     arg_parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -209,8 +209,8 @@ if __name__ == '__main__':
         # transforms.Resize(256),
         # transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-        # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
     # Data loader
