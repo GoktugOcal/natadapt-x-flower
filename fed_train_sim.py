@@ -156,7 +156,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         output = model(images)
         
         if args.fedprox:
-            proximal_term = 0.0
+            proximal_term = 0.01
             for local_weights, global_weights in zip(model.parameters(), global_model.parameters()):
                 proximal_term += (local_weights - global_weights).norm(2)
             loss = criterion(output, target_onehot) + (1.0 / 2) * proximal_term
@@ -330,6 +330,7 @@ def client(global_model, client_id, args):
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
 
+    model = nn.DataParallel(model)
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
     # Train & evaluation
@@ -385,6 +386,7 @@ def train_server_model(model, args):
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
+    model = nn.DataParallel(model)
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
     # Train & evaluation
@@ -434,6 +436,7 @@ def federated_learning(args):
         num_workers=args.workers, pin_memory=True)
 
     global_model = torch.load(args.global_model_path, map_location=DEVICE)
+    global_model= nn.DataParallel(global_model)
     global_model = global_model.to(DEVICE)
 
     #Client Selection
@@ -461,9 +464,12 @@ def federated_learning(args):
             local_model, no_samples = client(global_model, client_id, args)
             weights.append((get_parameters(local_model), no_samples))
 
+        print("FedAVG")
         parameters_aggregated = fedavg(weights)
         parameters = parameters_to_ndarrays(parameters_aggregated)
+        del weights
         # Set parameters
+        print("Set parameters")
         params_dict = zip(global_model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         global_model.load_state_dict(state_dict, strict=True)
@@ -490,6 +496,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--use_server_data', default=False, action="store_true")
     arg_parser.add_argument('--fedprox', default=False, action="store_true")
     arg_parser.add_argument('--client_selection', default=False, action="store_true")
+    arg_parser.add_argument('--pretrained', default=False, action="store_true")
     #NIID
     arg_parser.add_argument("-niid", "--niid", type=str, help="Non-IID format.")
     arg_parser.add_argument("-b", "--b", type=str, help="Balanced scenario")
@@ -532,7 +539,7 @@ if __name__ == '__main__':
         shutil.copytree("./data/cifar-10-batches-py", os.path.join(args.data, "rawdata", "cifar-10-batches-py"))
     except:
         pass
-    
+
     with open(os.path.join(args.project_folder,"config.json"), "w") as f:
         f.write(json.dumps(vars(args), indent=2))
 
@@ -560,17 +567,19 @@ if __name__ == '__main__':
     # )
     
     #Train Server Model
-    # model_arch = args.arch
-    # model = models.__dict__[model_arch](num_classes=args.num_classes)
-    # # model = AlexNet_MNIST()
-    # model = train_server_model(model, args)
-    # args.global_model_path = os.path.join(args.project_folder, args.model_name)
-    # torch.save(model, args.global_model_path)
-    
-    model_arch = args.arch
-    args.global_model_path = os.path.join(args.project_folder, args.model_name)
-    model = models.__dict__[model_arch](num_classes=args.num_classes)
-    torch.save(model, args.global_model_path)
+    if args.pretrained: # Use the pretrained model
+        model_arch = args.arch
+        model = models.__dict__[model_arch](num_classes=args.num_classes)
+        # model = AlexNet_MNIST()
+        model = train_server_model(model, args)
+        args.global_model_path = os.path.join(args.project_folder, args.model_name)
+        torch.save(model, args.global_model_path)
+        
+    else:
+        model_arch = args.arch
+        args.global_model_path = os.path.join(args.project_folder, args.model_name)
+        model = models.__dict__[model_arch](num_classes=args.num_classes)
+        torch.save(model, args.global_model_path)
 
     # args.global_model_path = "./projects/test_1_fed_sim_NIID_wServerData_alpha05_ft10/alexnet.pth.tar"
 

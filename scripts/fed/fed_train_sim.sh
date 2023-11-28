@@ -5,7 +5,7 @@ for alpha in 0.3 0.5; do
         -m alexnet.pth.tar \
         -nc 140 \
         -nr 200 \
-        --fine_tuning_epochs 50 \
+        --fine_tuning_epochs 5 \
         -niid noniid \
         -b - \
         -p dir \
