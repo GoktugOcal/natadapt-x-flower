@@ -5,13 +5,14 @@ for alpha in 0.3 0.5; do
         -m alexnet.pth.tar \
         -nc 140 \
         -nr 200 \
-        --fine_tuning_epochs 5 \
+        --fine_tuning_epochs 50 \
         -niid noniid \
         -b - \
         -p dir \
         --alpha $alpha \
         --epochs 200 \
-        --arch alexnet_reduced
+        --arch alexnet_reduced \
+        --client_selection
 done
 
 

@@ -14,6 +14,7 @@ import torch.backends.cudnn as cudnn
 import pickle
 import numpy as np
 import json
+import random
 from datetime import datetime
 
 from copy import deepcopy
@@ -32,6 +33,7 @@ from generate_cifar10 import generate_cifar10
 from generate_mnist import generate_mnist
 
 from client_selection import ClientSelector
+
 
 _NUM_CLASSES = 10
 # DEVICE = os.environ["TORCH_DEVICE"]
@@ -156,7 +158,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         output = model(images)
         
         if args.fedprox:
-            proximal_term = 0.01
+            proximal_term = 1.0
             for local_weights, global_weights in zip(model.parameters(), global_model.parameters()):
                 proximal_term += (local_weights - global_weights).norm(2)
             loss = criterion(output, target_onehot) + (1.0 / 2) * proximal_term
@@ -448,6 +450,8 @@ def federated_learning(args):
     if args.client_selection:
         client_selector = ClientSelector(no_clients, no_groups, no_classes, dataset_path)
         client_selector.find_groups()
+        # group_no = random.choice(np.arange(no_groups).tolist())
+        # print("Group No:", group_no)
         selected_clients = client_selector.get_clients()
     else: selected_clients = np.arange(args.no_clients)
     print("Selected Clients:",selected_clients)
@@ -455,6 +459,11 @@ def federated_learning(args):
     for round_no in range(args.no_rounds):
         args.round_no = round_no
         print(f"Round No: {round_no}")
+
+        if args.client_selection:
+            group_no = round_no % 10
+            selected_clients = client_selector.get_clients(group_no = group_no)
+        else: selected_clients = np.arange(args.no_clients)
 
         weights = []
 
