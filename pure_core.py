@@ -2,6 +2,8 @@ import logging
 import time
 import os
 import argparse
+import numpy as np
+import random
 
 from core.emulator.coreemu import CoreEmu
 from core.emulator.data import IpPrefixes
@@ -17,11 +19,39 @@ from custom_nodes.dockerclient import DockerClient
 
 logging.basicConfig(level=logging.DEBUG)
 
-WORKING_PATH = "projects/32_pure_test_NIID_a01_20c_alexnet_2"
+WORKING_PATH = "projects/network_test_20c_a03"
 MAX_ITER = 5
 NO_CLIENTS = 20
 CPU_PER_CLIENT = 4
 MEM_LIMIT_PER_CLIENT = "6g"
+
+
+WEAK_NETWORK = np.arange(500_000, 2_500_000, 500_000)
+NORMAL_NETWORK = np.arange(8_000_000, 32_000_000, 1_000_000)
+STRONG_NETWORK = np.arange(50_000_000, 100_000_000, 10_000_000)
+
+client_networks = {
+    0 : WEAK_NETWORK,
+    1 : NORMAL_NETWORK,
+    2 : STRONG_NETWORK,
+    3 : WEAK_NETWORK,
+    4 : NORMAL_NETWORK,
+    5 : STRONG_NETWORK,
+    6 : WEAK_NETWORK,
+    7 : NORMAL_NETWORK,
+    8 : STRONG_NETWORK,
+    9 : WEAK_NETWORK,
+    10 : NORMAL_NETWORK,
+    11 : NORMAL_NETWORK,
+    12 : STRONG_NETWORK,
+    13 : WEAK_NETWORK,
+    14 : NORMAL_NETWORK,
+    15 : STRONG_NETWORK,
+    16 : WEAK_NETWORK,
+    17 : NORMAL_NETWORK,
+    18 : STRONG_NETWORK,
+    19 : WEAK_NETWORK,
+}
 
 def main():
     parser = argparse.ArgumentParser(description="Core")
@@ -79,7 +109,7 @@ def main():
             f"docker exec -td DockerServer2 python pure_server.py "
             f"{WORKING_PATH} "
             f"-nc {NO_CLIENTS} "
-            f"-m models/alexnet/alexnet32_server.pth.tar",
+            f"-m models/alexnet/alexnet32_a03_server.pth.tar",
             wait=True
         )
         
@@ -91,13 +121,30 @@ def main():
                 f"docker exec -td DockerClient{3 + i} python client.py "
                 f"{WORKING_PATH} "
                 f"--server_ip {iface1_data.ip4} "
-                f"-dn 32_Cifar10_NIID_20c_a01 "
+                f"-dn 32_Cifar10_NIID_20c_a03 "
                 f"--no {i} "
             )
+
+        for client in clients:
+            new_options = LinkOptions(
+                bandwidth=random.choice(client_networks[client.id-3]),
+                )
+            session.update_link(switch.id, client.id, client.id-2, 0, options=new_options)
         
         time.sleep(10)
         temp_line = ""
+        start = time.time()
         while(True):
+            
+            elapsed = time.time() - start
+            if elapsed > 300:
+                for client in clients:
+                    new_options = LinkOptions(
+                        bandwidth=random.choice(client_networks[client.id-3]),
+                        )
+                    session.update_link(switch.id, client.id, client.id-2, 0, options=new_options)
+                start = time.time()
+
             with open(os.path.join(WORKING_PATH,"logs_debug.txt"), "r") as f:
                 last_line = f.readlines()[-1]
                 if temp_line != last_line:

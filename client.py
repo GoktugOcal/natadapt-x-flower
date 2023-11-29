@@ -40,7 +40,18 @@ warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = os.environ["TORCH_DEVICE"]
 # DEVICE = "cuda"
 
-
+def dt_log(date_file, com_round, event, type):
+    with open(date_file, "a") as f:
+        line = ",".join(
+            [
+                str(com_round),
+                event,
+                type,
+                datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+            ]
+        )
+        line += "\n"
+        f.write(line)
 
 def timer(start=None, mess=None):
     if mess: logging.info(f"{mess} - {time() - start}")
@@ -248,10 +259,11 @@ net = Net().to(DEVICE)
 
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(self, client_id, log_file, train_loader, test_loader):
+    def __init__(self, client_id, log_file, date_file, train_loader, test_loader):
         super().__init__()
         self.client_id = client_id
         self.log_file = log_file
+        self.date_file = date_file
 
         self.trainLoader, self.testLoader = train_loader, test_loader
 
@@ -262,7 +274,10 @@ class FlowerClient(fl.client.NumPyClient):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
     
     def get_properties(self, ins):
-        print("Server requested for the properties.")
+        logging.debug("Server requested for the properties.")
+        logging.debug(self.properties)
+        logging.debug(ins)
+
         return self.properties
 
     def set_parameters(self, parameters):
@@ -273,7 +288,7 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         self.netadapt_config = config
 
-        logging.debug(config)
+        #logging.debug(config)
 
         if "network_arch" in list(config.keys()):
             ## Receive the model
@@ -285,19 +300,11 @@ class FlowerClient(fl.client.NumPyClient):
             logging.debug(f"here")
             self.set_parameters(parameters=parameters)
 
-        with open(self.log_file, "a") as f:
-            line = ",".join(
-                [
-                    str(self.netadapt_config["netadapt_iteration"]),
-                    str(self.netadapt_config["block_id"]),
-                    str(self.netadapt_config["server_round"]),
-                    "0.0",
-                    "0.0",
-                    datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-                ]
-            )
-            line += "\n"
-            f.write(line)
+        dt_log(
+            self.date_file,
+            self.netadapt_config["server_round"], 
+            "Fit",
+            "Received")
         
         ## Check the received model 
         # self.model.eval()
@@ -307,14 +314,26 @@ class FlowerClient(fl.client.NumPyClient):
         # train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
         # test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"
         
-        self.model = fine_tune(self.model, 10, self.trainLoader, print_frequency=1)
+        # self.model = fine_tune(self.model, 10, self.trainLoader, print_frequency=1)
         logging.info("Fine tuning ended.")
+
+        dt_log(
+            self.date_file,
+            self.netadapt_config["server_round"], 
+            "Fit",
+            "Send")
 
         # train(net, trainloader, epochs=1)
         return self.get_parameters(config), len(self.trainLoader.dataset), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
+
+        dt_log(
+            self.date_file,
+            self.netadapt_config["server_round"], 
+            "Evaluate",
+            "Received")
 
         # train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
         # test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"        
@@ -342,7 +361,12 @@ class FlowerClient(fl.client.NumPyClient):
             )
             line += "\n"
             f.write(line)
-
+        
+        dt_log(
+            self.date_file,
+            self.netadapt_config["server_round"], 
+            "Evaluate",
+            "Send")
 
         return loss, len(self.testLoader.dataset), {"accuracy": accuracy}
 
@@ -363,15 +387,17 @@ if __name__ == '__main__':
 
     client_folder_name = os.path.join(args.working_folder, "client" + "_" + str(client_id))
     logfilename = os.path.join(client_folder_name, "logs.txt")
+    datefilename = os.path.join(client_folder_name, "time.txt")
     debug_logfilename = os.path.join(client_folder_name, "logs_debug.txt")
 
     os.makedirs(os.path.dirname(logfilename), exist_ok=True)
+    os.makedirs(os.path.dirname(datefilename), exist_ok=True)
     os.makedirs(os.path.dirname(debug_logfilename), exist_ok=True)
 
     logging.basicConfig(
         filename=debug_logfilename,
         format='%(asctime)s %(levelname)-8s %(message)s',
-        level=logging.INFO,
+        level=logging.DEBUG,
         datefmt='%Y-%m-%d %H:%M:%S')
 
     train_dataset_path = f"./data/{args.dataset_name}/train/{client_id}.pkl"
@@ -381,6 +407,10 @@ if __name__ == '__main__':
     if not os.path.exists(logfilename):
         with open(logfilename, "w") as f:
             f.write("Iteration,Block,Round,Accuracy,Loss,DateTime\n")
+
+    if not os.path.exists(datefilename):
+        with open(datefilename, "w") as f:
+            f.write("Round,Event,Type,DateTime\n")
 
     while True:
         try:
@@ -392,6 +422,7 @@ if __name__ == '__main__':
                 client=FlowerClient(
                     client_id,
                     logfilename,
+                    datefilename,
                     train_loader= trainloader,
                     test_loader=testloader
                 ),

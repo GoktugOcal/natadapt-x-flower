@@ -42,3 +42,5 @@ docker run -d --rm --cpus=4 --name gocker -v /home/goktug.ocal/thesis/netadapt-x
 sudop nohup python pure_core.py > logs/core_NIID_a1_20c_alexnet.log &
 
 srun --immediate --time=0 --ntasks=1 --cpus-per-task=1 --gpus-per-task=1 --container-name=d_sample0 --container-image=nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04 --pty bash
+
+docker exec -td DockerServer2 python pure_server.py projects/32_pure_test_NIID_a01_20c_alexnet_3 -nc 20 -m projects/define_pretrained_fed_sim_NIID_alpha03/alexnet.pth.tar
