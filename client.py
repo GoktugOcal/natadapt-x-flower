@@ -39,6 +39,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 # DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 DEVICE = os.environ["TORCH_DEVICE"]
 # DEVICE = "cuda"
+LAST_MODEL = None
 
 def dt_log(date_file, com_round, event, type):
     with open(date_file, "a") as f:
@@ -281,6 +282,7 @@ class FlowerClient(fl.client.NumPyClient):
         return self.properties
 
     def set_parameters(self, parameters):
+        if not hasattr(self, "model"): self.model = LAST_MODEL
         params_dict = zip(self.model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         self.model.load_state_dict(state_dict, strict=True)
@@ -314,8 +316,9 @@ class FlowerClient(fl.client.NumPyClient):
         # train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
         # test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"
         
-        self.model = fine_tune(self.model, 10, self.trainLoader, print_frequency=1)
+        # self.model = fine_tune(self.model, 10, self.trainLoader, print_frequency=1)
         logging.info("Fine tuning ended.")
+        LAST_MODEL = self.model
 
         dt_log(
             self.date_file,
@@ -432,7 +435,7 @@ if __name__ == '__main__':
             break
         except Exception as e:
             if(e.__class__.__name__ == "_MultiThreadedRendezvous"):
-                print("Waiting for server connnection...")
+                logging.debug("Waiting for server connnection...")
             else:
                 # logging.warning(e)
                 # print_exc()

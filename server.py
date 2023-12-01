@@ -189,9 +189,12 @@ class NetStrategy(FedAvg):
 def flower_server_execute(strategy, no_rounds=3):
     hist = fl.server.start_server(
         server_address="0.0.0.0:8080",
-        config=fl.server.ServerConfig(num_rounds=no_rounds),
+        config=fl.server.ServerConfig(
+            num_rounds=no_rounds,
+            round_timeout=18000),
         strategy=strategy,
-        grpc_max_message_length=1073741824
+        grpc_max_message_length=1073741824,
+        keepalive_time_ms = 7200000,
     )
 
     return hist

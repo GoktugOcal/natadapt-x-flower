@@ -19,14 +19,19 @@ from custom_nodes.dockerclient import DockerClient
 
 logging.basicConfig(level=logging.DEBUG)
 
-WORKING_PATH = "projects/network_test_20c_a03"
+WORKING_PATH = "projects/network_test_20c_a03_4"
+MODEL_PATH = "projects/define_pretrained_fed_sim_NIID_alpha03/alexnet.pth.tar"
+DATASET_PATH = "alpha/Cifar10_NIID_80c_a03"
 MAX_ITER = 5
-NO_CLIENTS = 20
-CPU_PER_CLIENT = 4
+NO_CLIENTS = 8
+CPU_PER_CLIENT = 8
 MEM_LIMIT_PER_CLIENT = "6g"
 
 
-WEAK_NETWORK = np.arange(500_000, 2_500_000, 500_000)
+# WEAK_NETWORK = np.arange(500_000, 2_500_000, 500_000)
+# WEAK_NETWORK = np.array([2_000_000, 2_500_000])
+# WEAK_NETWORK = np.array([5_500_000])
+WEAK_NETWORK = np.array([1_500_000])
 NORMAL_NETWORK = np.arange(8_000_000, 32_000_000, 1_000_000)
 STRONG_NETWORK = np.arange(50_000_000, 100_000_000, 10_000_000)
 
@@ -109,9 +114,10 @@ def main():
             f"docker exec -td DockerServer2 python pure_server.py "
             f"{WORKING_PATH} "
             f"-nc {NO_CLIENTS} "
-            f"-m models/alexnet/alexnet32_a03_server.pth.tar",
+            f"-m {MODEL_PATH}",
             wait=True
         )
+        # models/alexnet/alexnet32_a03_server.pth.tar
         
         # time.sleep(5)  # Give server enough time to start
 
@@ -121,9 +127,11 @@ def main():
                 f"docker exec -td DockerClient{3 + i} python client.py "
                 f"{WORKING_PATH} "
                 f"--server_ip {iface1_data.ip4} "
-                f"-dn 32_Cifar10_NIID_20c_a03 "
+                f"-dn {DATASET_PATH} "
                 f"--no {i} "
             )
+
+            # 32_Cifar10_NIID_20c_a03 
 
         for client in clients:
             new_options = LinkOptions(
@@ -147,6 +155,7 @@ def main():
 
             with open(os.path.join(WORKING_PATH,"logs_debug.txt"), "r") as f:
                 last_line = f.readlines()[-1]
+                # logging.debug(last_line)
                 if temp_line != last_line:
                     logging.debug(last_line)
                     temp_line = last_line
