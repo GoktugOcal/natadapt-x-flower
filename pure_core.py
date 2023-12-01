@@ -19,7 +19,7 @@ from custom_nodes.dockerclient import DockerClient
 
 logging.basicConfig(level=logging.DEBUG)
 
-WORKING_PATH = "projects/network_test_20c_a03_4"
+WORKING_PATH = "projects/network_test_8c_a03_8core/"
 # MODEL_PATH = "projects/define_pretrained_fed_sim_NIID_alpha03/alexnet.pth.tar"
 MODEL_PATH = "models/alexnet/alexnet32_a03_server.pth.tar"
 DATASET_PATH = "alpha/Cifar10_NIID_80c_a03"
