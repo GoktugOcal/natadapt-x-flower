@@ -27,7 +27,7 @@ else:
     MODEL_PATH = "models/alexnet/alexnet32_a03_server.pth.tar"
     DATASET_PATH = "32_Cifar10_NIID_20c_a03"
 
-WORKING_PATH = "projects/network_test_8c_a03_8_core_2_000_000/"
+WORKING_PATH = "projects/network_test_8c_a03_8_core_2_500_000/"
 MAX_ITER = 5
 NO_CLIENTS = 8
 CPU_PER_CLIENT = 8
@@ -36,7 +36,7 @@ MEM_LIMIT_PER_CLIENT = "6g"
 
 # WEAK_NETWORK = np.arange(500_000, 2_500_000, 500_000)
 # WEAK_NETWORK = np.array([2_000_000, 2_500_000])
-WEAK_NETWORK = np.array([2_000_000])
+WEAK_NETWORK = np.array([2_500_000])
 # WEAK_NETWORK = np.array([1_500_000])
 NORMAL_NETWORK = np.arange(8_000_000, 32_000_000, 1_000_000)
 STRONG_NETWORK = np.arange(50_000_000, 100_000_000, 10_000_000)
