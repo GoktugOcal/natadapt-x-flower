@@ -21,22 +21,23 @@ logging.basicConfig(level=logging.DEBUG)
 
 user = os.getlogin()
 if user == "goktug":
-    MODEL_PATH = "projects/define_pretrained_fed_sim_NIID_alpha03/alexnet.pth.tar"
+    #MODEL_PATH = "projects/define_pretrained_fed_sim_NIID_alpha03/alexnet.pth.tar"
+    MODEL_PATH = "projects/test/test-1/worker/iter_9_block_6_model.pth.tar"
     DATASET_PATH = "32_Cifar10_NIID_80c_a03"
 else:
     MODEL_PATH = "models/alexnet/alexnet32_a03_server.pth.tar"
     DATASET_PATH = "32_Cifar10_NIID_20c_a03"
 
-WORKING_PATH = "projects/network_test_8c_a03_8_core_2_500_000/"
+WORKING_PATH = "projects/network_test_8c_a03_8_core_2_000_000_minModel_flwr/"
 MAX_ITER = 5
-NO_CLIENTS = 8
+NO_CLIENTS = 5
 CPU_PER_CLIENT = 8
 MEM_LIMIT_PER_CLIENT = "6g"
 
 
 # WEAK_NETWORK = np.arange(500_000, 2_500_000, 500_000)
 # WEAK_NETWORK = np.array([2_000_000, 2_500_000])
-WEAK_NETWORK = np.array([2_500_000])
+WEAK_NETWORK = np.array([2_000_000])
 # WEAK_NETWORK = np.array([1_500_000])
 NORMAL_NETWORK = np.arange(8_000_000, 32_000_000, 1_000_000)
 STRONG_NETWORK = np.arange(50_000_000, 100_000_000, 10_000_000)
