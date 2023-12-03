@@ -316,7 +316,7 @@ class FlowerClient(fl.client.NumPyClient):
         # train_dataset_path = f"./data/Cifar10/train/{self.client_id}.pkl"
         # test_dataset_path = f"./data/Cifar10/test/{self.client_id}.pkl"
         
-        # self.model = fine_tune(self.model, 10, self.trainLoader, print_frequency=1)
+        self.model = fine_tune(self.model, 10, self.trainLoader, print_frequency=1)
         logging.info("Fine tuning ended.")
         LAST_MODEL = self.model
 
