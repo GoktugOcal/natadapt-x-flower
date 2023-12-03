@@ -28,7 +28,7 @@ else:
     MODEL_PATH = "models/alexnet/alexnet32_a03_server.pth.tar"
     DATASET_PATH = "32_Cifar10_NIID_80c_a03"
 
-WORKING_PATH = "projects/network_test_8c_a03_8_core_2_000_000_minModel_flwr/"
+WORKING_PATH = "projects/network_test_8c_a03_8core_test_1/"
 MAX_ITER = 5
 NO_CLIENTS = 5
 CPU_PER_CLIENT = 8
