@@ -30,7 +30,7 @@ else:
 
 WORKING_PATH = "projects/network_test_8c_a03_8core_test_1/"
 MAX_ITER = 5
-NO_CLIENTS = 5
+NO_CLIENTS = 8
 CPU_PER_CLIENT = 8
 MEM_LIMIT_PER_CLIENT = "6g"
 
