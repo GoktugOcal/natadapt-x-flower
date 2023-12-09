@@ -121,7 +121,7 @@ def worker(
                                                                resource_type,
                                                                netadapt_iteration,
                                                                log_path,
-                                                               1,
+                                                               2,
                                                                lookup_table_path
                                                                ))
 
@@ -687,6 +687,10 @@ if __name__ == '__main__':
 
     # Launch the master.
     print(args)
+    argparse_dict = vars(args)
+    with open(os.path.join(args.working_folder,"config.json"), 'wt') as f:
+        json.dump(vars(args), f, indent=4)
+        
     try:
         master(args)
     except Exception as e:
