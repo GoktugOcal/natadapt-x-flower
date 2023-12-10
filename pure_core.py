@@ -22,23 +22,23 @@ logging.basicConfig(level=logging.DEBUG)
 user = os.getlogin()
 if user == "goktug":
     #MODEL_PATH = "projects/define_pretrained_fed_sim_NIID_alpha03/alexnet.pth.tar"
-    MODEL_PATH = "projects/test/test-1/worker/iter_9_block_6_model.pth.tar"
-    DATASET_PATH = "32_Cifar10_NIID_80c_a03"
+    MODEL_PATH = "projects/test/test-5/worker/iter_1_block_0_model.pth.tar"
+    DATASET_PATH = "32_Cifar10_NIID_56c_a03"
 else:
-    MODEL_PATH = "models/alexnet/alexnet32_a03_server.pth.tar"
+    MODEL_PATH = "projects/test/test-5/master/iter_0_best_model.pth.tar"
     DATASET_PATH = "32_Cifar10_NIID_80c_a03"
 
-WORKING_PATH = "projects/network_test_8c_a03_8core_test_1/"
+WORKING_PATH = "projects/12dec/network_test_8c_iter_1_block_0/"
 MAX_ITER = 5
 NO_CLIENTS = 8
+NO_ROUNDS = 1
 CPU_PER_CLIENT = 8
 MEM_LIMIT_PER_CLIENT = "6g"
 
 
 # WEAK_NETWORK = np.arange(500_000, 2_500_000, 500_000)
 # WEAK_NETWORK = np.array([2_000_000, 2_500_000])
-WEAK_NETWORK = np.array([2_500_000])
-# WEAK_NETWORK = np.array([1_500_000])
+WEAK_NETWORK = np.array([2_500_000, 3_500_000])
 NORMAL_NETWORK = np.arange(8_000_000, 32_000_000, 1_000_000)
 STRONG_NETWORK = np.arange(50_000_000, 100_000_000, 10_000_000)
 
@@ -121,7 +121,8 @@ def main():
             f"docker exec -td DockerServer2 python pure_server.py "
             f"{WORKING_PATH} "
             f"-nc {NO_CLIENTS} "
-            f"-m {MODEL_PATH}",
+            f"-m {MODEL_PATH} "
+            f"-nr {NO_ROUNDS}",
             wait=True
         )
         # models/alexnet/alexnet32_a03_server.pth.tar

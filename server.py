@@ -175,7 +175,7 @@ class NetStrategy(FedAvg):
             line = ",".join(
                 [
                     str(server_round),
-                    "Aggregate",
+                    "Evaluation",
                     "Received",
                     datetime.now().strftime("%m/%d/%Y %H:%M:%S")
                 ]
@@ -194,7 +194,7 @@ def flower_server_execute(strategy, no_rounds=3):
             round_timeout=18000),
         strategy=strategy,
         grpc_max_message_length=1073741824,
-        # keepalive_time_ms = 7200000,
+        keepalive_time_ms = 7200000,
     )
 
     return hist

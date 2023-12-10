@@ -170,6 +170,8 @@ if __name__ == "__main__":
                             help='Root folder where models, related files and history information are saved.')
     arg_parser.add_argument('-nc', '--nc', type=int,
                             help="Number of clients for federated learning.")
+    arg_parser.add_argument('-nr', '--nr', type=int, default=20,
+                            help="Number of rounds in federated learning.")
     arg_parser.add_argument('-m', '--model_path', type=str,
                             help="Model path")
     
@@ -226,7 +228,7 @@ if __name__ == "__main__":
         logging.info("> Strategy defined")
         hist = flower_server_execute(
             strategy=strategy,
-            no_rounds=20)
+            no_rounds=args.nr)
         logging.info("> Server Closed")
         print("########## FLOWER ##########")
 
