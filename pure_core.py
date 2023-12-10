@@ -150,8 +150,11 @@ def main():
         time.sleep(10)
         temp_line = ""
         start = time.time()
+
+        # Runtime Operations
         while(True):
             
+            # Change BandWidth
             elapsed = time.time() - start
             if elapsed > 300:
                 for client in clients:
@@ -160,7 +163,8 @@ def main():
                         )
                     session.update_link(switch.id, client.id, client.id-2, 0, options=new_options)
                 start = time.time()
-
+                
+            # Read Logs
             with open(os.path.join(WORKING_PATH,"logs_debug.txt"), "r") as f:
                 last_line = f.readlines()[-1]
                 # logging.debug(last_line)
