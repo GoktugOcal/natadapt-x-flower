@@ -25,10 +25,10 @@ if user == "goktug":
     MODEL_PATH = "projects/test/test-5/worker/iter_1_block_0_model.pth.tar"
     DATASET_PATH = "32_Cifar10_NIID_56c_a03"
 else:
-    MODEL_PATH = "projects/test/test-5/master/iter_0_best_model.pth.tar"
+    MODEL_PATH = "projects/test/test-5/master/iter_5_best_model.pth.tar"
     DATASET_PATH = "32_Cifar10_NIID_80c_a03"
 
-WORKING_PATH = "projects/12dec/network_test_8c_iter_1/"
+WORKING_PATH = "projects/12dec/network_test_8c_iter_5/"
 MAX_ITER = 5
 NO_CLIENTS = 8
 NO_ROUNDS = 1

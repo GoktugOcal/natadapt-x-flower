@@ -237,7 +237,10 @@ if __name__ == "__main__":
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         fine_tuned_model.load_state_dict(state_dict, strict=True)
 
-        federated_eval(fine_tuned_model, args)
+        try:
+            federated_eval(fine_tuned_model, args)
+        except Exception as e:
+            logging.error(e)
 
         logging.info("DONE")
 
