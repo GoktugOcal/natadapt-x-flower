@@ -443,8 +443,8 @@ def federated_learning(args):
 
     #Client Selection
     dataset_path = os.path.join(args.data)
-    no_clients = 140
-    no_groups = 10
+    no_clients = 56
+    no_groups = 7
     no_classes = 10
 
     if args.client_selection:
@@ -595,10 +595,3 @@ if __name__ == '__main__':
     #Federated Learning
     global_model = federated_learning(args)
     torch.save(global_model, os.path.join(args.project_folder, "last_model.pth.tar"))
-
-
-    
-
- 
-
-    

@@ -150,6 +150,18 @@ def worker(
                            common.WORKER_RESOURCE_FILENAME_TEMPLATE.format(netadapt_iteration, block)),
               'w') as file_id:
         file_id.write(str(simplified_resource))
+    ####
+    with open(os.path.join(worker_folder,
+                           common.WORKER_MODELSIZE_FILENAME_TEMPLATE.format(netadapt_iteration, block)),
+              'w') as file_id:
+        model_path = os.path.join(worker_folder,
+                            common.WORKER_MODEL_FILENAME_TEMPLATE.format(netadapt_iteration, block))
+        file_id.write(str(os.path.getsize(model_path)))
+    with open(os.path.join(worker_folder,
+                           common.WORKER_PARAMETERS_FILENAME_TEMPLATE.format(netadapt_iteration, block)),
+              'w') as file_id:
+        file_id.write(str(sum(p.numel() for p in fine_tuned_model.parameters() if p.requires_grad)))
+    ####
     with open(os.path.join(worker_folder,
                            common.WORKER_FINISH_FILENAME_TEMPLATE.format(netadapt_iteration, block)),
               'w') as file_id:
@@ -500,6 +512,8 @@ def master(args):
             ('Process iteration {:>3}: current_accuracy = {:>8.3f}, '
              'current_resource = {:>8.3f}, target_resource = {:>8.3f}').format(
                 current_iter, current_accuracy, current_resource, target_resource))
+        print("irr", args.init_resource_reduction)
+        print("rrd", args.resource_reduction_decay)
 
         # Launch the workers.
         job_list = []
@@ -585,12 +599,12 @@ def master(args):
         current_resource = best_resource
         current_block = best_block
         
-        # if args.save_interval == -1 or (current_iter % args.save_interval != 0):
-        #     for block_idx in range(network_utils.get_num_simplifiable_blocks()):
-        #         temp_model_path = os.path.join(worker_folder, common.WORKER_MODEL_FILENAME_TEMPLATE.format(current_iter, block_idx))
-        #         os.remove(temp_model_path)
-        #         print('Remove', temp_model_path)
-        #     print(' ')
+        if args.save_interval == -1 or (current_iter % args.save_interval != 0):
+            for block_idx in range(network_utils.get_num_simplifiable_blocks()):
+                temp_model_path = os.path.join(worker_folder, common.WORKER_MODEL_FILENAME_TEMPLATE.format(current_iter, block_idx))
+                os.remove(temp_model_path)
+                print('Remove', temp_model_path)
+            print(' ')
 
         # Save and print the history.
         model = torch.load(current_model_path)

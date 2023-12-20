@@ -744,6 +744,7 @@ def simplify_network_def_based_on_constraint_test(network_def, block, constraint
                           'channels.')
                     sys.stdout.flush()
             max_num_out_channels = layer_properties[KEY_NUM_OUT_CHANNELS]
+            layer_type = layer_properties["layer_type_str"]
             print('    simplify_def> target layer: {}, layer index: {}'.format(layer_name, layer_idx))
             del block[0]
             if not block:
@@ -758,10 +759,17 @@ def simplify_network_def_based_on_constraint_test(network_def, block, constraint
     simplified_network_def = copy.deepcopy(network_def)
     simplified_resource = None
     return_with_constraint_satisfied = False
+    print("max_num_out_channels :", max_num_out_channels)
     if max_num_out_channels >= min_feature_size:
         # Try numbers of channels that are multiples of '_MIN_FEATURE_SIZE'.
-        num_out_channels_try = list(range(max_num_out_channels // min_feature_size * min_feature_size, 
-                                          min_feature_size - 1, -min_feature_size*coeff))
+        if layer_type == "Linear":
+            min_feature_size = int(max_num_out_channels/8)
+            num_out_channels_try = list(range(max_num_out_channels // min_feature_size * min_feature_size, 
+                                            min_feature_size - 1, -min_feature_size*coeff))
+        else:
+            num_out_channels_try = list(range(max_num_out_channels // min_feature_size * min_feature_size, 
+                                            min_feature_size - 1, -min_feature_size*coeff))
+
     else:
         num_out_channels_try = [max_num_out_channels]
 

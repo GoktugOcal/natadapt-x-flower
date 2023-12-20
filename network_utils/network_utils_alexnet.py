@@ -12,9 +12,12 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torch.utils.data.sampler as sampler
 
+from tqdm import tqdm
+
 sys.path.append(os.path.abspath('../'))
 
-DEVICE = os.environ["TORCH_DEVICE"]
+# DEVICE = os.environ["TORCH_DEVICE"]
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 from constants import *
 import functions as fns
@@ -254,7 +257,7 @@ class networkUtils_alexnet(NetworkUtilsAbstract):
         return self.num_simplifiable_blocks
     
 
-    def fine_tune(self, model, iterations, print_frequency=100):
+    def fine_tune(self, model, iterations, print_frequency=1):
         '''
             short-term fine-tune a simplified model
             
@@ -273,30 +276,58 @@ class networkUtils_alexnet(NetworkUtilsAbstract):
         model = model.to(DEVICE)
         model.train()
         dataloader_iter = iter(self.train_loader)
-        for i in range(iterations):
-            try:
-                (input, target) = next(dataloader_iter)
-            except:
-                dataloader_iter = iter(self.train_loader)
-                (input, target) = next(dataloader_iter)
+        # for i in range(iterations):
+        #     try:
+        #         (input, target) = next(dataloader_iter)
+        #     except:
+        #         dataloader_iter = iter(self.train_loader)
+        #         (input, target) = next(dataloader_iter)
                 
-            if i % print_frequency == 0:
-                print('Fine-tuning iteration {}'.format(i))
-                sys.stdout.flush()
+        #     if i % print_frequency == 0:
+        #         print('Fine-tuning iteration {}'.format(i))
+        #         sys.stdout.flush()
             
-            target.unsqueeze_(1)
-            target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
-            target_onehot.zero_()
-            target_onehot.scatter_(1, target, 1)
-            target.squeeze_(1)
-            input, target = input.to(DEVICE), target.to(DEVICE)
-            target_onehot = target_onehot.to(DEVICE)
+        #     target.unsqueeze_(1)
+        #     target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
+        #     target_onehot.zero_()
+        #     target_onehot.scatter_(1, target, 1)
+        #     target.squeeze_(1)
+        #     input, target = input.to(DEVICE), target.to(DEVICE)
+        #     target_onehot = target_onehot.to(DEVICE)
 
-            pred = model(input)
-            loss = self.criterion(pred, target_onehot)
-            optimizer.zero_grad()
-            loss.backward()  # compute gradient and do SGD step
-            optimizer.step()
+        #     pred = model(input)
+        #     loss = self.criterion(pred, target_onehot)
+        #     optimizer.zero_grad()
+        #     loss.backward()  # compute gradient and do SGD step
+        #     optimizer.step()
+
+        print("Fine tuning started.")
+        for i in range(iterations):
+            if i % print_frequency == 0:
+                print('Fine-tuning Epoch {}'.format(i))
+                sys.stdout.flush()
+            for i, (input, target) in enumerate(tqdm(self.train_loader)):
+                
+                # (input, target) = next(dataloader_iter)
+                
+                # Ensure the target shape is sth like torch.Size([batch_size])
+                if len(target.shape) > 1: target = target.reshape(len(target))
+
+                target.unsqueeze_(1)
+                target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
+                target_onehot.zero_()
+                target_onehot.scatter_(1, target, 1)
+                target.squeeze_(1)
+                input, target = input.to(DEVICE), target.to(DEVICE)
+                target_onehot = target_onehot.to(DEVICE)
+
+                pred = model(input)
+                loss = self.criterion(pred, target_onehot)
+                optimizer.zero_grad()
+                loss.backward()  # compute gradient and do SGD step
+                optimizer.step()
+
+                del loss, pred
         return model
     
 

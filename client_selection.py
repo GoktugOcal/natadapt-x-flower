@@ -55,7 +55,7 @@ class MyProblem(ElementwiseProblem):
                         #  n_eq_constr=NO_CLASSES,
                          n_ieq_constr=self.NO_CLASSES,
                          xl=np.ones(self.NO_CLIENTS) * 0,
-                         xu=np.ones(self.NO_CLIENTS) * 10,
+                         xu=np.ones(self.NO_CLIENTS) * self.NO_GROUPS,
                          vtype=int)
         self.main_label_vectors = main_label_vectors
 
