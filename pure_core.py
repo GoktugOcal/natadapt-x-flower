@@ -1,3 +1,5 @@
+from argparse import ArgumentParser
+
 import logging
 import time
 import os
@@ -65,9 +67,15 @@ client_networks = {
     19 : WEAK_NETWORK,
 }
 
-def main():
-    parser = argparse.ArgumentParser(description="Core")
-    args = parser.parse_args()
+def main(args):
+
+    if args.working_path: WORKING_PATH = args.working_path
+    if args.model_path: MODEL_PATH = args.model_path
+    if args.dataset_path: DATASET_PATH = args.dataset_path
+    if args.cpu_per_client: CPU_PER_CLIENT = args.cpu_per_client
+    if args.mem_per_client: MEM_LIMIT_PER_CLIENT = args.mem_per_client
+    if args.no_rounds: NO_ROUNDS = args.no_rounds
+
 
     # create core session
     coreemu = CoreEmu()
@@ -203,5 +211,25 @@ def main():
         coreemu.shutdown()
 
 if __name__ == "__main__":
-    main()
+
+    arg_parser = ArgumentParser()
+    arg_parser.add_argument("-wp", "--working_path", type=str,
+                            help="Working path.")
+    arg_parser.add_argument("-mp", "--model_path", type=str,
+                            help="Path to the model that is used in federated learning.")
+    arg_parser.add_argument("-dp", "--dataset_path", type=str,
+                            help="Path to the dataset.")
+    arg_parser.add_argument("-nc", "--no_clients", type=int,
+                            help="Number of clients")
+    arg_parser.add_argument("-ng", "--no_groups", type=int,
+                            help="Number of groups")
+    arg_parser.add_argument("-nr", "--no_rounds", type=int,
+                            help="Number of communcation rounds in FL.")                        
+    arg_parser.add_argument("-cpc", "--cpu_per_client", type=int,
+                            help="CPU per client")
+    arg_parser.add_argument("-mpc", "--mem_per_client", type=str,
+                            help="Memory per client")
+    args = arg_parser.parse_args()
+
+    main(args)
     print("DONE.")

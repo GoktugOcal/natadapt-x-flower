@@ -332,7 +332,7 @@ def client(global_model, client_id, args):
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
 
-    model = nn.DataParallel(model)
+    # model = nn.DataParallel(model)
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
     # Train & evaluation
@@ -388,7 +388,7 @@ def train_server_model(model, args):
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
-    model = nn.DataParallel(model)
+    # model = nn.DataParallel(model)
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
     # Train & evaluation
