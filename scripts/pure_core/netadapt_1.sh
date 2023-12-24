@@ -8,7 +8,7 @@ model_names=("iter_10_block_0_model_simp.pth.tar"
 "iter_10_block_5_model_simp.pth.tar"
 "iter_10_block_6_model_simp.pth.tar")
 
-worker_path="/home/goktug.ocal/thesis/netadapt-x-flower/projects/netadapt/netadapt_1/worker/"
+worker_path="./projects/netadapt/netadapt_1/worker/"
 dataset_path="32_Cifar10_NIID_80c_a03"
 working_path="projects/pure_core/netadapt_1/netadapt_1_iter_10/"
 
