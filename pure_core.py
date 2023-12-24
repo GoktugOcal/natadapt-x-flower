@@ -97,16 +97,25 @@ def main(args):
             (os.getcwd() + "/data", "/app/data"),
             (os.getcwd() + "/projects", "/app/projects")
             ]
-        options.no_cpus = CPU_PER_CLIENT
-        options.mem_limit = MEM_LIMIT_PER_CLIENT
+        # options.no_cpus = CPU_PER_CLIENT
+        # options.mem_limit = MEM_LIMIT_PER_CLIENT
         servernode = session.add_node(DockerServer, options=options)
         iface1_data = prefixes.create_iface(servernode)
 
         # Client Nodes
+        client_options = DockerNode.create_options()
+        client_options.image = "pynode"
+        client_options.binds = [
+            (os.getcwd() + "/models", "/app/models"),
+            (os.getcwd() + "/data", "/app/data"),
+            (os.getcwd() + "/projects", "/app/projects")
+            ]
+        client_options.no_cpus = CPU_PER_CLIENT
+        client_options.mem_limit = MEM_LIMIT_PER_CLIENT
         clients = []
         client_ifaces = []
         for i in range(NO_CLIENTS):
-            new_client = session.add_node(DockerClient, options=options)
+            new_client = session.add_node(DockerClient, options=client_options)
             clients.append(new_client)
             client_ifaces.append(prefixes.create_iface(new_client))
 
