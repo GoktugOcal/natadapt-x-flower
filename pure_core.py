@@ -109,12 +109,14 @@ def main(args):
     if args.mem_per_client: MEM_LIMIT_PER_CLIENT = args.mem_per_client
     if args.no_rounds: NO_ROUNDS = args.no_rounds
 
-    if any(item in name for item in ["block_0","block_1"]):
+    if any(block_id in MODEL_PATH for block_id in ["block_0","block_1"]):
         client_networks =  client_networks_high
-    elif any(item in name for item in ["block_2","block_3","block_4"]):
+    elif any(block_id in MODEL_PATH for block_id in ["block_2","block_3","block_4"]):
         client_networks =  client_networks_medium
-    elif any(item in name for item in ["block_5","block_6"]):
+    elif any(block_id in MODEL_PATH for block_id in ["block_5","block_6"]):
         client_networks =  client_networks_low
+    
+    print(client_networks)
 
     # create core session
     coreemu = CoreEmu()
