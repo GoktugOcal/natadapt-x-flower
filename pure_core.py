@@ -67,6 +67,39 @@ client_networks = {
     19 : WEAK_NETWORK,
 }
 
+client_networks_high = {
+    0 : STRONG_NETWORK,
+    1 : STRONG_NETWORK,
+    2 : STRONG_NETWORK,
+    3 : STRONG_NETWORK,
+    4 : STRONG_NETWORK,
+    5 : STRONG_NETWORK,
+    6 : STRONG_NETWORK,
+    7 : STRONG_NETWORK,
+}
+
+client_networks_medium = {
+    0 : NORMAL_NETWORK,
+    1 : NORMAL_NETWORK,
+    2 : NORMAL_NETWORK,
+    3 : NORMAL_NETWORK,
+    4 : NORMAL_NETWORK,
+    5 : NORMAL_NETWORK,
+    6 : NORMAL_NETWORK,
+    7 : NORMAL_NETWORK,
+}
+
+client_networks_low = {
+    0 : WEAK_NETWORK,
+    1 : WEAK_NETWORK,
+    2 : WEAK_NETWORK,
+    3 : WEAK_NETWORK,
+    4 : WEAK_NETWORK,
+    5 : WEAK_NETWORK,
+    6 : WEAK_NETWORK,
+    7 : WEAK_NETWORK,
+}
+
 def main(args):
 
     if args.working_path: WORKING_PATH = args.working_path
@@ -76,6 +109,12 @@ def main(args):
     if args.mem_per_client: MEM_LIMIT_PER_CLIENT = args.mem_per_client
     if args.no_rounds: NO_ROUNDS = args.no_rounds
 
+    if any(item in name for item in ["block_0","block_1"]):
+        client_networks =  client_networks_high
+    elif any(item in name for item in ["block_2","block_3","block_4"]):
+        client_networks =  client_networks_medium
+    elif any(item in name for item in ["block_5","block_6"]):
+        client_networks =  client_networks_low
 
     # create core session
     coreemu = CoreEmu()
