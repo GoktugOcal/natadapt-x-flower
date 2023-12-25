@@ -6,6 +6,7 @@ import os
 import argparse
 import numpy as np
 import random
+import json
 
 from core.emulator.coreemu import CoreEmu
 from core.emulator.data import IpPrefixes
