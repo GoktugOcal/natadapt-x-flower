@@ -120,8 +120,11 @@ def main(args):
 
     os.makedirs(WORKING_PATH, exist_ok=True)
 
+    config_networks = client_networks.copy()
+    for key, value in config_networks.items():
+        config_networks[key] = value.tolist()
     config_dict = vars(args)
-    config_dict["client_networks"] = client_networks
+    config_dict["client_networks"] = config_networks
 
     json_file_path = os.path.join(WORKING_PATH,"config.json")
     with open(json_file_path, "w") as json_file:
