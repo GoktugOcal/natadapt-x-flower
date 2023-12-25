@@ -30,7 +30,7 @@ else:
     MODEL_PATH = "projects/test/test-5/master/iter_10_best_model.pth.tar"
     DATASET_PATH = "32_Cifar10_NIID_80c_a03"
 
-WORKING_PATH = "projects/12dec/network_test_8c_iter_10/"
+#WORKING_PATH = "projects/12dec/network_test_8c_iter_10/"
 MAX_ITER = 5
 NO_CLIENTS = 8
 NO_ROUNDS = 1
@@ -116,7 +116,12 @@ def main(args):
     elif any(block_id in MODEL_PATH for block_id in ["block_5","block_6"]):
         client_networks =  client_networks_low
     
-    print(client_networks)
+    config_dict = vars(args)
+    config_dict["client_networks"] = client_networks
+
+    json_file_path = os.path.join(WORKING_PATH,"config.json")
+    with open(json_file_path, "w") as json_file:
+        json.dump(config_dict, json_file, indent=4)
 
     # create core session
     coreemu = CoreEmu()
