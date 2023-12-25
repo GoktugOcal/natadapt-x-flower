@@ -116,6 +116,9 @@ def main(args):
     elif any(block_id in MODEL_PATH for block_id in ["block_5","block_6"]):
         client_networks =  client_networks_low
     
+
+    os.makedirs(WORKING_PATH, exist_ok=True)
+
     config_dict = vars(args)
     config_dict["client_networks"] = client_networks
 
