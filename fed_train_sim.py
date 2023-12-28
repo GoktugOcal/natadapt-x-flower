@@ -470,6 +470,13 @@ def federated_learning(args):
     # else: selected_clients = np.arange(args.no_clients)
     # print("Selected Clients:",selected_clients)
 
+    client_selector = ClientSelector(
+        no_clients,
+        no_groups,
+        os.path.join(dataset_path,"bws_groups.csv")
+    )
+    client_selector.random_grouping()
+
     for round_no in range(args.no_rounds):
         args.round_no = round_no
         print(f"Round No: {round_no}")
@@ -477,13 +484,6 @@ def federated_learning(args):
         if args.client_selection:
             group_no = round_no % 7
             # selected_clients = client_selector.get_clients(group_no = group_no)
-
-            client_selector = ClientSelector(
-                no_clients,
-                no_groups,
-                os.path.join(dataset_path,"bws_groups.csv")
-            )
-            client_selector.random_grouping()
             selected_clients = client_selector.get_clients(group_no=group_no)
         else: selected_clients = np.arange(args.no_clients)
 

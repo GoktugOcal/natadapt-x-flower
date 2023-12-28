@@ -1,4 +1,4 @@
-/home/goktug/python_envs/easyfl/bin/python fed_train_sim.py \
+python fed_train_sim.py \
     -pf ./projects/pretrained_model/predefined_a03_56c/ \
     -dp ./data/32_Cifar10_NIID_56c_a03 \
     -m alexnet.pth.tar \
