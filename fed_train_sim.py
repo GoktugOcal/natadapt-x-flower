@@ -161,10 +161,10 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         output = model(images)
         
         if args.fedprox:
-            proximal_term = 1.0
+            proximal_term = 0.1
             for local_weights, global_weights in zip(model.parameters(), global_model.parameters()):
                 proximal_term += (local_weights - global_weights).norm(2)
-            loss = criterion(output, target_onehot) + (1.0 / 2) * proximal_term
+            loss = criterion(output, target_onehot) + (0.1 / 2) * proximal_term
         
         else:
             loss = criterion(output, target_onehot)
