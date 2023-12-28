@@ -23,7 +23,7 @@ sudop python core_up.py
 ```bash
 source /home/goktug/python_envs/easyfl/bin/activate; cd /home/goktug/Desktop/thesis/netadapt-x-flower/
 ```
-
+projects/netadapt/netadapt_1/worker/iter_4_block_4_model_simp.pth.tar
 
 docker run --rm -it --cpus=4 --name gocker -v /home/goktug.ocal/thesis/netadapt-x-flower/logs/:/app/logs/ -v /home/goktug.ocal/thesis/netadapt-x-flower/data/:/app/data/ -v /home/goktug.ocal/thesis/netadapt-x-flower/projects/:/app/projects/ pynode /bin/bash
 

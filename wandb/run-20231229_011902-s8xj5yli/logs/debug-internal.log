@@ -492,3 +492,312 @@
 2023-12-29 01:22:48,603 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: internal_messages
 2023-12-29 01:22:48,603 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: stop_status
 2023-12-29 01:22:49,390 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:22:50,728 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:22:50,729 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:22:50,729 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:22:50,729 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:22:51,148 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:22:51,391 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:22:51,391 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:22:53,391 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:22:55,392 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:22:55,524 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:22:55,525 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:22:55,525 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:22:55,526 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:22:56,154 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:22:56,392 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:22:57,392 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:22:59,393 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:22:59,562 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:22:59,564 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:22:59,564 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:22:59,564 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:00,393 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:01,155 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:23:01,394 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:03,365 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:03,367 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:03,367 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:03,367 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:03,394 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:03,394 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:03,488 DEBUG   SenderThread:53403 [sender.py:send():382] send: stats
+2023-12-29 01:23:03,603 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: internal_messages
+2023-12-29 01:23:03,603 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: stop_status
+2023-12-29 01:23:03,604 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: stop_status
+2023-12-29 01:23:05,395 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:05,720 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:05,721 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:05,721 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:05,722 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:06,200 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:23:06,395 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:07,395 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:09,396 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:09,457 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:09,458 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:09,458 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:09,459 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:10,396 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:11,246 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:23:11,396 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:13,397 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:14,527 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:14,528 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:14,528 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:14,528 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:15,397 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:15,398 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:16,294 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:23:17,398 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:18,608 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: internal_messages
+2023-12-29 01:23:18,609 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: stop_status
+2023-12-29 01:23:18,609 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: stop_status
+2023-12-29 01:23:19,399 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:19,937 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:19,938 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:19,938 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:19,938 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:20,399 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:21,302 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:23:21,400 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:23,400 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:25,402 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:26,305 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:23:27,402 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:28,956 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:28,956 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:28,958 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:28,958 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:28,958 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:28,958 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:28,958 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:28,961 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:29,403 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:29,403 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:31,341 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:23:31,403 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:33,384 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:33,385 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:33,385 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:33,386 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:33,404 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:33,404 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:33,489 DEBUG   SenderThread:53403 [sender.py:send():382] send: stats
+2023-12-29 01:23:33,624 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: stop_status
+2023-12-29 01:23:33,625 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: internal_messages
+2023-12-29 01:23:33,625 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: stop_status
+2023-12-29 01:23:35,404 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:36,382 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:23:37,405 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:39,406 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:40,240 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:40,241 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:40,241 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:40,241 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:40,406 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:41,406 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:41,421 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:23:43,407 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:43,882 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:43,883 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:43,883 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:43,883 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:44,407 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:45,407 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:45,921 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:45,922 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:45,922 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:45,923 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:46,408 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:46,988 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:23:47,408 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:48,632 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: internal_messages
+2023-12-29 01:23:48,633 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: stop_status
+2023-12-29 01:23:48,633 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: stop_status
+2023-12-29 01:23:49,408 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:51,409 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:51,953 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:51,954 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:51,955 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:51,955 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:52,013 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:23:52,409 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:53,409 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:55,410 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:55,735 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:55,735 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:55,736 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:55,736 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:56,410 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:57,035 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:23:57,410 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:23:59,390 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:23:59,391 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:23:59,391 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:23:59,391 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:23:59,410 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:23:59,411 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:01,411 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:02,038 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:24:03,411 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:03,490 DEBUG   SenderThread:53403 [sender.py:send():382] send: stats
+2023-12-29 01:24:03,657 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: stop_status
+2023-12-29 01:24:03,657 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: internal_messages
+2023-12-29 01:24:03,657 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: stop_status
+2023-12-29 01:24:05,412 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:07,051 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:24:07,412 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:08,437 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:24:08,438 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:24:08,438 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:24:08,438 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:24:09,413 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:24:09,413 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:11,413 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:12,051 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:24:13,414 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:15,414 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:17,064 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:24:17,415 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:17,468 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:24:17,468 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:24:17,469 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:24:17,469 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:24:17,469 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:24:17,470 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:24:17,470 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:24:17,478 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:24:18,415 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:24:18,656 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: stop_status
+2023-12-29 01:24:18,657 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: internal_messages
+2023-12-29 01:24:18,657 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: stop_status
+2023-12-29 01:24:19,415 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:21,416 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:22,078 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:24:22,936 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:24:22,937 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:24:22,938 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:24:22,938 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:24:23,417 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:24:23,417 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:25,417 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:27,109 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:24:27,418 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:28,775 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:24:28,776 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:24:28,776 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:24:28,776 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:24:29,419 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:24:29,419 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:29,503 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:24:29,504 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:24:29,504 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:24:29,505 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:24:30,419 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:24:31,419 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:32,111 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:24:33,420 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:33,491 DEBUG   SenderThread:53403 [sender.py:send():382] send: stats
+2023-12-29 01:24:33,668 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: stop_status
+2023-12-29 01:24:33,668 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: internal_messages
+2023-12-29 01:24:33,668 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: stop_status
+2023-12-29 01:24:35,275 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:24:35,276 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:24:35,276 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:24:35,276 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:24:35,420 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:24:35,420 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:37,152 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:24:37,421 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:37,999 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:24:38,000 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:24:38,000 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:24:38,000 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:24:38,421 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:24:39,421 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:40,026 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:24:40,027 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:24:40,027 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:24:40,028 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:24:40,422 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:24:41,422 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:42,200 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:24:43,422 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:45,423 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:46,920 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:24:46,921 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:24:46,921 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:24:46,921 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:24:47,227 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:24:47,423 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:24:47,424 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:48,694 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: internal_messages
+2023-12-29 01:24:48,695 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: stop_status
+2023-12-29 01:24:48,695 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: stop_status
+2023-12-29 01:24:49,424 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:51,425 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:52,221 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:24:52,222 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:24:52,222 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:24:52,222 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:24:52,287 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:24:52,425 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:24:53,425 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:55,426 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:57,287 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:24:57,426 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:24:59,427 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:25:01,427 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:25:02,052 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:25:02,052 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:25:02,053 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:25:02,053 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:25:02,053 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:25:02,054 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:25:02,054 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:25:02,057 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:25:02,294 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:25:02,427 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:25:03,428 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:25:03,492 DEBUG   SenderThread:53403 [sender.py:send():382] send: stats
+2023-12-29 01:25:03,695 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: stop_status
+2023-12-29 01:25:03,695 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: internal_messages
+2023-12-29 01:25:03,695 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: stop_status
+2023-12-29 01:25:05,428 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:25:06,702 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:25:06,703 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:25:06,703 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:25:06,704 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:25:07,318 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:25:07,429 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:25:07,429 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:25:09,429 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:25:11,107 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:25:11,109 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:25:11,109 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:25:11,109 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:25:11,430 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:25:11,430 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:25:12,328 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:25:13,430 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:25:15,211 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:25:15,212 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:25:15,213 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:25:15,213 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:25:15,431 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:25:15,431 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:25:15,951 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: partial_history
+2023-12-29 01:25:15,952 DEBUG   SenderThread:53403 [sender.py:send():382] send: history
+2023-12-29 01:25:15,952 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: summary_record
+2023-12-29 01:25:15,952 INFO    SenderThread:53403 [sender.py:_save_file():1392] saving file wandb-summary.json with policy end
+2023-12-29 01:25:16,431 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/wandb-summary.json
+2023-12-29 01:25:17,345 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report
+2023-12-29 01:25:17,431 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:25:18,699 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: stop_status
+2023-12-29 01:25:18,699 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: internal_messages
+2023-12-29 01:25:18,700 DEBUG   SenderThread:53403 [sender.py:send_request():409] send_request: stop_status
+2023-12-29 01:25:19,432 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:25:21,432 INFO    Thread-12 :53403 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231229_011902-s8xj5yli/files/output.log
+2023-12-29 01:25:22,361 DEBUG   HandlerThread:53403 [handler.py:handle_request():146] handle_request: status_report

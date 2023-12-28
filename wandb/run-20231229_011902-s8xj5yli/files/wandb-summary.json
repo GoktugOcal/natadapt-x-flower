@@ -1,1 +1,1 @@
-{"fl_round": 4, "device": "server", "acc_type": "test", "acc": 10.0, "_timestamp": 1703802165.7226236, "_runtime": 222.93038654327393, "_step": 49}
+{"fl_round": 8, "device": "client_25", "acc_type": "test", "acc": 48.717948717948715, "_timestamp": 1703802315.9503717, "_runtime": 373.1581346988678, "_step": 83}
