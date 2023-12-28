@@ -1,0 +1,27 @@
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_setup.py:_flush():76] Current SDK version is 0.16.1
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_setup.py:_flush():76] Configure stats pid to 29964
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_setup.py:_flush():76] Loading settings from /home/goktug/.config/wandb/settings
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_setup.py:_flush():76] Loading settings from /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/settings
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'fed_train_sim.py', 'program_abspath': '/home/goktug/Desktop/thesis/netadapt-x-flower/fed_train_sim.py', 'program': '/home/goktug/Desktop/thesis/netadapt-x-flower/fed_train_sim.py'}
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_init.py:_log_setup():524] Logging user logs to /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231228_221118-88qruyqy/logs/debug.log
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_init.py:_log_setup():525] Logging internal logs to /home/goktug/Desktop/thesis/netadapt-x-flower/wandb/run-20231228_221118-88qruyqy/logs/debug-internal.log
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_init.py:init():564] calling init triggers
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_init.py:init():571] wandb.init called with sweep_config: {}
+config: {}
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_init.py:init():614] starting backend
+2023-12-28 22:11:18,233 INFO    MainThread:29964 [wandb_init.py:init():618] setting up manager
+2023-12-28 22:11:18,234 INFO    MainThread:29964 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2023-12-28 22:11:18,235 INFO    MainThread:29964 [wandb_init.py:init():624] backend started and connected
+2023-12-28 22:11:18,236 INFO    MainThread:29964 [wandb_init.py:init():716] updated telemetry
+2023-12-28 22:11:18,239 INFO    MainThread:29964 [wandb_init.py:init():749] communicating run to backend with 90.0 second timeout
+2023-12-28 22:11:18,823 ERROR   MainThread:29964 [wandb_init.py:init():775] encountered error: It appears that you do not have permission to access the requested resource. Please reach out to the project owner to grant you access. If you have the correct permissions, verify that there are no issues with your networking setup.(Error 403: Forbidden)
+2023-12-28 22:11:19,091 ERROR   MainThread:29964 [wandb_init.py:init():1188] It appears that you do not have permission to access the requested resource. Please reach out to the project owner to grant you access. If you have the correct permissions, verify that there are no issues with your networking setup.(Error 403: Forbidden)
+Traceback (most recent call last):
+  File "/home/goktug/python_envs/easyfl/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1170, in init
+    run = wi.init()
+  File "/home/goktug/python_envs/easyfl/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 781, in init
+    raise error
+wandb.errors.CommError: It appears that you do not have permission to access the requested resource. Please reach out to the project owner to grant you access. If you have the correct permissions, verify that there are no issues with your networking setup.(Error 403: Forbidden)
+2023-12-28 22:11:20,092 WARNING MsgRouterThr:29964 [router.py:message_loop():77] message_loop has been closed

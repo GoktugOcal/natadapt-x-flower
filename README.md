@@ -25,8 +25,13 @@ source /home/goktug/python_envs/easyfl/bin/activate; cd /home/goktug/Desktop/the
 ```
 
 
-docker run --rm -it --cpus=4 --name gocker -v /home/goktug.ocal/thesis/netadapt-x-flower/logs/:/app/logs/ -v /home/goktug.ocal/thesis/netadapt-x-flower/data/:/app/data/ pynode /bin/bash
+docker run --rm -it --cpus=4 --name gocker -v /home/goktug.ocal/thesis/netadapt-x-flower/logs/:/app/logs/ -v /home/goktug.ocal/thesis/netadapt-x-flower/data/:/app/data/ -v /home/goktug.ocal/thesis/netadapt-x-flower/projects/:/app/projects/ pynode /bin/bash
 
+python pure_server.py projects/pure_core/netadapt_1/netadapt_1_iter_1/block_0/ -nc 8 -m /home/goktug.ocal/thesis/netadapt-x-flower/projects/netadapt/netadapt_1/worker/iter_1_block_0_model_simp.pth.tar -nr 1
+
+python pure_server.py projects/trial/ -nc 8 -m projects/define_pretrained_fed_sim_NIID_alpha03/last_model.pth.tar -nr 1
+
+projects/define_pretrained_fed_sim_NIID_alpha03/last_model.pth.tar
 
 docker run --rm -it \
     -v /home/goktug/Desktop/thesis/netadapt-x-flower/models/:/app/models/ \

@@ -382,7 +382,7 @@ def client(global_model, client_id, args):
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
 
-    model = nn.DataParallel(model)
+    # model = nn.DataParallel(model)
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
     # Train & evaluation
@@ -441,7 +441,7 @@ def train_server_model(model, args):
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
-    model = nn.DataParallel(model)
+    # model = nn.DataParallel(model)
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
     # Train & evaluation
@@ -491,7 +491,7 @@ def federated_learning(args):
         num_workers=args.workers, pin_memory=True)
 
     global_model = torch.load(args.global_model_path, map_location=DEVICE)
-    global_model= nn.DataParallel(global_model)
+    # global_model= nn.DataParallel(global_model)
     global_model = global_model.to(DEVICE)
 
     #Client Selection

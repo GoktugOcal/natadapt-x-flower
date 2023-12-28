@@ -1,6 +1,9 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+import wandb
+
+
 from argparse import ArgumentParser
 import os
 import time
@@ -288,7 +291,7 @@ def eval(test_loader, model, args):
     print('===================================================================')
     return float(acc.get_avg())
             
-def client(global_model, client_id, args):
+def client(global_model, client_id, round_no, args):
 
     # with open(args.logfilename, "a") as f:
     #     f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},{client_id},start,{0}\n")
@@ -343,7 +346,7 @@ def client(global_model, client_id, args):
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch, args)
         acc = eval(test_loader, model, args)
-        
+
         if acc > best_acc:
             best_acc = acc
         print(' ')
@@ -351,6 +354,16 @@ def client(global_model, client_id, args):
         
     best_acc = eval(test_loader, model, args)
     print('Best accuracy:', best_acc)
+
+    wandb.log(
+            {
+                'fl_round': round_no,
+                "device": f"client_{client_id}",
+                "acc_type": "test",
+                'acc': best_acc
+            }
+        )
+
 
     with open(args.logfilename, "a") as f:
         f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},{client_id},test,{best_acc}\n")
@@ -438,7 +451,7 @@ def federated_learning(args):
         num_workers=args.workers, pin_memory=True)
 
     global_model = torch.load(args.global_model_path, map_location=DEVICE)
-    global_model= nn.DataParallel(global_model)
+    # global_model= nn.DataParallel(global_model)
     global_model = global_model.to(DEVICE)
 
     #Client Selection
@@ -447,22 +460,31 @@ def federated_learning(args):
     no_groups = 7
     no_classes = 10
 
-    if args.client_selection:
-        client_selector = ClientSelector(no_clients, no_groups, no_classes, dataset_path)
-        client_selector.find_groups()
-        # group_no = random.choice(np.arange(no_groups).tolist())
-        # print("Group No:", group_no)
-        selected_clients = client_selector.get_clients()
-    else: selected_clients = np.arange(args.no_clients)
-    print("Selected Clients:",selected_clients)
+    # if args.client_selection:
+    #     # client_selector = ClientSelector(no_clients, no_groups, no_classes, dataset_path)
+    #     # client_selector.find_groups()
+    #     # # group_no = random.choice(np.arange(no_groups).tolist())
+    #     # # print("Group No:", group_no)
+    #     # selected_clients = client_selector.get_clients()
+    #     pass
+    # else: selected_clients = np.arange(args.no_clients)
+    # print("Selected Clients:",selected_clients)
 
     for round_no in range(args.no_rounds):
         args.round_no = round_no
         print(f"Round No: {round_no}")
 
         if args.client_selection:
-            group_no = round_no % 10
-            selected_clients = client_selector.get_clients(group_no = group_no)
+            group_no = round_no % 7
+            # selected_clients = client_selector.get_clients(group_no = group_no)
+
+            client_selector = ClientSelector(
+                no_clients,
+                no_groups,
+                os.path.join(dataset_path,"bws_groups.csv")
+            )
+            client_selector.random_grouping()
+            selected_clients = client_selector.get_clients(group_no=group_no)
         else: selected_clients = np.arange(args.no_clients)
 
         weights = []
@@ -470,7 +492,7 @@ def federated_learning(args):
         # for client_id in range(args.no_clients):
         for client_id in selected_clients:
             print(f"Client No: {client_id}")
-            local_model, no_samples = client(global_model, client_id, args)
+            local_model, no_samples = client(global_model, client_id, round_no,args)
             weights.append((get_parameters(local_model), no_samples))
 
         print("FedAVG")
@@ -485,6 +507,9 @@ def federated_learning(args):
 
         global_train_acc = eval(train_loader, global_model, args)
         global_test_acc = eval(test_loader, global_model, args)
+
+        wandb.log({'fl_round': round_no, "device": "server", "acc_type": "train", 'acc': global_train_acc})
+        wandb.log({'fl_round': round_no, "device": "server", "acc_type": "test", 'acc': global_test_acc})
 
         with open(args.logfilename, "a") as f:
             f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},server,train,{global_train_acc}\n")
@@ -507,10 +532,12 @@ if __name__ == '__main__':
     arg_parser.add_argument('--client_selection', default=False, action="store_true")
     arg_parser.add_argument('--pretrained', default=False, action="store_true")
     #NIID
+    arg_parser.add_argument('--generate_dataset', default=False, action="store_true")
     arg_parser.add_argument("-niid", "--niid", type=str, help="Non-IID format.")
     arg_parser.add_argument("-b", "--b", type=str, help="Balanced scenario")
     arg_parser.add_argument("-p", "--p", help="Pathological or Practical(Dirichlet) scenerio . (pat/dir)")
-    arg_parser.add_argument("--alpha", type=float, required=True)
+    arg_parser.add_argument("--alpha", type=float)
+    arg_parser.add_argument("-dp", "--dataset_path", type=str, help="Dataset path if there is a default one.")
     #Server Model
     arg_parser.add_argument('--epochs', default=150, type=int, metavar='N', help='number of total epochs to run (default: 150)')
     arg_parser.add_argument('--arch', type=str)
@@ -532,48 +559,58 @@ if __name__ == '__main__':
     print(json.dumps(vars(args), indent=2))
     print()
 
-    args.num_classes=10
-    args.data=os.path.join(args.project_folder,"data/")
+    wandb.init(
+        project="federated-predefined",
+        name=args.project_folder.split("/")[-2]
+    )
+
 
     #Fundamental
     if not os.path.exists(args.project_folder):
         os.makedirs(args.project_folder)
         print('Create directory', args.project_folder)
 
-    if not os.path.exists(args.data):
-        os.makedirs(args.data)
-        print('Create directory', args.data)
-    
-    try:
-        shutil.copytree("./data/cifar-10-batches-py", os.path.join(args.data, "rawdata", "cifar-10-batches-py"))
-    except:
-        pass
+    args.num_classes=10
 
-    with open(os.path.join(args.project_folder,"config.json"), "w") as f:
-        f.write(json.dumps(vars(args), indent=2))
+    if args.generate_dataset:
+        args.data = os.path.join(args.project_folder,"data/")
 
-    #Create NIID dataset
-    niid = True if args.niid == "noniid" else False
-    balance = True if args.b == "balance" else False
-    partition = args.p if args.p != "-" else None
-    generate_cifar10(
-        dir_path=args.data,
-        num_clients=args.no_clients,
-        num_classes=args.num_classes,
-        niid=niid,
-        balance=balance,
-        partition=partition,
-        alpha=args.alpha
-    )
-    # generate_mnist(
-    #     dir_path=args.data,
-    #     num_clients=args.no_clients,
-    #     num_classes=args.num_classes,
-    #     niid=niid,
-    #     balance=balance,
-    #     partition=partition,
-    #     alpha=args.alpha
-    # )
+        if not os.path.exists(args.data):
+            os.makedirs(args.data)
+            print('Create directory', args.data)
+        
+        try:
+            shutil.copytree("./data/cifar-10-batches-py", os.path.join(args.data, "rawdata", "cifar-10-batches-py"))
+        except:
+            pass
+
+        with open(os.path.join(args.project_folder,"config.json"), "w") as f:
+            f.write(json.dumps(vars(args), indent=2))
+
+        #Create NIID dataset
+        niid = True if args.niid == "noniid" else False
+        balance = True if args.b == "balance" else False
+        partition = args.p if args.p != "-" else None
+        generate_cifar10(
+            dir_path=args.data,
+            num_clients=args.no_clients,
+            num_classes=args.num_classes,
+            niid=niid,
+            balance=balance,
+            partition=partition,
+            alpha=args.alpha
+        )
+        # generate_mnist(
+        #     dir_path=args.data,
+        #     num_clients=args.no_clients,
+        #     num_classes=args.num_classes,
+        #     niid=niid,
+        #     balance=balance,
+        #     partition=partition,
+        #     alpha=args.alpha
+        # )
+    else: args.data = args.dataset_path
+
     
     #Train Server Model
     if args.pretrained: # Use the pretrained model
