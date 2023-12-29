@@ -4,7 +4,7 @@ python fed_train_sim.py \
     -m alexnet.pth.tar \
     -nc 56 \
     -nr 300 \
-    --fine_tuning_epochs 10 \
+    --fine_tuning_epochs 50 \
     --epochs 200 \
     --arch alexnet_reduced \
     --client_selection \
