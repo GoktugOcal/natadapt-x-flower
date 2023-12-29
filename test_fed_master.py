@@ -71,6 +71,356 @@ def elapsed(title:str, start=None):
         print(title + " started.")
         return time.time()
 
+
+
+def adjust_learning_rate(optimizer, epoch, args):
+    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
+    lr = args.lr * (0.1 ** (epoch // 50))
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def get_avg(self):
+        return self.avg
+    
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
+        
+def compute_accuracy(output, target):
+    output = output.argmax(dim=1)
+    acc = 0.0
+    acc = torch.sum(target == output).item()
+    acc = acc/output.size(0)*100
+    return acc
+    
+def train(train_loader, model, criterion, optimizer, epoch, args):
+    batch_time = AverageMeter()
+    losses = AverageMeter()
+    acc = AverageMeter()
+
+    if args.fedprox: global_model = deepcopy(model)
+
+    # switch to train mode
+    model.train()
+    
+    print('===================================================================')
+    end = time.time()
+    
+    for i, (images, target) in enumerate(train_loader):
+        
+        # # Ensure the target shape is sth like torch.Size([batch_size])
+        if len(target.shape) > 1: target = target.reshape(len(target))
+
+        target.unsqueeze_(1)
+        target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
+        target_onehot.zero_()
+        target_onehot.scatter_(1, target, 1)
+        target.squeeze_(1)
+        
+        images = images.to(DEVICE)
+        target_onehot = target_onehot.to(DEVICE)
+        target = target.to(DEVICE)
+
+        output = model(images)
+        
+        if args.fedprox:
+            proximal_term = 0.1
+            for local_weights, global_weights in zip(model.parameters(), global_model.parameters()):
+                proximal_term += (local_weights - global_weights).norm(2)
+            loss = criterion(output, target_onehot) + (0.1 / 2) * proximal_term
+        
+        else:
+            loss = criterion(output, target_onehot)
+        
+        # measure accuracy and record loss
+        batch_acc = compute_accuracy(output, target)
+        
+        losses.update(loss.item(), images.size(0))
+        acc.update(batch_acc, images.size(0))
+
+        # compute gradient and do SGD step
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        # measure elapsed time
+        batch_time.update(time.time() - end)
+        end = time.time()
+        
+        # Update statistics
+        estimated_time_remained = batch_time.get_avg()*(len(train_loader)-i-1)
+        fns.update_progress(i, len(train_loader), 
+            ESA='{:8.2f}'.format(estimated_time_remained)+'s',
+            loss='{:4.2f}'.format(loss.item()),
+            acc='{:4.2f}%'.format(float(batch_acc))
+            )
+
+    print()
+    print('Finish epoch {}: time = {:8.2f}s, loss = {:4.2f}, acc = {:4.2f}%'.format(
+            epoch+1, batch_time.get_avg()*len(train_loader), 
+            float(losses.get_avg()), float(acc.get_avg())))
+    print('===================================================================')
+    return
+
+def server_train(train_loader, model, criterion, optimizer, epoch, args):
+    batch_time = AverageMeter()
+    losses = AverageMeter()
+    acc = AverageMeter()
+
+    # switch to train mode
+    model.train()
+    
+    print('===================================================================')
+    end = time.time()
+    
+    for i, (images, target) in enumerate(train_loader):
+        
+        # # Ensure the target shape is sth like torch.Size([batch_size])
+        if len(target.shape) > 1: target = target.reshape(len(target))
+
+        target.unsqueeze_(1)
+        target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
+        target_onehot.zero_()
+        target_onehot.scatter_(1, target, 1)
+        target.squeeze_(1)
+        
+        images = images.to(DEVICE)
+        target_onehot = target_onehot.to(DEVICE)
+        target = target.to(DEVICE)
+
+        output = model(images)
+        loss = criterion(output, target_onehot)
+        
+        # measure accuracy and record loss
+        batch_acc = compute_accuracy(output, target)
+        
+        losses.update(loss.item(), images.size(0))
+        acc.update(batch_acc, images.size(0))
+
+        # compute gradient and do SGD step
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        # measure elapsed time
+        batch_time.update(time.time() - end)
+        end = time.time()
+        
+        # Update statistics
+        estimated_time_remained = batch_time.get_avg()*(len(train_loader)-i-1)
+        fns.update_progress(i, len(train_loader), 
+            ESA='{:8.2f}'.format(estimated_time_remained)+'s',
+            loss='{:4.2f}'.format(loss.item()),
+            acc='{:4.2f}%'.format(float(batch_acc))
+            )
+
+    print()
+    print('Finish epoch {}: time = {:8.2f}s, loss = {:4.2f}, acc = {:4.2f}%'.format(
+            epoch+1, batch_time.get_avg()*len(train_loader), 
+            float(losses.get_avg()), float(acc.get_avg())))
+    print('===================================================================')
+    return
+
+def eval(test_loader, model, args):
+    batch_time = AverageMeter()
+    acc = AverageMeter()
+
+    # switch to eval mode
+    model.eval()
+
+    end = time.time()
+    for i, (images, target) in enumerate(test_loader):
+
+        if len(target.shape) > 1: target = target.reshape(len(target))
+
+        images = images.to(DEVICE)
+        target = target.to(DEVICE)
+        
+        output = model(images)
+        batch_acc = compute_accuracy(output, target)
+        acc.update(batch_acc, images.size(0))
+        batch_time.update(time.time() - end)
+        end = time.time()
+
+        # Update statistics
+        estimated_time_remained = batch_time.get_avg()*(len(test_loader)-i-1)
+        fns.update_progress(i, len(test_loader), 
+            ESA='{:8.2f}'.format(estimated_time_remained)+'s',
+            acc='{:4.2f}'.format(float(batch_acc))
+            )
+    print()
+    print('Test accuracy: {:4.2f}% (time = {:8.2f}s)'.format(
+            float(acc.get_avg()), batch_time.get_avg()*len(test_loader)))
+    print('===================================================================')
+    return float(acc.get_avg())
+            
+def client(global_model, client_id, round_no, args):
+
+    # with open(args.logfilename, "a") as f:
+    #     f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},{client_id},start,{0}\n")
+
+    model = deepcopy(global_model)
+
+    train_dataset_path = os.path.join(args.data, "train", f"{client_id}.pkl")
+    train_data = pickle.load(open(train_dataset_path, "rb"))
+    train_loader = torch.utils.data.DataLoader(
+        train_data,
+        batch_size=args.batch_size,
+        shuffle=True)
+
+    test_dataset_path = os.path.join(args.data, "test", f"{client_id}.pkl")
+    test_data = pickle.load(open(test_dataset_path, "rb"))
+    test_loader = torch.utils.data.DataLoader(
+        test_data,
+        batch_size=args.batch_size,
+        shuffle=True)
+
+    #Server dataset
+    if args.use_server_data:
+        server_train_dataset_path = os.path.join(args.data,"server","train.pkl")
+        server_train_data = pickle.load(open(server_train_dataset_path, "rb"))
+        server_test_dataset_path = os.path.join(args.data,"server","test.pkl")
+        server_test_data = pickle.load(open(server_test_dataset_path, "rb"))
+
+        train_data.data = np.concatenate((train_data.data, server_train_data.data))
+        train_data.labels = np.concatenate((train_data.labels, server_train_data.labels))
+
+        test_data.data = np.concatenate((test_data.data, server_test_data.data))
+        test_data.labels = np.concatenate((test_data.labels, server_test_data.labels))
+
+
+    # Network
+    cudnn.benchmark = True
+    num_classes = _NUM_CLASSES
+    criterion = nn.BCEWithLogitsLoss()
+    # criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.SGD(model.parameters(), args.lr,
+                                momentum=args.momentum,
+                                weight_decay=args.weight_decay)
+
+    # model = nn.DataParallel(model)
+    model = model.to(DEVICE)
+    criterion = criterion.to(DEVICE)
+    # Train & evaluation
+    best_acc = 0
+    for epoch in range(args.fine_tuning_epochs):
+        print('Epoch [{}/{}]'.format(epoch+1, args.fine_tuning_epochs))
+        adjust_learning_rate(optimizer, epoch, args)
+        # train for one epoch
+        train(train_loader, model, criterion, optimizer, epoch, args)
+        acc = eval(test_loader, model, args)
+
+        if acc > best_acc:
+            best_acc = acc
+        print(' ')
+    print('Best accuracy:', best_acc)
+        
+    best_acc = eval(test_loader, model, args)
+    print('Best accuracy:', best_acc)
+
+    with open(args.logfilename, "a") as f:
+        f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},{client_id},test,{best_acc}\n")
+
+    return model, len(train_data.data)
+
+def fedavg(weights_results):
+    parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+    return parameters_aggregated
+
+def get_parameters(model):
+    return [val.cpu().numpy() for _, val in model.state_dict().items()]
+
+def federated_learning(args, netadapt_iteration, block):
+
+    args.logfilename = common.WORKER_MODELSIZE_FILENAME_TEMPLATE.format(netadapt_iteration, block)
+    with open(args.logfilename, "w") as f:
+        f.write("DateTime,RoundNo,ClientNo,Dataset,Accuracy\n")
+
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        # transforms.RandomCrop(32, padding=4), 
+        # transforms.Resize(224),
+        # transforms.RandomHorizontalFlip(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    ])
+
+    train_dataset = datasets.CIFAR10(root="./data", train=True, download=True,
+        transform=transform)
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=args.batch_size, shuffle=True,
+        num_workers=args.workers, pin_memory=True)
+    test_dataset = datasets.CIFAR10(root="./data", train=False, download=True,
+        transform=transform)
+    test_loader = torch.utils.data.DataLoader(
+        test_dataset, batch_size=args.batch_size, shuffle=True,
+        num_workers=args.workers, pin_memory=True)
+
+    global_model = torch.load(args.global_model_path, map_location=DEVICE)
+    # global_model= nn.DataParallel(global_model)
+    global_model = global_model.to(DEVICE)
+
+    #Client Selection
+    no_clients = 56
+    no_groups = 7
+    no_classes = 10
+
+    # if args.client_selection:
+    #     # client_selector = ClientSelector(no_clients, no_groups, no_classes, dataset_path)
+    #     # client_selector.find_groups()
+    #     # # group_no = random.choice(np.arange(no_groups).tolist())
+    #     # # print("Group No:", group_no)
+    #     # selected_clients = client_selector.get_clients()
+    #     pass
+    # else: selected_clients = np.arange(args.no_clients)
+    # print("Selected Clients:",selected_clients)
+
+    
+    selected_clients = client_selector.get_clients(group_no=block)
+    for round_no in range(args.no_rounds):
+        args.round_no = round_no
+        print(f"Round No: {round_no}")
+
+        weights = []
+
+        # for client_id in range(args.no_clients):
+        for client_id in selected_clients:
+            print(f"Client No: {client_id}")
+            local_model, no_samples = client(global_model, client_id, round_no,args)
+            weights.append((get_parameters(local_model), no_samples))
+
+        print("FedAVG")
+        parameters_aggregated = fedavg(weights)
+        parameters = parameters_to_ndarrays(parameters_aggregated)
+        del weights
+        # Set parameters
+        print("Set parameters")
+        params_dict = zip(global_model.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        global_model.load_state_dict(state_dict, strict=True)
+
+        global_train_acc = eval(train_loader, global_model, args)
+        global_test_acc = eval(test_loader, global_model, args)
+
+        with open(args.logfilename, "a") as f:
+            f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},server,train,{global_train_acc}\n")
+            f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},server,test,{global_test_acc}\n")
+    return global_model
+
+
+
 def worker(
     gpu,
     no_clients,
@@ -86,7 +436,8 @@ def worker(
     worker_folder,
     netadapt_iteration,
     short_term_fine_tune_iteration,
-    log_path
+    log_path,
+    client_selector
     ):
     """
         The main function of the worker.
@@ -123,17 +474,16 @@ def worker(
                                                                resource_type,
                                                                netadapt_iteration,
                                                                log_path,
-                                                               1,
+                                                               2,
                                                                lookup_table_path
                                                                ))
 
     # Choose the filters.
     simplified_model = network_utils.simplify_model_based_on_network_def(simplified_network_def, model)
     # fine_tuned_model = deepcopy(simplified_model)
-    args.global_model_path = os.path.join(args.project_folder, "last_model.pth.tar")
+    args.global_model_path = os.path.join(args.project_folder, "temp_model.pth.tar")
     torch.save(simplified_model, args.global_model_path)
-    fine_tuned_model = federated_learning(args)
-
+    fine_tuned_model = federated_learning(args, netadapt_iteration, block, client_selector)
 
     #### FLOWER GOES
     # fine_tuned_model = network_utils.fine_tune(simplified_model, short_term_fine_tune_iteration)
@@ -143,6 +493,9 @@ def worker(
 
 
     # Save the results.
+    torch.save(simplified_model,
+               os.path.join(worker_folder,
+                            common.WORKER_SIMP_MODEL_FILENAME_TEMPLATE.format(netadapt_iteration, block)))
     torch.save(fine_tuned_model,
                os.path.join(worker_folder,
                             common.WORKER_MODEL_FILENAME_TEMPLATE.format(netadapt_iteration, block)))
@@ -154,6 +507,19 @@ def worker(
                            common.WORKER_RESOURCE_FILENAME_TEMPLATE.format(netadapt_iteration, block)),
               'w') as file_id:
         file_id.write(str(simplified_resource))
+    
+    ####
+    with open(os.path.join(worker_folder,
+                           common.WORKER_MODELSIZE_FILENAME_TEMPLATE.format(netadapt_iteration, block)),
+              'w') as file_id:
+        model_path = os.path.join(worker_folder,
+                            common.WORKER_MODEL_FILENAME_TEMPLATE.format(netadapt_iteration, block))
+        file_id.write(str(os.path.getsize(model_path)))
+    with open(os.path.join(worker_folder,
+                           common.WORKER_PARAMETERS_FILENAME_TEMPLATE.format(netadapt_iteration, block)),
+              'w') as file_id:
+        file_id.write(str(sum(p.numel() for p in fine_tuned_model.parameters() if p.requires_grad)))
+    ####
     with open(os.path.join(worker_folder,
                            common.WORKER_FINISH_FILENAME_TEMPLATE.format(netadapt_iteration, block)),
               'w') as file_id:
@@ -534,6 +900,14 @@ def master(args):
             """
             - Federation should be here: _launch_worker
             """
+
+            dataset_path = os.path.join(args.data)
+            client_selector = ClientSelector(
+                no_clients,
+                no_groups,
+                os.path.join(dataset_path,"bws_groups.csv")
+            )
+            client_selector.random_grouping()
             # logging.info("Worker starts.")
             hist = worker(
                 gpu = 0,
@@ -550,7 +924,8 @@ def master(args):
                 worker_folder = worker_folder,
                 netadapt_iteration = current_iter,
                 short_term_fine_tune_iteration = args.short_term_fine_tune_iteration,
-                log_path = log_path
+                log_path = log_path,
+                client_selector = client_selector
             )
             # logging.info(f"For block {block_idx} the process has finished in {round(time.time() - block_start,2)} seconds.")
             # print(hist.losses_distributed)
@@ -589,12 +964,12 @@ def master(args):
         current_resource = best_resource
         current_block = best_block
         
-        # if args.save_interval == -1 or (current_iter % args.save_interval != 0):
-        #     for block_idx in range(network_utils.get_num_simplifiable_blocks()):
-        #         temp_model_path = os.path.join(worker_folder, common.WORKER_MODEL_FILENAME_TEMPLATE.format(current_iter, block_idx))
-        #         os.remove(temp_model_path)
-        #         print('Remove', temp_model_path)
-        #     print(' ')
+        if args.save_interval == -1 or (current_iter % args.save_interval != 0):
+            for block_idx in range(network_utils.get_num_simplifiable_blocks()):
+                temp_model_path = os.path.join(worker_folder, common.WORKER_MODEL_FILENAME_TEMPLATE.format(current_iter, block_idx))
+                os.remove(temp_model_path)
+                print('Remove', temp_model_path)
+            print(' ')
 
         # Save and print the history.
         model = torch.load(current_model_path)
