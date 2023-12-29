@@ -354,7 +354,7 @@ def get_parameters(model):
 def federated_learning(args, netadapt_iteration, block, client_selector):
 
     args.logfilename = os.path.join(
-        worker_folder,
+        args.worker_folder,
         common.WORKER_FED_LOGFILE.format(netadapt_iteration, block))
     with open(args.logfilename, "w") as f:
         f.write("DateTime,RoundNo,ClientNo,Dataset,Accuracy\n")
@@ -714,6 +714,7 @@ def master(args):
     # Set the important paths.
     master_folder = os.path.join(args.working_folder, _MASTER_FOLDER_FILENAME)
     worker_folder = os.path.join(args.working_folder, _WORKER_FOLDER_FILENAME)
+    args.worker_folder = worker_folder
     client_folder = os.path.join(args.working_folder, _CLIENT_FOLDER_FILENAME)
     server_folder = os.path.join(args.working_folder, _SERVER_FOLDER_FILENAME)
     history_pickle_file = os.path.join(master_folder, _HISTORY_PICKLE_FILENAME)
