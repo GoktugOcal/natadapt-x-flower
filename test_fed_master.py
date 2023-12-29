@@ -58,10 +58,18 @@ _KEY_MODEL = 'model'
 _KEY_NETWORK_DEF = 'network_def'
 _KEY_NUM_OUT_CHANNELS = 'num_out_channels'
 
+_NUM_CLASSES = 10
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DT_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 # Supported network_utils
 network_utils_all = sorted(name for name in networkUtils.__dict__
     if name.islower() and not name.startswith("__")
     and callable(networkUtils.__dict__[name]))
+
+model_names = sorted(name for name in models.__dict__
+    if name.islower() and not name.startswith("__")
+    and callable(models.__dict__[name]))
 
 def elapsed(title:str, start=None):
     if start:
@@ -343,9 +351,11 @@ def fedavg(weights_results):
 def get_parameters(model):
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
-def federated_learning(args, netadapt_iteration, block):
+def federated_learning(args, netadapt_iteration, block, client_selector):
 
-    args.logfilename = common.WORKER_MODELSIZE_FILENAME_TEMPLATE.format(netadapt_iteration, block)
+    args.logfilename = os.path.join(
+        worker_folder,
+        common.WORKER_FED_LOGFILE.format(netadapt_iteration, block))
     with open(args.logfilename, "w") as f:
         f.write("DateTime,RoundNo,ClientNo,Dataset,Accuracy\n")
 
@@ -901,6 +911,8 @@ def master(args):
             - Federation should be here: _launch_worker
             """
 
+            no_clients=56
+            no_groups=7
             dataset_path = os.path.join(args.data)
             client_selector = ClientSelector(
                 no_clients,

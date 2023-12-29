@@ -11,8 +11,8 @@ from scipy.interpolate import Rbf
 from collections import OrderedDict
 from constants import *
 
-DEVICE = os.environ["TORCH_DEVICE"]
-
+# DEVICE = os.environ["TORCH_DEVICE"]
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def update_progress(index, length, **kwargs):
     '''

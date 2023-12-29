@@ -13,7 +13,9 @@ import torchvision.datasets as datasets
 import torch.utils.data.sampler as sampler
 
 sys.path.append(os.path.abspath('../'))
-DEVICE = os.environ["TORCH_DEVICE"]
+# DEVICE = os.environ["TORCH_DEVICE"]
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 
 from constants import *
