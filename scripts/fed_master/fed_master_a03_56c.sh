@@ -7,6 +7,6 @@ python test_fed_master.py \
     -dp ./data/32_Cifar10_NIID_56c_a03 \
     --arch alexnet \
     -nc 56 \
-    -nr 1 \
-    --fine_tuning_epochs 2
+    -nr 20 \
+    --fine_tuning_epochs 50
     # --client_selection
