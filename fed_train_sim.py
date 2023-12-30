@@ -161,10 +161,10 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         output = model(images)
         
         if args.fedprox:
-            proximal_term = 0.1
+            #proximal_term = 0.1
             for local_weights, global_weights in zip(model.parameters(), global_model.parameters()):
                 proximal_term += (local_weights - global_weights).norm(2)
-            loss = criterion(output, target_onehot) + (0.1 / 2) * proximal_term
+            loss = criterion(output, target_onehot) + (args.mu / 2) * proximal_term
         
         else:
             loss = criterion(output, target_onehot)
@@ -529,6 +529,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--fine_tuning_epochs', default=10, type=int, metavar='N', help='number of total epochs to for fine tuning')
     arg_parser.add_argument('--use_server_data', default=False, action="store_true")
     arg_parser.add_argument('--fedprox', default=False, action="store_true")
+    arg_parser.add_argument('--mu', default=0.01, help="mu value that is used in FedProx.")
     arg_parser.add_argument('--client_selection', default=False, action="store_true")
     arg_parser.add_argument('--pretrained', default=False, action="store_true")
     #NIID
