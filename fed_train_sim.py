@@ -529,7 +529,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--fine_tuning_epochs', default=10, type=int, metavar='N', help='number of total epochs to for fine tuning')
     arg_parser.add_argument('--use_server_data', default=False, action="store_true")
     arg_parser.add_argument('--fedprox', default=False, action="store_true")
-    arg_parser.add_argument('--mu', default=0.01, help="mu value that is used in FedProx.")
+    arg_parser.add_argument('--mu', default=0.01, type=float, help="mu value that is used in FedProx.")
     arg_parser.add_argument('--client_selection', default=False, action="store_true")
     arg_parser.add_argument('--pretrained', default=False, action="store_true")
     #NIID
