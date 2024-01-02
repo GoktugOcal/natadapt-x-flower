@@ -38,7 +38,7 @@ from generate_mnist import generate_mnist
 from client_selection import ClientSelector
 
 
-_NUM_CLASSES = 10
+_NUM_CLASSES = 100
 # DEVICE = os.environ["TORCH_DEVICE"]
 # DEVICE = "cuda"
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -329,12 +329,12 @@ def client(global_model, client_id, round_no, args):
     # Network
     cudnn.benchmark = True
     num_classes = _NUM_CLASSES
-    criterion = nn.BCEWithLogitsLoss()
-    # criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), args.lr,
-                                momentum=args.momentum,
-                                weight_decay=args.weight_decay)
-
+    # criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.CrossEntropyLoss()
+    # optimizer = torch.optim.SGD(model.parameters(), args.lr,
+    #                             momentum=args.momentum,
+    #                             weight_decay=args.weight_decay)
+    optimizer = torch.optim.Adam(model.parameters(), args.lr)
     # model = nn.DataParallel(model)
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
@@ -355,14 +355,14 @@ def client(global_model, client_id, round_no, args):
     best_acc = eval(test_loader, model, args)
     print('Best accuracy:', best_acc)
 
-    wandb.log(
-            {
-                'fl_round': round_no,
-                "device": f"client_{client_id}",
-                "acc_type": "test",
-                'acc': best_acc
-            }
-        )
+    # wandb.log(
+    #         {
+    #             'fl_round': round_no,
+    #             "device": f"client_{client_id}",
+    #             "acc_type": "test",
+    #             'acc': best_acc
+    #         }
+    #     )
 
 
     with open(args.logfilename, "a") as f:
@@ -509,8 +509,8 @@ def federated_learning(args):
         global_train_acc = eval(train_loader, global_model, args)
         global_test_acc = eval(test_loader, global_model, args)
 
-        wandb.log({'fl_round': round_no, "device": "server", "acc_type": "train", 'acc': global_train_acc})
-        wandb.log({'fl_round': round_no, "device": "server", "acc_type": "test", 'acc': global_test_acc})
+        # wandb.log({'fl_round': round_no, "device": "server", "acc_type": "train", 'acc': global_train_acc})
+        # wandb.log({'fl_round': round_no, "device": "server", "acc_type": "test", 'acc': global_test_acc})
 
         with open(args.logfilename, "a") as f:
             f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},server,train,{global_train_acc}\n")
@@ -525,6 +525,7 @@ if __name__ == '__main__':
     # arg_parser.add_argument('data', metavar='DIR', help='path to dataset')
     arg_parser.add_argument('-m', '--model_name', type=str)
     arg_parser.add_argument('-nc', '--no_clients', type=int)
+    arg_parser.add_argument('-c', '--num_classes', type=int)
     #FED
     arg_parser.add_argument('-nr', '--no_rounds', type=int)
     arg_parser.add_argument('--fine_tuning_epochs', default=10, type=int, metavar='N', help='number of total epochs to for fine tuning')
@@ -561,10 +562,10 @@ if __name__ == '__main__':
     print(json.dumps(vars(args), indent=2))
     print()
     
-    wandb.init(
-        project="federated-predefined",
-        name=args.project_folder.split("/")[-2]
-    )
+    # wandb.init(
+    #     project="federated-predefined",
+    #     name=args.project_folder.split("/")[-2]
+    # )
 
 
     #Fundamental
@@ -572,7 +573,7 @@ if __name__ == '__main__':
         os.makedirs(args.project_folder)
         print('Create directory', args.project_folder)
 
-    args.num_classes=10
+    # args.num_classes=100
 
     if args.generate_dataset:
         args.data = os.path.join(args.project_folder,"data/")
