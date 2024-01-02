@@ -38,7 +38,7 @@ from generate_mnist import generate_mnist
 from client_selection import ClientSelector
 
 
-_NUM_CLASSES = 100
+# _NUM_CLASSES = 100
 # DEVICE = os.environ["TORCH_DEVICE"]
 # DEVICE = "cuda"
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -149,7 +149,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         if len(target.shape) > 1: target = target.reshape(len(target))
 
         target.unsqueeze_(1)
-        target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
+        target_onehot = torch.FloatTensor(target.shape[0], args.num_classes)
         target_onehot.zero_()
         target_onehot.scatter_(1, target, 1)
         target.squeeze_(1)
@@ -216,7 +216,7 @@ def server_train(train_loader, model, criterion, optimizer, epoch, args):
         if len(target.shape) > 1: target = target.reshape(len(target))
 
         target.unsqueeze_(1)
-        target_onehot = torch.FloatTensor(target.shape[0], _NUM_CLASSES)
+        target_onehot = torch.FloatTensor(target.shape[0], args.num_classes)
         target_onehot.zero_()
         target_onehot.scatter_(1, target, 1)
         target.squeeze_(1)
@@ -328,7 +328,7 @@ def client(global_model, client_id, round_no, args):
 
     # Network
     cudnn.benchmark = True
-    num_classes = _NUM_CLASSES
+    num_classes = args.num_classes
     # criterion = nn.BCEWithLogitsLoss()
     criterion = nn.CrossEntropyLoss()
     # optimizer = torch.optim.SGD(model.parameters(), args.lr,
@@ -395,7 +395,7 @@ def train_server_model(model, args):
 
     # Network
     cudnn.benchmark = True
-    num_classes = _NUM_CLASSES
+    num_classes = args.num_classes
     #criterion = nn.BCEWithLogitsLoss()
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
