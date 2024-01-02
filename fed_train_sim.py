@@ -396,11 +396,12 @@ def train_server_model(model, args):
     # Network
     cudnn.benchmark = True
     num_classes = _NUM_CLASSES
-    criterion = nn.BCEWithLogitsLoss()
-    # criterion = nn.CrossEntropyLoss()
+    #criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)  
     # model = nn.DataParallel(model)
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
@@ -559,6 +560,7 @@ if __name__ == '__main__':
     print(args)
     print(json.dumps(vars(args), indent=2))
     print()
+    exit()
 
     wandb.init(
         project="federated-predefined",
