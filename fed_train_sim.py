@@ -560,8 +560,7 @@ if __name__ == '__main__':
     print(args)
     print(json.dumps(vars(args), indent=2))
     print()
-    exit()
-
+    
     wandb.init(
         project="federated-predefined",
         name=args.project_folder.split("/")[-2]
