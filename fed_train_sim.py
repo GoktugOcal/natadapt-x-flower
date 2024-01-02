@@ -123,11 +123,15 @@ class AverageMeter(object):
         self.count += n
         self.avg = self.sum / self.count
         
-def compute_accuracy(output, target):
+def compute_accuracy(output, target, debug=False):
     output = output.argmax(dim=1)
     acc = 0.0
     acc = torch.sum(target == output).item()
     acc = acc/output.size(0)*100
+    if debug:
+        print(target)
+        print(output)
+        input()
     return acc
     
 def train(train_loader, model, criterion, optimizer, epoch, args):
@@ -258,7 +262,7 @@ def server_train(train_loader, model, criterion, optimizer, epoch, args):
     print('===================================================================')
     return
 
-def eval(test_loader, model, args):
+def eval(test_loader, model, args, debug=False):
     batch_time = AverageMeter()
     acc = AverageMeter()
 
@@ -274,7 +278,7 @@ def eval(test_loader, model, args):
         target = target.to(DEVICE)
         
         output = model(images)
-        batch_acc = compute_accuracy(output, target)
+        batch_acc = compute_accuracy(output, target, debug=debug)
         acc.update(batch_acc, images.size(0))
         batch_time.update(time.time() - end)
         end = time.time()
@@ -440,16 +444,28 @@ def federated_learning(args):
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
     ])
 
-    train_dataset = datasets.CIFAR10(root="./data", train=True, download=True,
-        transform=transform)
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=True)
-    test_dataset = datasets.CIFAR10(root="./data", train=False, download=True,
-        transform=transform)
-    test_loader = torch.utils.data.DataLoader(
-        test_dataset, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=True)
+    if args.dataset_name == "cifar100":
+        train_dataset = datasets.CIFAR100(root="./data", train=True, download=True,
+            transform=transform)
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True)
+        test_dataset = datasets.CIFAR100(root="./data", train=False, download=True,
+            transform=transform)
+        test_loader = torch.utils.data.DataLoader(
+            test_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True)
+    else:
+        train_dataset = datasets.CIFAR10(root="./data", train=True, download=True,
+            transform=transform)
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True)
+        test_dataset = datasets.CIFAR10(root="./data", train=False, download=True,
+            transform=transform)
+        test_loader = torch.utils.data.DataLoader(
+            test_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True)
 
     global_model = torch.load(args.global_model_path, map_location=DEVICE)
     # global_model= nn.DataParallel(global_model)
@@ -506,8 +522,8 @@ def federated_learning(args):
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         global_model.load_state_dict(state_dict, strict=True)
 
-        global_train_acc = eval(train_loader, global_model, args)
-        global_test_acc = eval(test_loader, global_model, args)
+        global_train_acc = eval(train_loader, global_model, args, debug=False)
+        global_test_acc = eval(test_loader, global_model, args, debug=False)
 
         # wandb.log({'fl_round': round_no, "device": "server", "acc_type": "train", 'acc': global_train_acc})
         # wandb.log({'fl_round': round_no, "device": "server", "acc_type": "test", 'acc': global_test_acc})
@@ -526,6 +542,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('-m', '--model_name', type=str)
     arg_parser.add_argument('-nc', '--no_clients', type=int)
     arg_parser.add_argument('-c', '--num_classes', type=int)
+    arg_parser.add_argument('-dn', '--dataset_name', type=str, default="cifar10")
     #FED
     arg_parser.add_argument('-nr', '--no_rounds', type=int)
     arg_parser.add_argument('--fine_tuning_epochs', default=10, type=int, metavar='N', help='number of total epochs to for fine tuning')
