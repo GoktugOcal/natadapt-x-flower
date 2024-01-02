@@ -144,7 +144,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     # switch to train mode
     model.train()
     
-    print('===================================================================')
+    # print('===================================================================')
     end = time.time()
     
     for i, (images, target) in enumerate(train_loader):
@@ -190,17 +190,16 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         
         # Update statistics
         estimated_time_remained = batch_time.get_avg()*(len(train_loader)-i-1)
-        fns.update_progress(i, len(train_loader), 
-            ESA='{:8.2f}'.format(estimated_time_remained)+'s',
-            loss='{:4.2f}'.format(loss.item()),
-            acc='{:4.2f}%'.format(float(batch_acc))
-            )
+        # fns.update_progress(i, len(train_loader), 
+        #     ESA='{:8.2f}'.format(estimated_time_remained)+'s',
+        #     loss='{:4.2f}'.format(loss.item()),
+        #     acc='{:4.2f}%'.format(float(batch_acc))
+        #     )
 
-    print()
     print('Finish epoch {}: time = {:8.2f}s, loss = {:4.2f}, acc = {:4.2f}%'.format(
             epoch+1, batch_time.get_avg()*len(train_loader), 
             float(losses.get_avg()), float(acc.get_avg())))
-    print('===================================================================')
+    # print('===================================================================')
     return
 
 def server_train(train_loader, model, criterion, optimizer, epoch, args):
@@ -285,14 +284,13 @@ def eval(test_loader, model, args, debug=False):
 
         # Update statistics
         estimated_time_remained = batch_time.get_avg()*(len(test_loader)-i-1)
-        fns.update_progress(i, len(test_loader), 
-            ESA='{:8.2f}'.format(estimated_time_remained)+'s',
-            acc='{:4.2f}'.format(float(batch_acc))
-            )
-    print()
+        # fns.update_progress(i, len(test_loader), 
+        #     ESA='{:8.2f}'.format(estimated_time_remained)+'s',
+        #     acc='{:4.2f}'.format(float(batch_acc))
+        #     )
     print('Test accuracy: {:4.2f}% (time = {:8.2f}s)'.format(
             float(acc.get_avg()), batch_time.get_avg()*len(test_loader)))
-    print('===================================================================')
+    # print('===================================================================')
     return float(acc.get_avg())
             
 def client(global_model, client_id, round_no, args):
@@ -353,11 +351,11 @@ def client(global_model, client_id, round_no, args):
 
         if acc > best_acc:
             best_acc = acc
-        print(' ')
-    print('Best accuracy:', best_acc)
+        # print(' ')
+    # print('Best accuracy:', best_acc)
         
     best_acc = eval(test_loader, model, args)
-    print('Best accuracy:', best_acc)
+    print('Accuracy:', best_acc)
 
     # wandb.log(
     #         {
@@ -434,6 +432,10 @@ def train_server_model(model, args):
 def federated_learning(args):
     args.logfilename = os.path.join(args.project_folder, "federated.txt")
     with open(args.logfilename, "w") as f:
+        f.write("DateTime,RoundNo,ClientNo,Dataset,Accuracy\n")
+    
+    args.evalfilename = os.path.join(args.project_folder, "federated_eval.txt")
+    with open(args.evalfilename, "w") as f:
         f.write("DateTime,RoundNo,ClientNo,Dataset,Accuracy\n")
 
     transform = transforms.Compose([
@@ -531,7 +533,57 @@ def federated_learning(args):
         with open(args.logfilename, "a") as f:
             f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},server,train,{global_train_acc}\n")
             f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},server,test,{global_test_acc}\n")
+
+        #Federated Evaluation
+        federated_eval(global_model, args)
+
     return global_model
+
+def federated_eval(model, args):
+
+    train_acc_list = []
+    test_acc_list = []
+    train_len = []
+    test_len = []
+
+    for client_id in range(args.no_clients):
+
+        train_dataset_path = os.path.join(args.data, "train", f"{client_id}.pkl")
+        train_data = pickle.load(open(train_dataset_path, "rb"))
+        train_loader = torch.utils.data.DataLoader(
+            train_data,
+            batch_size=args.batch_size,
+            shuffle=True)
+
+        test_dataset_path = os.path.join(args.data, "test", f"{client_id}.pkl")
+        test_data = pickle.load(open(test_dataset_path, "rb"))
+        test_loader = torch.utils.data.DataLoader(
+            test_data,
+            batch_size=args.batch_size,
+            shuffle=True)
+        
+        len_train = len(train_data)
+        len_test = len(test_data)
+
+        train_acc = eval(train_loader, model, args)
+        test_acc = eval(test_loader, model, args)
+
+        with open(args.evalfilename, "a") as f:
+            f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},{client_id},train,{train_acc}\n")
+            f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},{client_id},test,{test_acc}\n")
+        
+        train_acc_list.append(train_acc * len_train)
+        test_acc_list.append(test_acc * len_test)
+        train_len.append(len_train)
+        test_len.append(len_test)
+    
+    aggregated_train_accuracy = sum(train_acc_list) / sum(train_len)
+    aggregated_test_accuracy = sum(test_acc_list) / sum(test_len)
+    with open(args.evalfilename, "a") as f:
+        f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},aggregated,train,{aggregated_train_accuracy}\n")
+        f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},aggregated,test,{aggregated_test_accuracy}\n")
+        
+
 
 if __name__ == '__main__':
     # Parse the input arguments.
