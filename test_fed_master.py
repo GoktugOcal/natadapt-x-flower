@@ -367,16 +367,28 @@ def federated_learning(args, netadapt_iteration, block, client_selector):
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
     ])
 
-    train_dataset = datasets.CIFAR10(root="./data", train=True, download=True,
-        transform=transform)
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=True)
-    test_dataset = datasets.CIFAR10(root="./data", train=False, download=True,
-        transform=transform)
-    test_loader = torch.utils.data.DataLoader(
-        test_dataset, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=True)
+    if args.dataset_name == "cifar100":
+        train_dataset = datasets.CIFAR100(root="./data", train=True, download=True,
+            transform=transform)
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True)
+        test_dataset = datasets.CIFAR100(root="./data", train=False, download=True,
+            transform=transform)
+        test_loader = torch.utils.data.DataLoader(
+            test_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True)
+    else:
+        train_dataset = datasets.CIFAR10(root="./data", train=True, download=True,
+            transform=transform)
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True)
+        test_dataset = datasets.CIFAR10(root="./data", train=False, download=True,
+            transform=transform)
+        test_loader = torch.utils.data.DataLoader(
+            test_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True)
 
     global_model = torch.load(args.global_model_path, map_location=DEVICE)
     # global_model= nn.DataParallel(global_model)
@@ -1060,6 +1072,8 @@ if __name__ == '__main__':
 
     #PROJECT
     arg_parser.add_argument('-nc', '--nc', '--no_clients', type=int)
+    arg_parser.add_argument('-c', '--num_classes', type=int)
+    arg_parser.add_argument('-dn', '--dataset_name', type=str, default="cifar10")
     #FED
     arg_parser.add_argument('-nr', '--no_rounds', type=int)
     arg_parser.add_argument('--fine_tuning_epochs', default=10, type=int, metavar='N', help='number of total epochs to for fine tuning')
@@ -1085,9 +1099,11 @@ if __name__ == '__main__':
     args = arg_parser.parse_args()
 
     args.no_clients = args.nc
+    _NUM_CLASSES = args.num_classes
 
     args.project_folder = args.working_folder
-    args.data="data/32_Cifar10_NIID_56c_a03/"
+    # args.data="data/32_Cifar10_NIID_56c_a03/"
+    args.data = args.dataset_path
     # if not args.no_cuda:
     #     os.environ["TORCH_DEVICE"] = "cpu"
     # else:
