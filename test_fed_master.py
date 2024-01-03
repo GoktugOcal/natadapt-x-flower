@@ -313,11 +313,12 @@ def client(global_model, client_id, round_no, args):
     # Network
     cudnn.benchmark = True
     num_classes = _NUM_CLASSES
-    criterion = nn.BCEWithLogitsLoss()
-    # criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), args.lr,
-                                momentum=args.momentum,
-                                weight_decay=args.weight_decay)
+    # criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.CrossEntropyLoss()
+    # optimizer = torch.optim.SGD(model.parameters(), args.lr,
+    #                             momentum=args.momentum,
+    #                             weight_decay=args.weight_decay)
+    optimizer = torch.optim.Adam(model.parameters(), args.lr)
 
     # model = nn.DataParallel(model)
     model = model.to(DEVICE)
@@ -513,7 +514,8 @@ def worker(
     netadapt_iteration,
     short_term_fine_tune_iteration,
     log_path,
-    client_selector
+    client_selector,
+    test_loader
     ):
     """
         The main function of the worker.
@@ -563,7 +565,13 @@ def worker(
 
     #### FLOWER GOES
     # fine_tuned_model = network_utils.fine_tune(simplified_model, short_term_fine_tune_iteration)
-    fine_tuned_accuracy = network_utils.evaluate(fine_tuned_model)
+    # fine_tuned_accuracy = network_utils.evaluate(fine_tuned_model)
+    fine_tuned_accuracy = eval(
+        test_loader=test_loader,
+        model=fine_tuned_model,
+        args=args
+    )
+
     logging.info('Accuracy after finetune : ' + str(fine_tuned_accuracy))
     #### FLOWER OUT
 
@@ -786,7 +794,36 @@ def master(args):
     history_pickle_file = os.path.join(master_folder, _HISTORY_PICKLE_FILENAME)
     history_text_file = os.path.join(master_folder, _HISTORY_TEXT_FILENAME)
     server_text_file = os.path.join(server_folder, _SERVER_TEXT_FILENAME)
-    log_path = os.path.join(args.working_folder, _TEST_FOLDER_NAME)    
+    log_path = os.path.join(args.working_folder, _TEST_FOLDER_NAME)
+
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    ])
+
+    if args.dataset_name == "cifar100":
+        train_dataset = datasets.CIFAR100(root=args.data, train=True, download=True,
+            transform=transform)
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True)
+        test_dataset = datasets.CIFAR100(root=args.data, train=False, download=True,
+            transform=transform)
+        test_loader = torch.utils.data.DataLoader(
+            test_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True)
+    else:
+        train_dataset = datasets.CIFAR10(root=args.data, train=True, download=True,
+            transform=transform)
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True)
+        test_dataset = datasets.CIFAR10(root=args.data, train=False, download=True,
+            transform=transform)
+        test_loader = torch.utils.data.DataLoader(
+            test_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True)
+
 
     # Get available GPUs.
     available_gpus = args.gpus
@@ -898,7 +935,12 @@ def master(args):
         current_resource = network_utils.compute_resource(network_def, args.resource_type, args.lookup_table_path)
 
         logging.info("Model evaluation is being started.")
-        current_accuracy = network_utils.evaluate(model)
+        current_accuracy = eval(
+            test_loader=test_loader,
+            model=model,
+            args=args
+            )
+        # current_accuracy = network_utils.evaluate(model)
         # current_accuracy = 99.81
         logging.info(f"Model evaluation has ended. Acc: {current_accuracy}")
         current_block = None
@@ -1004,7 +1046,8 @@ def master(args):
                 netadapt_iteration = current_iter,
                 short_term_fine_tune_iteration = args.short_term_fine_tune_iteration,
                 log_path = log_path,
-                client_selector = client_selector
+                client_selector = client_selector,
+                test_loader=test_loader
             )
             # logging.info(f"For block {block_idx} the process has finished in {round(time.time() - block_start,2)} seconds.")
             # print(hist.losses_distributed)
