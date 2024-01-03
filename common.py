@@ -12,4 +12,5 @@ WORKER_FINISH_FILENAME_TEMPLATE = 'iter_{}_block_{}_finish.signal'
 WORKER_MODELSIZE_FILENAME_TEMPLATE = 'iter_{}_block_{}_modelsize.txt'
 WORKER_PARAMETERS_FILENAME_TEMPLATE = 'iter_{}_block_{}_paremeters.txt'
 WORKER_FED_LOGFILE = 'iter_{}_block_{}_federated.txt'
+WORKER_FED_EVAL_LOGFILE = 'iter_{}_block_{}_federated_eval.txt'
 

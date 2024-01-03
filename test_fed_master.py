@@ -359,6 +359,12 @@ def federated_learning(args, netadapt_iteration, block, client_selector):
     with open(args.logfilename, "w") as f:
         f.write("DateTime,RoundNo,ClientNo,Dataset,Accuracy\n")
 
+    args.evalfilename = os.path.join(
+        args.worker_folder,
+        common.WORKER_FED_EVAL_LOGFILE.format(netadapt_iteration, block))
+    with open(args.evalfilename, "w") as f:
+        f.write("DateTime,RoundNo,ClientNo,Dataset,Accuracy\n")
+
     transform = transforms.Compose([
         transforms.ToTensor(),
         # transforms.RandomCrop(32, padding=4), 
@@ -439,9 +445,57 @@ def federated_learning(args, netadapt_iteration, block, client_selector):
         with open(args.logfilename, "a") as f:
             f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},server,train,{global_train_acc}\n")
             f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},server,test,{global_test_acc}\n")
+
+        #Federated Evaluation
+        federated_eval(global_model, args)
+    
     return global_model
 
 
+def federated_eval(model, args):
+
+    train_acc_list = []
+    test_acc_list = []
+    train_len = []
+    test_len = []
+
+    for client_id in range(args.no_clients):
+
+        train_dataset_path = os.path.join(args.data, "train", f"{client_id}.pkl")
+        train_data = pickle.load(open(train_dataset_path, "rb"))
+        train_loader = torch.utils.data.DataLoader(
+            train_data,
+            batch_size=args.batch_size,
+            shuffle=True)
+
+        test_dataset_path = os.path.join(args.data, "test", f"{client_id}.pkl")
+        test_data = pickle.load(open(test_dataset_path, "rb"))
+        test_loader = torch.utils.data.DataLoader(
+            test_data,
+            batch_size=args.batch_size,
+            shuffle=True)
+        
+        len_train = len(train_data)
+        len_test = len(test_data)
+
+        train_acc = eval(train_loader, model, args)
+        test_acc = eval(test_loader, model, args)
+
+        with open(args.evalfilename, "a") as f:
+            f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},{client_id},train,{train_acc}\n")
+            f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},{client_id},test,{test_acc}\n")
+        
+        train_acc_list.append(train_acc * len_train)
+        test_acc_list.append(test_acc * len_test)
+        train_len.append(len_train)
+        test_len.append(len_test)
+    
+    aggregated_train_accuracy = sum(train_acc_list) / sum(train_len)
+    aggregated_test_accuracy = sum(test_acc_list) / sum(test_len)
+    with open(args.evalfilename, "a") as f:
+        f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},aggregated,train,{aggregated_train_accuracy}\n")
+        f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},aggregated,test,{aggregated_test_accuracy}\n")
+     
 
 def worker(
     gpu,
