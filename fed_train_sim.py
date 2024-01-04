@@ -336,7 +336,7 @@ def client(global_model, client_id, round_no, args):
     # optimizer = torch.optim.SGD(model.parameters(), args.lr,
     #                             momentum=args.momentum,
     #                             weight_decay=args.weight_decay)
-    optimizer = torch.optim.Adam(model.parameters(), args.lr)
+    optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.weight_decay)
     # model = nn.DataParallel(model)
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
@@ -535,7 +535,7 @@ def federated_learning(args):
             f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},server,test,{global_test_acc}\n")
 
         #Federated Evaluation
-        federated_eval(global_model, args)
+        agg_train_acc, agg_test_acc = federated_eval(global_model, args)
 
     return global_model
 
@@ -582,7 +582,8 @@ def federated_eval(model, args):
     with open(args.evalfilename, "a") as f:
         f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},aggregated,train,{aggregated_train_accuracy}\n")
         f.write(f"{datetime.now().strftime(DT_FORMAT)},{args.round_no},aggregated,test,{aggregated_test_accuracy}\n")
-        
+    
+    return aggregated_train_accuracy, aggregated_test_accuracy
 
 
 if __name__ == '__main__':
