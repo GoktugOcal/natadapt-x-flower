@@ -11,9 +11,9 @@ for iterno in 1 10 15; do
         "iter_"${iterno[@]}"_block_5_model_simp.pth.tar"
         "iter_"${iterno[@]}"_block_6_model_simp.pth.tar")
 
-    worker_path="./projects/fed_master/fed_master_a03_56c/worker/"
+    worker_path="projects/fed_master/fed_master_a03_56c/worker/"
     dataset_path="32_Cifar10_NIID_56c_a03"
-    working_path="./projects/fed_master/fed_master_cifar10_a03_56c_network_opt_small/iter_"${iterno[@]}"/"
+    working_path="projects/fed_master/fed_master_cifar10_a03_56c_network_opt_small/iter_"${iterno[@]}"/"
 
     length=${#model_names[@]}
 
