@@ -500,7 +500,11 @@ def federated_learning(args):
         args.round_no = round_no
         print(f"Round No: {round_no}")
 
-        if args.client_selection:
+        if args.clients_selected:
+            with open(os.path.join(args.clients_selected,"model_groups.json"), "r") as json_file:
+                model_metadata = json.load(json_file)
+            selected_clients = model_metadata[args.fine_tune_model]["clients"]
+        elif args.client_selection:
             group_no = round_no % 7
             # selected_clients = client_selector.get_clients(group_no = group_no)
             selected_clients = client_selector.get_clients(group_no=group_no)
@@ -603,7 +607,9 @@ if __name__ == '__main__':
     arg_parser.add_argument('--fedprox', default=False, action="store_true")
     arg_parser.add_argument('--mu', default=0.01, type=float, help="mu value that is used in FedProx.")
     arg_parser.add_argument('--client_selection', default=False, action="store_true")
+    arg_parser.add_argument('--clients_selected', type=str)    
     arg_parser.add_argument('--pretrained', default=False, action="store_true")
+    arg_parser.add_argument('-ft', '--fine_tune_model', type=str)
     #NIID
     arg_parser.add_argument('--generate_dataset', default=False, action="store_true")
     arg_parser.add_argument("-niid", "--niid", type=str, help="Non-IID format.")
@@ -692,6 +698,11 @@ if __name__ == '__main__':
         # model = AlexNet_MNIST()
         model = train_server_model(model, args)
         args.global_model_path = os.path.join(args.project_folder, args.model_name)
+        torch.save(model, args.global_model_path)
+
+    elif args.fine_tune_model:
+        args.global_model_path = os.path.join(args.project_folder, args.model_name)
+        model = torch.load(args.fine_tune_model)
         torch.save(model, args.global_model_path)
         
     else:
