@@ -6,6 +6,7 @@ import os
 import io
 import base64
 
+import pandas as pd
 import json
 import pickle
 import time
@@ -313,14 +314,13 @@ def client(global_model, client_id, round_no, args):
     # Network
     cudnn.benchmark = True
     num_classes = _NUM_CLASSES
-    # criterion = nn.BCEWithLogitsLoss()
-    criterion = nn.CrossEntropyLoss()
-    # optimizer = torch.optim.SGD(model.parameters(), args.lr,
-    #                             momentum=args.momentum,
-    #                             weight_decay=args.weight_decay)
-    optimizer = torch.optim.Adam(model.parameters(), args.lr)
+    criterion = nn.BCEWithLogitsLoss()
+    optimizer = torch.optim.SGD(model.parameters(), args.lr,
+                                momentum=args.momentum,
+                                weight_decay=args.weight_decay)
+    # criterion = nn.CrossEntropyLoss()
+    # optimizer = torch.optim.Adam(model.parameters(), args.lr)
 
-    # model = nn.DataParallel(model)
     model = model.to(DEVICE)
     criterion = criterion.to(DEVICE)
     # Train & evaluation
@@ -352,7 +352,7 @@ def fedavg(weights_results):
 def get_parameters(model):
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
-def federated_learning(args, netadapt_iteration, block, client_selector):
+def federated_learning(args, netadapt_iteration, block, client_selector, selected_clients = None):
 
     args.logfilename = os.path.join(
         args.worker_folder,
@@ -992,7 +992,66 @@ def master(args):
 
         # Launch the workers.
         job_list = []
+
+        ############################################################################
+        ############################################################################
+        ############################################################################
+        no_clients=56
+        no_groups=7
+        dataset_path = os.path.join(args.data)
+        client_selector = ClientSelector(
+            no_clients,
+            no_groups,
+            os.path.join(dataset_path,"bws_groups.csv")
+        )
         
+        if args.client_selection == "network":
+            model_metadata = {}
+            for block_idx in range(network_utils.get_num_simplifiable_blocks()):
+                model = torch.load(current_model_path)
+                network_utils = networkUtils.__dict__[args.arch](
+                    model,
+                    args.input_data_shape,
+                    args.dataset_path,
+                    args.finetune_lr)
+                
+                if network_utils.get_num_simplifiable_blocks() <= block_idx:
+                    raise ValueError("Block index >= number of simplifiable blocks")
+                
+                network_def = network_utils.get_network_def_from_model(model)
+                simplified_network_def, simplified_resource = (
+                    fns.simplify_network_def_based_on_constraint_test(  network_def,
+                                                                        block_idx,
+                                                                        target_resource,
+                                                                        args.resource_type,
+                                                                        current_iter,
+                                                                        log_path,
+                                                                        2,
+                                                                        args.lookup_table_path
+                                                                        ))
+                # Choose the filters.
+                simplified_model = network_utils.simplify_model_based_on_network_def(simplified_network_def, model)
+                temp_model_path = os.path.join(worker_folder,"cs_temp_model.pth.tar")
+                torch.save(simplified_model,temp_model_path)
+                model_size = os.path.getsize(temp_model_path)
+                os.remove(temp_model_path)
+                model_metadata[block_idx] = {
+                    "clients" : None,
+                    "size" : model_size / 1000000
+                }
+            model_metadata = dict(sorted(
+                model_metadata.items(),
+                key=lambda x:x[1]["size"],
+                reverse=False))
+            client_selector.network_optimized_grouping(model_metadata)
+        
+        elif args.client_selection == "random":
+            client_selector.random_grouping()
+        ############################################################################
+        ############################################################################
+        ############################################################################
+
+
         # Launch worker for each block
         print("num simp blocks:",network_utils.get_num_simplifiable_blocks())
         for block_idx in range(network_utils.get_num_simplifiable_blocks()):
@@ -1002,33 +1061,6 @@ def master(args):
             print("model path : ", current_model_path)
             print("model idx : ", block_idx)
 
-            """
-                Solution is this function
-            """
-
-            """
-            - There may be available clients function in here
-            """
-            # # Check and update the gpu availability.
-            # job_list, available_gpus = _update_job_list_and_available_gpus(worker_folder, job_list, available_gpus)
-            # while not available_gpus:
-            #     print('  Wait for the next available gpu...')
-            #     time.sleep(_SLEEP_TIME)
-            #     job_list, available_gpus = _update_job_list_and_available_gpus(worker_folder, job_list, available_gpus)
-
-            """
-            - Federation should be here: _launch_worker
-            """
-
-            no_clients=56
-            no_groups=7
-            dataset_path = os.path.join(args.data)
-            client_selector = ClientSelector(
-                no_clients,
-                no_groups,
-                os.path.join(dataset_path,"bws_groups.csv")
-            )
-            client_selector.random_grouping()
             # logging.info("Worker starts.")
             hist = worker(
                 gpu = 0,
@@ -1176,7 +1208,9 @@ if __name__ == '__main__':
     arg_parser.add_argument('--fine_tuning_epochs', default=10, type=int, metavar='N', help='number of total epochs to for fine tuning')
     arg_parser.add_argument('--use_server_data', default=False, action="store_true")
     arg_parser.add_argument('--fedprox', default=False, action="store_true")
-    arg_parser.add_argument('--client_selection', default=False, action="store_true")
+    arg_parser.add_argument('--client_selection', type=str, default="random",
+                            choices=["network","random"]
+                            )
     arg_parser.add_argument('--pretrained', default=False, action="store_true")
     #General Training Params
     arg_parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',

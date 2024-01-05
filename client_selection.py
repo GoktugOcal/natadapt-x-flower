@@ -149,6 +149,20 @@ class ClientSelector:
         groups = np.repeat(np.arange(self.no_groups),self.no_clients//self.no_groups)
         random.shuffle(groups)
         self.groupdf["group"] = groups
+    
+    def network_optimized_grouping(self, model_metadata):
+        grp_no = 0
+        replace_dict = {}
+        for k, v in model_metadata.items():
+            replace_dict[grp_no] = k
+            # clients = bw_table[bw_table["group"] == grp_no]["client_id"].values.tolist()
+            # model_metadata[k]["clients"] = clients
+            grp_no +=1
+        
+        for idx, row in self.groupdf.iterrows():
+            group_no = row.group
+            self.groupdf.at[idx,"group"] = replace_dict[group_no]
+        
 
     def get_clients(self, group_no = 0):
         selected_group = self.groupdf[self.groupdf["group"] == group_no]
