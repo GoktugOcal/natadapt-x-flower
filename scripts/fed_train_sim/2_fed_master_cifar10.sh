@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for iterno in 1 10 15; do
+for iterno in 1; do
     model_names=(
         "iter_"${iterno[@]}"_block_0_model_simp.pth.tar"
         "iter_"${iterno[@]}"_block_1_model_simp.pth.tar"
