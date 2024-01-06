@@ -6,7 +6,7 @@ python fed_train_sim.py \
     -c 100 \
     -nc 56 \
     -nr 300 \
-    --fine_tuning_epochs 50 \
+    --fine_tuning_epochs 20 \
     --epochs 200 \
     --lr 0.0001 \
     --arch alexnet_reduced \
