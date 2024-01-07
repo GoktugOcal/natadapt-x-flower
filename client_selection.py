@@ -166,13 +166,13 @@ def NnDOG(maindf, NO_GROUPS):
     all_scores = []
     scores = []
     emds = []
-    for group_no in range(NO_GROUPS,0,-1):
+    for group_no in range(NO_GROUPS-1,-1,-1):
         group_selected = df_iter[df_iter["group"] == group_no]
         group_dist = np.sum(group_selected.distribution.values, axis=0)
         scores.append(EMD(group_dist, global_dist))
     all_scores.append(scores)
 
-    seq_of_move = np.arange(1,NO_GROUPS+1).tolist()
+    seq_of_move = np.arange(0,NO_GROUPS).tolist()
 
     for iter_no in range(10):
         no_operations_done = 0
@@ -285,7 +285,7 @@ class ClientSelector:
         
         for idx, row in self.groupdf.iterrows():
             group_no = row.group
-            self.groupdf.at[idx,"group"] = replace_dict[group_no] + 1
+            self.groupdf.at[idx,"group"] = replace_dict[group_no]
         print(self.groupdf)
         
         self.groupdf = NnDOG(self.groupdf, self.no_groups)
