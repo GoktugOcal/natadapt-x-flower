@@ -288,7 +288,7 @@ class ClientSelector:
         
         for idx, row in self.groupdf.iterrows():
             group_no = row.group
-            self.groupdf.at[idx,"group"] = replace_dict[group_no]
+            self.groupdf.at[idx,"group"] = replace_dict[group_no] + 1
         print(self.groupdf)
         
         self.groupdf = NnDOG(self.groupdf, self.no_groups)
