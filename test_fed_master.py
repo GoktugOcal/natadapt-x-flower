@@ -1052,6 +1052,7 @@ def master(args):
             if args.client_selection == "network":
                 client_selector.network_optimized_grouping(model_metadata)
             elif args.client_selection == "optimized":
+                print(model_metadata)
                 client_selector.network_and_dis_opt_grouping(model_metadata)
         
         ############################################################################
