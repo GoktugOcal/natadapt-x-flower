@@ -137,8 +137,6 @@ from pymoo.optimize import minimize
 #         return [idx for idx, item in enumerate(self.groups) if item == group_no]
 
 def EMD(Z_i, Z_global):
-    print(Z_i)
-    print(Z_global)
     magnitude = lambda vector: math.sqrt(sum(pow(element, 2) for element in vector))
     return magnitude(Z_i/magnitude(Z_i) - Z_global/magnitude(Z_global))
 
@@ -170,7 +168,6 @@ def NnDOG(maindf, NO_GROUPS):
     emds = []
     for group_no in range(NO_GROUPS,0,-1):
         group_selected = df_iter[df_iter["group"] == group_no]
-        print(group_selected.distribution.values)
         group_dist = np.sum(group_selected.distribution.values, axis=0)
         scores.append(EMD(group_dist, global_dist))
     all_scores.append(scores)
