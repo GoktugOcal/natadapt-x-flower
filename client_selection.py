@@ -286,6 +286,11 @@ class ClientSelector:
             replace_dict[grp_no] = k
             grp_no +=1
         
+        for idx, row in self.groupdf.iterrows():
+            group_no = row.group
+            self.groupdf.at[idx,"group"] = replace_dict[group_no]
+        print(self.groupdf)
+        
         self.groupdf = NnDOG(self.groupdf, self.no_groups)
 
     def get_clients(self, group_no = 0):
