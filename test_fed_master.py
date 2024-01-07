@@ -1005,7 +1005,12 @@ def master(args):
             os.path.join(dataset_path,"bws_groups.csv")
         )
         
-        if args.client_selection == "network":
+
+
+        if args.client_selection == "random":
+            client_selector.random_grouping()
+
+        else:
             model_metadata = {}
             for block_idx in range(network_utils.get_num_simplifiable_blocks()):
                 model = torch.load(current_model_path)
@@ -1043,10 +1048,12 @@ def master(args):
                 model_metadata.items(),
                 key=lambda x:x[1]["size"],
                 reverse=False))
-            client_selector.network_optimized_grouping(model_metadata)
+
+            if args.client_selection == "network":
+                client_selector.network_optimized_grouping(model_metadata)
+            elif args.client_selection == "optimized":
+                client_selector.network_and_dis_opt_grouping(model_metadata)
         
-        elif args.client_selection == "random":
-            client_selector.random_grouping()
         ############################################################################
         ############################################################################
         ############################################################################
@@ -1209,7 +1216,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--use_server_data', default=False, action="store_true")
     arg_parser.add_argument('--fedprox', default=False, action="store_true")
     arg_parser.add_argument('--client_selection', type=str, default="random",
-                            choices=["network","random"]
+                            choices=["network","random","optimized"]
                             )
     arg_parser.add_argument('--pretrained', default=False, action="store_true")
     #General Training Params

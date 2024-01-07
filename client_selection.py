@@ -136,6 +136,119 @@ from pymoo.optimize import minimize
 
 #         return [idx for idx, item in enumerate(self.groups) if item == group_no]
 
+def EMD(Z_i, Z_global):
+    print(Z_i)
+    print(Z_global)
+    magnitude = lambda vector: math.sqrt(sum(pow(element, 2) for element in vector))
+    return magnitude(Z_i/magnitude(Z_i) - Z_global/magnitude(Z_global))
+
+def transfer_op(df_iter, candidate_operations, selected_idx):
+    selected_operation = candidate_operations[selected_idx]
+
+    df_dict = df_iter.to_dict(orient="index")
+    main_group = df_dict[selected_operation[0]]["group"]
+    other_group = df_dict[selected_operation[1]]["group"]
+
+    df_iter.at[selected_operation[0], "group"] = other_group
+    df_iter.at[selected_operation[1], "group"] = main_group
+
+    return df_iter
+
+def average_EMD(df_iter, global_dist):
+    EMDs = []
+    for group_name, group_df in df_iter.groupby("group"):
+        EMDs.append(EMD(np.sum(group_df.distribution.values, axis=0), global_dist))
+    return np.mean(EMDs)
+
+def NnDOG(maindf, NO_GROUPS):
+    global_dist = np.sum(maindf.distribution.values, axis=0)
+    df_iter = maindf.copy()
+
+    COEFF = 0.9
+    all_scores = []
+    scores = []
+    emds = []
+    for group_no in range(NO_GROUPS,0,-1):
+        group_selected = df_iter[df_iter["group"] == group_no]
+        print(group_selected.distribution.values)
+        group_dist = np.sum(group_selected.distribution.values, axis=0)
+        scores.append(EMD(group_dist, global_dist))
+    all_scores.append(scores)
+
+    seq_of_move = np.arange(1,NO_GROUPS+1).tolist()
+
+    for iter_no in range(10):
+        no_operations_done = 0
+        seq_of_move = seq_of_move[1:] + seq_of_move[: 1]
+        # print(seq_of_move)
+        for group_no in seq_of_move:
+            current_emd = average_EMD(df_iter, global_dist)
+            group_selected = df_iter[df_iter["group"] == group_no]
+            
+            group_friend_next = df_iter[df_iter["group"] == group_no-1]
+            group_friend_prev = df_iter[df_iter["group"] == group_no+1]
+
+            group_friend_next_2 = df_iter[df_iter["group"] == group_no-2]
+            group_friend_prev_2 = df_iter[df_iter["group"] == group_no+2]
+
+            candidate_groups = [
+                group_friend_next,
+                group_friend_prev,
+                group_friend_next_2,
+                group_friend_prev_2
+                ]
+
+            group_dist = np.sum(group_selected.distribution.to_numpy(), axis=0)
+            score = EMD(group_dist, global_dist)
+            candidate_operations = []
+            bw_debug = []
+            for idx, row in group_selected.iterrows():
+                client_id = row.client_id
+                group_dist_wo = group_dist - np.array(row.distribution)
+                bw_type = row.bw_type
+
+                for candidate_group in candidate_groups:
+                    for idx2, row2 in candidate_group.iterrows():
+                        candidate_dist = group_dist_wo + np.array(row2.distribution)
+                        candidate_score = EMD(candidate_dist ,global_dist)
+                        bw_type_candidate = row2.bw_type
+                        if bw_type == bw_type_candidate: coeff = 1
+                        else:
+                            coeff = COEFF
+
+                        if candidate_score < score*coeff:
+
+                            df_iter_temp = transfer_op(df_iter.copy(), [(client_id, row2.client_id, candidate_score)], -1)
+                            avg_emd = average_EMD(df_iter_temp, global_dist)
+                            emds.append(avg_emd)
+
+                            # candidate_operations.append((client_id, row2.client_id, candidate_score))
+                            candidate_operations.append((client_id, row2.client_id, avg_emd))
+                            bw_debug.append((bw_type, bw_type_candidate))
+
+
+            # Transfer operation            
+            candidate_operations = np.array(candidate_operations)
+            if len(candidate_operations) > 0:
+                selected_idx = np.argmin(candidate_operations[:,2])
+                if current_emd > candidate_operations[selected_idx,2]:
+                    # print(candidate_operations[selected_idx], bw_debug[selected_idx])
+                    df_iter = transfer_op(df_iter, candidate_operations, selected_idx)
+                    no_operations_done += 1
+
+        scores = []
+        for group_no in range(NO_GROUPS,0,-1):
+            group_selected = df_iter[df_iter["group"] == group_no]
+            group_dist = np.sum(group_selected.distribution.to_numpy(), axis=0)
+            scores.append(EMD(group_dist, global_dist))
+        all_scores.append(scores)
+
+        print(f"## ITER {iter_no} | No operations done : {no_operations_done}")
+        if no_operations_done == 0:
+            break
+
+    return df_iter
+
 
 class ClientSelector:
     def __init__(self, no_clients, no_groups, dataset_path):
@@ -143,6 +256,9 @@ class ClientSelector:
         self.no_groups = no_groups
 
         self.df = pd.read_csv(dataset_path)
+        for idx,row in self.df.iterrows():
+            self.df.at[idx,"distribution"] = np.array([float(item) for item in row.distribution.replace("[","").replace("]","").split(" ") if item != ""])
+
         self.groupdf = self.df.copy()
     
     def random_grouping(self):
@@ -163,6 +279,14 @@ class ClientSelector:
             group_no = row.group
             self.groupdf.at[idx,"group"] = replace_dict[group_no]
         
+    def network_and_dis_opt_grouping(self, model_metadata):
+        grp_no = 0
+        replace_dict = {}
+        for k, v in model_metadata.items():
+            replace_dict[grp_no] = k
+            grp_no +=1
+        
+        self.groupdf = NnDOG(self.groupdf, self.no_groups)
 
     def get_clients(self, group_no = 0):
         selected_group = self.groupdf[self.groupdf["group"] == group_no]
@@ -171,12 +295,12 @@ class ClientSelector:
 
 if __name__ == "__main__":
 
-    dataset_path = "./data/32_Cifar10_NIID_56c_a03/bws_groups.csv"
+    dataset_path = "./data/bws_groups.csv"
     no_clients=56
     no_groups=7
 
     client_selector = ClientSelector(no_clients, no_groups, dataset_path)
-    client_selector.random_grouping()
+    client_selector.network_and_dis_opt_grouping()
     for gid in range(no_groups):
         print(client_selector.get_clients(group_no=gid))
 
