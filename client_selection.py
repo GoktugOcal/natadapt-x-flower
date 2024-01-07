@@ -235,7 +235,7 @@ def NnDOG(maindf, NO_GROUPS):
                     no_operations_done += 1
 
         scores = []
-        for group_no in range(NO_GROUPS,0,-1):
+        for group_no in range(NO_GROUPS-1,-1,-1):
             group_selected = df_iter[df_iter["group"] == group_no]
             group_dist = np.sum(group_selected.distribution.to_numpy(), axis=0)
             scores.append(EMD(group_dist, global_dist))
@@ -253,7 +253,7 @@ class ClientSelector:
         self.no_clients = no_clients
         self.no_groups = no_groups
 
-        self.df = pd.read_csv(dataset_path)
+        self.df = pd.read_csv(dataset_path, index_col=0)
         for idx,row in self.df.iterrows():
             self.df.at[idx,"distribution"] = np.array([float(item) for item in row.distribution.replace("[","").replace("]","").split(" ") if item != ""])
 
