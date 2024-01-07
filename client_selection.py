@@ -168,7 +168,6 @@ def NnDOG(maindf, NO_GROUPS):
     emds = []
     for group_no in range(NO_GROUPS-1,-1,-1):
         group_selected = df_iter[df_iter["group"] == group_no]
-        print(group_selected)
         group_dist = np.sum(group_selected.distribution.values, axis=0)
         scores.append(EMD(group_dist, global_dist))
     all_scores.append(scores)
@@ -287,7 +286,6 @@ class ClientSelector:
         for idx, row in self.groupdf.iterrows():
             group_no = row.group
             self.groupdf.at[idx,"group"] = replace_dict[group_no]
-        print(self.groupdf)
         
         self.groupdf = NnDOG(self.groupdf, self.no_groups)
 
