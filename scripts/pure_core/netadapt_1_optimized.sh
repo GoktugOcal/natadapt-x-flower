@@ -1,16 +1,16 @@
 #!/bin/bash
 
-model_names=("iter_1_block_0_model_simp.pth.tar"
-"iter_1_block_1_model_simp.pth.tar"
-"iter_1_block_2_model_simp.pth.tar"
-"iter_1_block_3_model_simp.pth.tar"
-"iter_1_block_4_model_simp.pth.tar"
-"iter_1_block_5_model_simp.pth.tar"
-"iter_1_block_6_model_simp.pth.tar")
+model_names=("iter_10_block_0_model_simp.pth.tar"
+"iter_10_block_1_model_simp.pth.tar"
+"iter_10_block_2_model_simp.pth.tar"
+"iter_10_block_3_model_simp.pth.tar"
+"iter_10_block_4_model_simp.pth.tar"
+"iter_10_block_5_model_simp.pth.tar"
+"iter_10_block_6_model_simp.pth.tar")
 
 worker_path="./projects/netadapt/netadapt_1/worker/"
 dataset_path="32_Cifar10_NIID_80c_a03"
-working_path="projects/pure_core/netadapt_1_optimized/netadapt_1_iter_1/"
+working_path="projects/pure_core/netadapt_1_optimized/netadapt_1_iter_10/"
 
 length=${#model_names[@]}
 
