@@ -577,9 +577,10 @@ def worker(
 
 
     # Save the results.
-    torch.save(simplified_model,
-               os.path.join(worker_folder,
-                            common.WORKER_SIMP_MODEL_FILENAME_TEMPLATE.format(netadapt_iteration, block)))
+    # torch.save(simplified_model,
+    #            os.path.join(worker_folder,
+    #                         common.WORKER_SIMP_MODEL_FILENAME_TEMPLATE.format(netadapt_iteration, block)))
+
     torch.save(fine_tuned_model,
                os.path.join(worker_folder,
                             common.WORKER_MODEL_FILENAME_TEMPLATE.format(netadapt_iteration, block)))
