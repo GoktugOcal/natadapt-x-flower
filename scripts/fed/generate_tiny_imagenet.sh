@@ -1,1 +1,0 @@
-python generateTinyImageNet.py -nc 20 -c 200 -niid noniid -b - -p dir

@@ -1,1 +1,0 @@
-python generate_cifar10.py -nc 5 -c 10 -niid noniid -b - -p dir
