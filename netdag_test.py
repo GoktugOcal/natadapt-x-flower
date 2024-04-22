@@ -338,7 +338,7 @@ if __name__ == "__main__":
     no_tests = 20
     for no_clients in [56, 70, 140, 210]:
         for alpha in [0.1, 0.3, 0.5, 0.7, 1.0]:
-            for coeff in [0.5,0.7,0.9,1]:
+            for coeff in [0.1,0.3,0.5,0.7,0.8,0.9,1]:
                 for max_iter in [5,10,20,50]:
                     for test in range(no_tests):
 
