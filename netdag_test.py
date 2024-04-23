@@ -342,6 +342,8 @@ if __name__ == "__main__":
                 for max_iter in [5,10,20,50]:
                     for test in range(no_tests):
 
+                        print(no_clients, alpha, coeff, max_iter, test)
+
                         df_final, all_scores, final_scores, iter_no, down_durs, avg_elapsed = main(
                             no_clients=no_clients,
                             no_groups=7,
