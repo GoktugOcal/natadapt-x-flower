@@ -190,7 +190,7 @@ def main(args):
     for cid, tier in bw_data[block_id].items():
         print(cid, tier)
         print(tiers)
-        print(client_networks_all[cid])
+        print(client_networks_all[str(cid)])
         client_networks_all[cid] = tiers[tier]
     client_networks = client_networks_all
 
