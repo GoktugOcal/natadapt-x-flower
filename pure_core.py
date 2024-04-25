@@ -38,12 +38,20 @@ NO_ROUNDS = 1
 CPU_PER_CLIENT = 8
 MEM_LIMIT_PER_CLIENT = "6g"
 
-
-# WEAK_NETWORK = np.arange(500_000, 2_500_000, 500_000)
-# WEAK_NETWORK = np.array([2_000_000, 2_500_000])
 WEAK_NETWORK = np.array([2_500_000, 3_500_000])
 NORMAL_NETWORK = np.arange(8_000_000, 32_000_000, 1_000_000)
 STRONG_NETWORK = np.arange(50_000_000, 100_000_000, 10_000_000)
+
+TIER_11 = np.array([2_500_000, 3_500_000, 500_000])
+TIER_12 = np.array([4_000_000, 5_500_000, 500_000])
+TIER_13 = np.array([6_000_000, 8_000_000, 500_000])
+TIER_21 = np.array([8_500_000, 16_500_000, 1_000_000])
+TIER_22 = np.array([17_000_000, 25_000_000, 1_000_000])
+TIER_23 = np.array([25_500_000, 32_500_000, 1_000_000])
+TIER_31 = np.array([35_000_000, 55_000_000, 1_000_000])
+TIER_32 = np.array([56_000_000, 75_000_000, 1_000_000])
+TIER_33 = np.array([75_000_000, 100_000_000, 1_000_000])
+
 
 client_networks = {
     0 : WEAK_NETWORK,
@@ -125,6 +133,27 @@ client_networks_all = {
     },
 }
 
+tiers = {
+    "TIER_11" : np.arange(2_500_000, 3_500_000, 500_000),
+    "TIER_12" : np.arange(4_000_000, 5_500_000, 500_000),
+    "TIER_13" : np.arange(6_000_000, 8_000_000, 500_000),
+
+    "TIER_21" : np.arange(8_500_000, 12_500_000, 1_000_000),
+    "TIER_22" : np.arange(13_000_000, 16_000_000, 1_000_000),
+    "TIER_23" : np.arange(17_000_000, 25_000_000, 1_000_000),
+    "TIER_24" : np.arange(26_000_000, 30_000_000, 1_000_000),
+    "TIER_25" : np.arange(31_000_000, 34_000_000, 1_000_000),
+
+    "TIER_31" : np.arange(35_000_000, 40_000_000, 1_000_000),
+    "TIER_32" : np.arange(41_000_000, 55_000_000, 1_000_000),
+    "TIER_33" : np.arange(46_000_000, 65_000_000, 1_000_000),
+    "TIER_34" : np.arange(66_000_000, 75_000_000, 1_000_000),
+    "TIER_35" : np.arange(75_000_000, 100_000_000, 1_000_000),
+
+    "TIER_41" : np.arange(100_000_000, 400_000_000, 20_000_000)
+}
+
+
 def main(args):
 
     if args.working_path: WORKING_PATH = args.working_path
@@ -141,9 +170,14 @@ def main(args):
     # elif any(block_id in MODEL_PATH for block_id in ["block_5","block_6"]):
     #     client_networks =  client_networks_low
 
-    block_id = [block_id for block_id in ["block_0","block_1","block_2","block_3","block_4","block_5","block_6"] if block_id in MODEL_PATH][0]
-    client_networks = client_networks_all[block_id]
     
+    client_networks_all = {}
+    for cid, tier in json.load(os.path.join(DATASET_PATH,"client_groups.json")).items():
+        client_networks_all[cid] = tiers[tier]
+
+    block_id = [block_id for block_id in ["block_0","block_1","block_2","block_3","block_4","block_5","block_6"] if block_id in MODEL_PATH][0]    
+    client_networks = client_networks_all[block_id]
+
 
     os.makedirs(WORKING_PATH, exist_ok=True)
 
