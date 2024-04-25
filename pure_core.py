@@ -162,6 +162,7 @@ def main(args):
     if args.cpu_per_client: CPU_PER_CLIENT = args.cpu_per_client
     if args.mem_per_client: MEM_LIMIT_PER_CLIENT = args.mem_per_client
     if args.no_rounds: NO_ROUNDS = args.no_rounds
+    if args.no_clients: NO_CLIENTS = args.no_clients
 
     # if any(block_id in MODEL_PATH for block_id in ["block_0","block_1"]):
     #     client_networks =  client_networks_high
