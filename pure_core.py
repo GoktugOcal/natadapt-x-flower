@@ -172,7 +172,9 @@ def main(args):
 
     
     client_networks_all = {}
-    for cid, tier in json.load(os.path.join(DATASET_PATH,"client_groups.json")).items():
+    with open(f"../data/alpha/Cifar10_NIID_{no_clients}c_a{str(alpha).replace(".","")}/client_groups.json") as json_file:
+        bw_data = json.load(json_file)
+    for cid, tier in bw_data.items():
         client_networks_all[cid] = tiers[tier]
 
     block_id = [block_id for block_id in ["block_0","block_1","block_2","block_3","block_4","block_5","block_6"] if block_id in MODEL_PATH][0]    
