@@ -171,7 +171,15 @@ def main(args):
     #     client_networks =  client_networks_low
 
     
-    client_networks_all = {}
+    client_networks_all = {
+        0: None,
+        1: None,
+        2: None,
+        3: None,
+        4: None,
+        5: None,
+        6: None,
+    }
     with open(os.path.join("./data",DATASET_PATH,"client_groups.json")) as json_file:
         bw_data = json.load(json_file)
     for cid, tier in bw_data.items():
