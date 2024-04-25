@@ -25,7 +25,7 @@ for ((i=0; i<$length; i++)); do
   python pure_core.py -wp "${current_path}" \
     -mp "${model_path}" \
     -dp "${dataset_path}" \
-    -nc 8 \
+    -nc 210 \
     -ng 7 \
     -nr 1 \
     -cpc 8 \
