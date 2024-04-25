@@ -183,10 +183,13 @@ def main(args):
     with open(os.path.join("./data",DATASET_PATH,"client_groups.json")) as json_file:
         bw_data = json.load(json_file)
     for cid, tier in bw_data.items():
+        print(tiers[tier])
+        print(client_networks_all[cid])
         client_networks_all[cid] = tiers[tier]
 
     block_id = [block_id for block_id in ["block_0","block_1","block_2","block_3","block_4","block_5","block_6"] if block_id in MODEL_PATH][0]    
-    client_networks = client_networks_all[block_id]
+    # client_networks = client_networks_all[block_id]
+    client_networks = client_networks_all
 
 
     os.makedirs(WORKING_PATH, exist_ok=True)
