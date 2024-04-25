@@ -172,7 +172,7 @@ def main(args):
 
     
     client_networks_all = {}
-    with open(f"../data/alpha/Cifar10_NIID_{no_clients}c_a{str(alpha).replace(".","")}/client_groups.json") as json_file:
+    with open(os.path.join(DATASET_PATH,"client_groups.json")) as json_file:
         bw_data = json.load(json_file)
     for cid, tier in bw_data.items():
         client_networks_all[cid] = tiers[tier]
