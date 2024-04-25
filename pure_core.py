@@ -183,6 +183,7 @@ def main(args):
     with open(os.path.join("./data",DATASET_PATH,"client_groups.json")) as json_file:
         bw_data = json.load(json_file)
     for cid, tier in bw_data.items():
+        print(cid, tier)
         print(tiers)
         print(client_networks_all[cid])
         client_networks_all[cid] = tiers[tier]
