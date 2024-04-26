@@ -171,9 +171,6 @@ def main(args):
     # elif any(block_id in MODEL_PATH for block_id in ["block_5","block_6"]):
     #     client_networks =  client_networks_low
 
-    
-    
-
     block_id = [block_id for block_id in ["block_0","block_1","block_2","block_3","block_4","block_5","block_6"] if block_id in MODEL_PATH][0]    
     # client_networks = client_networks_all[block_id]
 
