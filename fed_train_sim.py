@@ -472,7 +472,7 @@ def federated_learning(args):
 
     #Client Selection
     dataset_path = os.path.join(args.data)
-    no_clients = 56
+    no_clients = args.no_clients
     no_groups = 7
     no_classes = 10
 
