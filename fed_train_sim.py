@@ -1,9 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-import wandb
-
-
 from argparse import ArgumentParser
 import os
 import time
