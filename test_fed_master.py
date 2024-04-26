@@ -915,7 +915,7 @@ def master(args):
         copyfile(args.init_model_path, current_model_path)
 
         # Initialize variables.
-        model = torch.load(current_model_path)
+        model = torch.load(current_model_path, map_location=DEVICE)
         print(model)
         print(type(model))
         logging.info("Model loaded.")
