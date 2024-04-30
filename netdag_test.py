@@ -96,25 +96,73 @@ def EMD(Z_i, Z_global):
     magnitude = lambda vector: math.sqrt(sum(pow(element, 2) for element in vector))
     return magnitude(Z_i/magnitude(Z_i) - Z_global/magnitude(Z_global))
 
-def spread_bw_random(main_label_vectors, no_clients, no_groups):
+# def spread_bw_random(main_label_vectors, no_clients, no_groups):
+#     NO_GROUPS = no_groups
+#     NO_CLIENTS = no_clients
+#     weak    = 2_500_000
+#     normal = 35_000_000
+#     strong  = 80_000_000
+
+
+#     low_count = int(10/56*NO_CLIENTS)
+#     high_count = int(10/56*NO_CLIENTS)
+#     medium_count = NO_CLIENTS - low_count - high_count
+
+#     bw_types = (["low"]*low_count) + (["medium"]*medium_count) + (["high"]*high_count)
+
+
+#     lows = [weak] * low_count
+#     mediums = [normal] * medium_count
+#     highs = [strong] * high_count
+#     bw = lows + mediums + highs
+
+#     ids = np.arange(NO_CLIENTS)
+#     random.shuffle(ids)
+
+#     bws = []
+#     for idx in ids:
+#         bws.append((bw[idx],bw_types[idx]))
+
+#     clients_list = []
+#     for idx in range(len(main_label_vectors)):
+#         clients_list.append(
+#             {
+#                 "client_id" : idx,
+#                 "bw" : bws[idx][0],
+#                 "bw_type" : bws[idx][1],
+#                 "distribution" : main_label_vectors[idx],
+#                 "group" : None
+#             }
+#         )
+
+#     clients_df = pd.DataFrame(clients_list)
+
+#     maindf = clients_df.sort_values("bw")
+#     maindf["group"] = np.repeat(np.arange(7),int(NO_CLIENTS / NO_GROUPS))
+
+
+#     for idx,row in maindf.iterrows():
+#         maindf.at[idx,"group"] = replace_dict[row.group]
+#         # maindf.at[idx,"distribution"] = np.array([float(item) for item in row.distribution.replace("[","").replace("]","").split(" ") if item != ""])
+        
+#     maindf.reset_index(drop=True)
+
+#     return maindf
+
+def spread_bw_random(main_label_vectors, no_clients, no_groups, tiers):
     NO_GROUPS = no_groups
     NO_CLIENTS = no_clients
-    weak    = 2_500_000
-    normal = 35_000_000
-    strong  = 80_000_000
+    
+    bw_types = []
+    bw = []
+    for k, v in tiers.items():
+        for i in range(int(NO_CLIENTS / len(tiers))):
+            bw_types.append(k)
+            bw.append(random.choice(tiers[k]))
 
-
-    low_count = int(10/56*NO_CLIENTS)
-    high_count = int(10/56*NO_CLIENTS)
-    medium_count = NO_CLIENTS - low_count - high_count
-
-    bw_types = (["low"]*low_count) + (["medium"]*medium_count) + (["high"]*high_count)
-
-
-    lows = [weak] * low_count
-    mediums = [normal] * medium_count
-    highs = [strong] * high_count
-    bw = lows + mediums + highs
+    # print(int(NO_CLIENTS / len(tiers)))
+    # print(len(bw))
+    # print(len(bw_types))
 
     ids = np.arange(NO_CLIENTS)
     random.shuffle(ids)
@@ -143,7 +191,6 @@ def spread_bw_random(main_label_vectors, no_clients, no_groups):
 
     for idx,row in maindf.iterrows():
         maindf.at[idx,"group"] = replace_dict[row.group]
-        # maindf.at[idx,"distribution"] = np.array([float(item) for item in row.distribution.replace("[","").replace("]","").split(" ") if item != ""])
         
     maindf.reset_index(drop=True)
 
@@ -311,6 +358,26 @@ def main(no_clients, no_groups, alpha, coeff, max_iter, no_classes=10, no_tests=
     COEFF = coeff
     MAX_ITER = max_iter
 
+    tiers = {
+        "TIER_11" : np.arange(2_500_000, 3_500_000, 500_000),
+        "TIER_12" : np.arange(4_000_000, 5_500_000, 500_000),
+        "TIER_13" : np.arange(6_000_000, 8_000_000, 500_000),
+
+        "TIER_21" : np.arange(8_500_000, 12_500_000, 1_000_000),
+        "TIER_22" : np.arange(13_000_000, 16_000_000, 1_000_000),
+        "TIER_23" : np.arange(17_000_000, 25_000_000, 1_000_000),
+        "TIER_24" : np.arange(26_000_000, 30_000_000, 1_000_000),
+        "TIER_25" : np.arange(31_000_000, 34_000_000, 1_000_000),
+
+        "TIER_31" : np.arange(35_000_000, 40_000_000, 1_000_000),
+        "TIER_32" : np.arange(41_000_000, 55_000_000, 1_000_000),
+        "TIER_33" : np.arange(46_000_000, 65_000_000, 1_000_000),
+        "TIER_34" : np.arange(66_000_000, 75_000_000, 1_000_000),
+        "TIER_35" : np.arange(75_000_000, 100_000_000, 1_000_000),
+
+        "TIER_41" : np.arange(100_000_000, 400_000_000, 20_000_000)
+    }
+
     path = f"./data/alpha/Cifar10_NIID_{NO_CLIENTS}c_a{ALPHA}/config.json"
     conf = json.loads(open(path, "r").read())
     data = [dict(zip(np.array(cli)[:,0], np.array(cli)[:,1])) for cli in conf["Size of samples for labels in clients"]]
@@ -325,7 +392,9 @@ def main(no_clients, no_groups, alpha, coeff, max_iter, no_classes=10, no_tests=
     durations = []
     for i in range(no_tests):
         s = time()
-        maindf = spread_bw_random(main_label_vectors, NO_CLIENTS, NO_GROUPS)
+        # maindf = spread_bw_random(main_label_vectors, NO_CLIENTS, NO_GROUPS)
+        maindf = spread_bw_random(main_label_vectors, NO_CLIENTS, NO_GROUPS, tiers)
+        # print(maindf)
         df_final, all_scores, iter_no, down_durs = NetDag(maindf, NO_GROUPS, COEFF, MAX_ITER, viz=viz)
         final_scores.append(np.mean(all_scores[-1]))
         durations.append(time() - s)
@@ -336,12 +405,14 @@ if __name__ == "__main__":
 
     logs = []
     no_tests = 20
-    for no_clients in [56, 70, 140, 210]:
-        for alpha in [0.1, 0.3, 0.5, 0.7, 1.0]:
-            for coeff in [0.1,0.3,0.5,0.7,0.8,0.9,1]:
-                for max_iter in [5,10,20,50]:
+    # for no_clients in [56, 70, 140, 210]:
+    for no_clients in np.arange(56,217,14):
+        # for alpha in [0.1, 0.3, 0.5, 0.7, 1.0]:
+        for alpha in np.arange(0.1,1.1,0.1):
+            # for coeff in [0.1,0.3,0.5,0.7,0.8,0.9,1]:
+            for coeff in np.arange(0.1,1.1,0.1):
+                for max_iter in [5,6,7,8,9,10,15,20]:
                     for test in range(no_tests):
-
                         print(no_clients, alpha, coeff, max_iter, test)
 
                         df_final, all_scores, final_scores, iter_no, down_durs, avg_elapsed = main(
@@ -369,4 +440,4 @@ if __name__ == "__main__":
                         logs.append(log)
 
                         log_df = pd.DataFrame(logs)
-                        log_df.to_csv("./data/alpha/test_1.csv")
+                        log_df.to_csv("./data/alpha/test_2.csv")
