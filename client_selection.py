@@ -264,7 +264,7 @@ class ClientSelector:
         self.groupdf["group"] = groups
     
     def network_optimized_grouping(self, model_metadata):
-        grp_no = 0
+        grp_no = 1
         replace_dict = {}
         for k, v in model_metadata.items():
             replace_dict[grp_no] = k
