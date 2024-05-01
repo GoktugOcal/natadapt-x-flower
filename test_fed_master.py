@@ -402,7 +402,7 @@ def federated_learning(args, netadapt_iteration, block, client_selector, selecte
     global_model = global_model.to(DEVICE)
 
     #Client Selection
-    no_clients = 56
+    no_clients = args.nc
     no_groups = 7
     no_classes = 10
 
@@ -997,7 +997,7 @@ def master(args):
         ############################################################################
         ############################################################################
         ############################################################################
-        no_clients=56
+        no_clients=args.nc
         no_groups=7
         dataset_path = os.path.join(args.data)
         client_selector = ClientSelector(
