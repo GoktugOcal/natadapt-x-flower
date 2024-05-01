@@ -232,7 +232,7 @@ def NetDag(maindf, no_groups, coeff, max_iter, viz=False):
 
 
     seq_of_move = np.arange(1,NO_GROUPS+1).tolist()
-
+    total_no_operations = 0
     for iter_no in range(max_iter):
         no_operations_done = 0
         # for group_no in range(NO_GROUPS,0,-1):
@@ -304,6 +304,7 @@ def NetDag(maindf, no_groups, coeff, max_iter, viz=False):
 
         down_durs.append(download_duration(df_iter))
 
+        total_no_operations += no_operations_done
         if viz: print(f"## ITER {iter_no} | No operations done : {no_operations_done}")
         if no_operations_done == 0:
             break
@@ -331,7 +332,7 @@ def NetDag(maindf, no_groups, coeff, max_iter, viz=False):
         plt.ylabel("EMD")
         plt.show()
     
-    return df_iter, all_scores, iter_no, down_durs
+    return df_iter, all_scores, iter_no, down_durs, total_no_operations
 
 def download_duration(df_final):
     model_sizes = {
@@ -395,11 +396,11 @@ def main(no_clients, no_groups, alpha, coeff, max_iter, no_classes=10, no_tests=
         # maindf = spread_bw_random(main_label_vectors, NO_CLIENTS, NO_GROUPS)
         maindf = spread_bw_random(main_label_vectors, NO_CLIENTS, NO_GROUPS, tiers)
         # print(maindf)
-        df_final, all_scores, iter_no, down_durs = NetDag(maindf, NO_GROUPS, COEFF, MAX_ITER, viz=viz)
+        df_final, all_scores, iter_no, down_durs, total_no_operations = NetDag(maindf, NO_GROUPS, COEFF, MAX_ITER, viz=viz)
         final_scores.append(np.mean(all_scores[-1]))
         durations.append(time() - s)
 
-    return df_final, all_scores, final_scores, iter_no, down_durs, np.mean(durations)
+    return df_final, all_scores, final_scores, iter_no, down_durs, np.mean(durations), total_no_operations
 
 if __name__ == "__main__":
 
@@ -416,7 +417,7 @@ if __name__ == "__main__":
                     for test in range(no_tests):
                         print(no_clients, alpha, coeff, max_iter, test)
 
-                        df_final, all_scores, final_scores, iter_no, down_durs, avg_elapsed = main(
+                        df_final, all_scores, final_scores, iter_no, down_durs, avg_elapsed, total_no_operations = main(
                             no_clients=no_clients,
                             no_groups=7,
                             alpha=alpha,
@@ -435,6 +436,7 @@ if __name__ == "__main__":
                             "initial_emd": np.mean(all_scores[0]),
                             "emd": avgEMD,
                             "final_iter": iter_no,
+                            "total_no_operations": total_no_operations,
                             "download_duration": lastDur,
                             "avg_elapsed_time": avg_elapsed
                         }
