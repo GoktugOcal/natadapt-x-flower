@@ -409,6 +409,7 @@ if __name__ == "__main__":
     for no_clients in np.arange(56,217,14):
         # for alpha in [0.1, 0.3, 0.5, 0.7, 1.0]:
         for alpha in np.arange(0.1,1.1,0.1):
+            alpha = round(alpha,1)
             # for coeff in [0.1,0.3,0.5,0.7,0.8,0.9,1]:
             for coeff in np.arange(0.1,1.1,0.1):
                 for max_iter in [5,6,7,8,9,10,15,20]:
