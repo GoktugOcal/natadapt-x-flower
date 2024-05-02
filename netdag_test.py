@@ -416,31 +416,35 @@ if __name__ == "__main__":
                 for max_iter in [5,6,7,8,9,10,15,20]:
                     for test in range(no_tests):
                         print(no_clients, alpha, coeff, max_iter, test)
+                        
+                        try:
+                            df_final, all_scores, final_scores, iter_no, down_durs, avg_elapsed, total_no_operations = main(
+                                no_clients=no_clients,
+                                no_groups=7,
+                                alpha=alpha,
+                                coeff=coeff,
+                                max_iter=max_iter,
+                                no_tests=1
+                            )
+                            avgEMD = np.mean(all_scores[-1])
+                            lastDur = down_durs[-1]
 
-                        df_final, all_scores, final_scores, iter_no, down_durs, avg_elapsed, total_no_operations = main(
-                            no_clients=no_clients,
-                            no_groups=7,
-                            alpha=alpha,
-                            coeff=coeff,
-                            max_iter=max_iter,
-                            no_tests=1
-                        )
-                        avgEMD = np.mean(all_scores[-1])
-                        lastDur = down_durs[-1]
+                            log = {
+                                "alpha": alpha,
+                                "no_clients" : no_clients,
+                                "coeff": coeff,
+                                "max_iter": max_iter,
+                                "initial_emd": np.mean(all_scores[0]),
+                                "emd": avgEMD,
+                                "final_iter": iter_no,
+                                "total_no_operations": total_no_operations,
+                                "download_duration": lastDur,
+                                "avg_elapsed_time": avg_elapsed
+                            }
+                            logs.append(log)
 
-                        log = {
-                            "alpha": alpha,
-                            "no_clients" : no_clients,
-                            "coeff": coeff,
-                            "max_iter": max_iter,
-                            "initial_emd": np.mean(all_scores[0]),
-                            "emd": avgEMD,
-                            "final_iter": iter_no,
-                            "total_no_operations": total_no_operations,
-                            "download_duration": lastDur,
-                            "avg_elapsed_time": avg_elapsed
-                        }
-                        logs.append(log)
-
-                        log_df = pd.DataFrame(logs)
-                        log_df.to_csv("./data/alpha/test_2.csv")
+                            log_df = pd.DataFrame(logs)
+                            log_df.to_csv("./data/alpha/test_3.csv")
+                            
+                        except Exception as e:
+                            print(e)
