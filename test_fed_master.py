@@ -150,7 +150,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             proximal_term = 0.0
             for local_weights, global_weights in zip(model.parameters(), global_model.parameters()):
                 proximal_term += (local_weights - global_weights).norm(2)
-            loss = criterion(output, target_onehot) + (args.mu / 2) * proximal_term
+            loss = criterion(output, target_onehot) + (args.proximal_mu / 2) * proximal_term
         
         else:
             loss = criterion(output, target_onehot)
