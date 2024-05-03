@@ -146,10 +146,11 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         output = model(images)
         
         if args.fedprox:
-            proximal_term = 0.1
+            logging.info("FedProx in active...")
+            proximal_term = 0.0
             for local_weights, global_weights in zip(model.parameters(), global_model.parameters()):
                 proximal_term += (local_weights - global_weights).norm(2)
-            loss = criterion(output, target_onehot) + (0.1 / 2) * proximal_term
+            loss = criterion(output, target_onehot) + (args.mu / 2) * proximal_term
         
         else:
             loss = criterion(output, target_onehot)
@@ -1217,6 +1218,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--fine_tuning_epochs', default=10, type=int, metavar='N', help='number of total epochs to for fine tuning')
     arg_parser.add_argument('--use_server_data', default=False, action="store_true")
     arg_parser.add_argument('--fedprox', default=False, action="store_true")
+    arg_parser.add_argument('-mu', '--proximal_mu', default=1.0, type=float)
     arg_parser.add_argument('--client_selection', type=str, default="random",
                             choices=["network","random","optimized"]
                             )
