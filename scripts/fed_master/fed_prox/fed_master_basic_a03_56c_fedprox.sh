@@ -12,4 +12,5 @@ python test_fed_master.py \
     -nr 20 \
     --fine_tuning_epochs 50 \
     --client_selection "random" \
-    --fedprox
+    --fedprox \
+    --resume
