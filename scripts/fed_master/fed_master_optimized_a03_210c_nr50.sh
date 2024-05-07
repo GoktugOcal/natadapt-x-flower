@@ -1,5 +1,5 @@
 python test_fed_master.py \
-    projects/fed_master/fed_master_optimized_a03_210c_1\
+    projects/fed_master/fed_master_optimized_a03_210c_nr50\
     3 32 32 \
     -im ./projects/pretrained_model/predefined_a03_210c_fedavg/last_model.pth.tar \
     -c 10 \
