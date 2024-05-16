@@ -11,4 +11,5 @@ python test_fed_master.py \
     -nc 210 \
     -nr 50 \
     --fine_tuning_epochs 50 \
-    --client_selection "random"
+    --client_selection "random" \
+    --resume

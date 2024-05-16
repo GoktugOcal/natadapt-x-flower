@@ -171,12 +171,12 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         end = time.time()
         
         # Update statistics
-        estimated_time_remained = batch_time.get_avg()*(len(train_loader)-i-1)
-        fns.update_progress(i, len(train_loader), 
-            ESA='{:8.2f}'.format(estimated_time_remained)+'s',
-            loss='{:4.2f}'.format(loss.item()),
-            acc='{:4.2f}%'.format(float(batch_acc))
-            )
+        # estimated_time_remained = batch_time.get_avg()*(len(train_loader)-i-1)
+        # fns.update_progress(i, len(train_loader), 
+        #     ESA='{:8.2f}'.format(estimated_time_remained)+'s',
+        #     loss='{:4.2f}'.format(loss.item()),
+        #     acc='{:4.2f}%'.format(float(batch_acc))
+        #     )
 
     print()
     print('Finish epoch {}: time = {:8.2f}s, loss = {:4.2f}, acc = {:4.2f}%'.format(
@@ -230,12 +230,12 @@ def server_train(train_loader, model, criterion, optimizer, epoch, args):
         end = time.time()
         
         # Update statistics
-        estimated_time_remained = batch_time.get_avg()*(len(train_loader)-i-1)
-        fns.update_progress(i, len(train_loader), 
-            ESA='{:8.2f}'.format(estimated_time_remained)+'s',
-            loss='{:4.2f}'.format(loss.item()),
-            acc='{:4.2f}%'.format(float(batch_acc))
-            )
+        # estimated_time_remained = batch_time.get_avg()*(len(train_loader)-i-1)
+        # fns.update_progress(i, len(train_loader), 
+        #     ESA='{:8.2f}'.format(estimated_time_remained)+'s',
+        #     loss='{:4.2f}'.format(loss.item()),
+        #     acc='{:4.2f}%'.format(float(batch_acc))
+        #     )
 
     print()
     print('Finish epoch {}: time = {:8.2f}s, loss = {:4.2f}, acc = {:4.2f}%'.format(
@@ -266,11 +266,11 @@ def eval(test_loader, model, args):
         end = time.time()
 
         # Update statistics
-        estimated_time_remained = batch_time.get_avg()*(len(test_loader)-i-1)
-        fns.update_progress(i, len(test_loader), 
-            ESA='{:8.2f}'.format(estimated_time_remained)+'s',
-            acc='{:4.2f}'.format(float(batch_acc))
-            )
+        # estimated_time_remained = batch_time.get_avg()*(len(test_loader)-i-1)
+        # fns.update_progress(i, len(test_loader), 
+        #     ESA='{:8.2f}'.format(estimated_time_remained)+'s',
+        #     acc='{:4.2f}'.format(float(batch_acc))
+        #     )
     print()
     print('Test accuracy: {:4.2f}% (time = {:8.2f}s)'.format(
             float(acc.get_avg()), batch_time.get_avg()*len(test_loader)))
@@ -336,7 +336,7 @@ def client(global_model, client_id, round_no, args):
         if acc > best_acc:
             best_acc = acc
         print(' ')
-    print('Best accuracy:', best_acc)
+    # print('Best accuracy:', best_acc)
         
     best_acc = eval(test_loader, model, args)
     print('Best accuracy:', best_acc)
