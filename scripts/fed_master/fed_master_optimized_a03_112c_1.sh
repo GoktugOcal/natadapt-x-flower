@@ -11,4 +11,5 @@ python test_fed_master.py \
     -nc 112 \
     -nr 20 \
     --fine_tuning_epochs 50 \
-    --client_selection "optimized"
+    --client_selection "optimized" \
+    --resume
