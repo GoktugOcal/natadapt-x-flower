@@ -224,7 +224,7 @@ for test in tests:
     
     print("ok.")
 
-with open("../projects/fed_master/comp.json","w") as f:
+with open("/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/comp.json","w") as f:
     json.dump(test_results,f)
 
 print("DONE...")
