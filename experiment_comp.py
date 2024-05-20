@@ -31,7 +31,8 @@ def tester(key, test_path, data_path, no_clients):
             train_acc, test_acc = federated_eval(model, no_clients, data_path)
             train_accs.append(train_acc)
             test_accs.append(test_acc)
-        except:
+        except Exception as e:
+            print(e)
             resources.append(None)
             train_accs.append(None)
             test_accs.append(None)
