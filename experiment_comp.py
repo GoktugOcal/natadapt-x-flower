@@ -145,13 +145,37 @@ def tester(key, test_path, data_path, no_clients):
 
 tests = [
     {
-        "test_name": "fedavg_56c_basic",
+        "test_name": "fedavg_56c_basic_prior",
+        "test_path": "/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/fed_master_a03_56c",
+        "no_clients": 56,
+        "data_path": "/users/goktug.ocal/thesis/netadapt-x-flower/data/32_Cifar10_NIID_56c_a03"
+    },
+    {
+        "test_name": "fedavg_56c_basic_0",
+        "test_path": "/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/fed_master_basic_a03_56c",
+        "no_clients": 56,
+        "data_path": "/users/goktug.ocal/thesis/netadapt-x-flower/data/32_Cifar10_NIID_56c_a03"
+    },
+    {
+        "test_name": "fedavg_56c_basic_1",
+        "test_path": "/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/fed_master_basic_a03_56c_1",
+        "no_clients": 56,
+        "data_path": "/users/goktug.ocal/thesis/netadapt-x-flower/data/32_Cifar10_NIID_56c_a03"
+    },{
+        "test_name": "fedavg_56c_basic_2",
+        "test_path": "/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/fed_master_basic_a03_56c_2",
+        "no_clients": 56,
+        "data_path": "/users/goktug.ocal/thesis/netadapt-x-flower/data/32_Cifar10_NIID_56c_a03"
+    },
+    {
+        "test_name": "fedavg_56c_basic_3",
         "test_path": "/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/fed_master_basic_a03_56c_3",
         "no_clients": 56,
         "data_path": "/users/goktug.ocal/thesis/netadapt-x-flower/data/32_Cifar10_NIID_56c_a03"
     },
-        
-
+    #############
+    #############
+    #############
     {
         "test_name": "fedavg_56c_network",
         "test_path": "/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/fed_master_network_optimized_a03_56c",
@@ -315,7 +339,7 @@ for test in tests:
     
     print("ok.")
 
-with open("/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/comp.json","w") as f:
+with open("/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/comp_2.json","w") as f:
     json.dump(test_results,f)
 
 print("DONE...")
