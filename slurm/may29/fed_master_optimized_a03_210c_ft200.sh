@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-gpu=8
 #SBATCH --mem-per-gpu=40G
 #SBATCH --time=60:00:00
-#SBATCH -o fed_master_optimized_a03_210c_nr50.log
+#SBATCH -o fed_master_optimized_a03_210c_1_ft200.log
 
 source /opt/python3/venv/base/bin/activate
 cd /users/goktug.ocal/thesis/netadapt-x-flower
