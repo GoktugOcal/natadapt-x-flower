@@ -1,5 +1,5 @@
 python test_fed_master.py \
-    projects/fed_master/fed_master_network_optimized_a03_210c_nr100\
+    projects/fed_master/fed_master_optimized_a03_210c_1_ft100\
     3 32 32 \
     -im ./projects/pretrained_model/predefined_a03_210c_fedavg/last_model.pth.tar \
     -c 10 \
@@ -9,6 +9,6 @@ python test_fed_master.py \
     -dp ./data/alpha/Cifar10_NIID_210c_a03 \
     --arch alexnet \
     -nc 210 \
-    -nr 100 \
-    --fine_tuning_epochs 50 \
-    --client_selection "network"
+    -nr 20 \
+    --fine_tuning_epochs 100 \
+    --client_selection "optimized"
