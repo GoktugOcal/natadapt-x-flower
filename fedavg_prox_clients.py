@@ -27,7 +27,7 @@ replace_dict = {
     6: 1,
 }
 
-path = f"./data/alpha/Cifar10_NIID_{NO_CLIENTS}c_a{ALPHA}/config.json"
+path = f"./data/alpha/fedavg/Cifar10_NIID_{NO_CLIENTS}c_a{ALPHA}/config.json"
 conf = json.loads(open(path, "r").read())
 data = [dict(zip(np.array(cli)[:,0], np.array(cli)[:,1])) for cli in conf["Size of samples for labels in clients"]]
 
@@ -111,7 +111,7 @@ assignment = {
 for bid in assignment.keys():
     selected_clients = random.sample(list(main_df.client_id.values), 30)
     assignment[bid] = main_df.iloc[selected_clients]["bw_type"].to_dict()
-    assignment[bid] = {str(k):v for k,v in assignment[bid].items()} 
+    assignment[bid] = {str(idx):v for idx, (k,v) in enumerate(assignment[bid].items())} 
 
 with open(f"./data/alpha/fedavg/Cifar10_NIID_210c_a03/client_groups.json","w") as f:
     json.dump(assignment,f)
