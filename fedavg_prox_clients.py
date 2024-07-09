@@ -113,5 +113,5 @@ for bid in assignment.keys():
     assignment[bid] = main_df.iloc[selected_clients]["bw_type"].to_dict()
     assignment[bid] = {str(k):v for k,v in assignment[bid].items()} 
 
-with open(f"../data/alpha/fedavg/Cifar10_NIID_210c_a03/client_groups.json","w") as f:
+with open(f"./data/alpha/fedavg/Cifar10_NIID_210c_a03/client_groups.json","w") as f:
     json.dump(assignment,f)
