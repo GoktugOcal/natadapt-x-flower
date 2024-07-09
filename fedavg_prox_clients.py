@@ -27,7 +27,7 @@ replace_dict = {
     6: 1,
 }
 
-path = f"../data/alpha/Cifar10_NIID_{NO_CLIENTS}c_a{ALPHA}/config.json"
+path = f"./data/alpha/Cifar10_NIID_{NO_CLIENTS}c_a{ALPHA}/config.json"
 conf = json.loads(open(path, "r").read())
 data = [dict(zip(np.array(cli)[:,0], np.array(cli)[:,1])) for cli in conf["Size of samples for labels in clients"]]
 
