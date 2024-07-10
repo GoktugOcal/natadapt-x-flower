@@ -278,7 +278,7 @@ def main(args):
 
         for client in clients:
             new_options = LinkOptions(
-                bandwidth=random.choice(client_networks[str(client.id-2)]),
+                bandwidth=random.choice(client_networks[str(client.id-3)]),
                 )
             session.update_link(switch.id, client.id, client.id-2, 0, options=new_options)
         
@@ -294,7 +294,7 @@ def main(args):
             if elapsed > 300:
                 for client in clients:
                     new_options = LinkOptions(
-                        bandwidth=random.choice(client_networks[str(client.id-2)]),
+                        bandwidth=random.choice(client_networks[str(client.id-3)]),
                         )
                     session.update_link(switch.id, client.id, client.id-2, 0, options=new_options)
                 start = time.time()
