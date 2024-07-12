@@ -190,8 +190,14 @@ tests = [
         "no_clients": 56,
         "data_path": "/users/goktug.ocal/thesis/netadapt-x-flower/data/32_Cifar10_NIID_56c_a03"
     },
-        
 
+        {
+        "test_name": "fedavg_56c_optimized_coeff08",
+        "test_path": "/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/fed_master_optimized_2_a03_56c_coeff08",
+        "no_clients": 56,
+        "data_path": "/users/goktug.ocal/thesis/netadapt-x-flower/data/alpha/Cifar10_NIID_56c_a03"
+    },
+    
     {
         "test_name": "fedavg_112c_basic",
         "test_path": "/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/fed_master_basic_a03_112c_1",
@@ -339,7 +345,7 @@ for test in tests:
     
     print("ok.")
 
-with open("/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/comp_2.json","w") as f:
+with open("/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/comp_3.json","w") as f:
     json.dump(test_results,f)
 
 print("DONE...")
