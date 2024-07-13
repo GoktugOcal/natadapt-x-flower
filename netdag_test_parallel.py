@@ -235,6 +235,8 @@ def NetDag(maindf, no_groups, coeff, max_iter, viz=False):
 
     seq_of_move = np.arange(1,NO_GROUPS+1).tolist()
     total_no_operations = 0
+    possible_ops = 0
+    candidate_ops = 0
     for iter_no in range(max_iter):
         no_operations_done = 0
         # for group_no in range(NO_GROUPS,0,-1):
@@ -269,6 +271,7 @@ def NetDag(maindf, no_groups, coeff, max_iter, viz=False):
 
                 for candidate_group in candidate_groups:
                     for idx2, row2 in candidate_group.iterrows():
+                        possible_ops += 1
                         candidate_dist = group_dist_wo + np.array(row2.distribution)
                         candidate_score = EMD(candidate_dist ,global_dist)
                         bw_type_candidate = row2.bw_type
@@ -278,7 +281,7 @@ def NetDag(maindf, no_groups, coeff, max_iter, viz=False):
                             coeff = COEFF
 
                         if candidate_score < score*coeff:
-
+                            candidate_ops += 1
                             df_iter_temp = transfer_op(df_iter.copy(), [(client_id, row2.client_id, candidate_score)], -1)
                             avg_emd = average_EMD(df_iter_temp, global_dist)
                             emds.append(avg_emd)
@@ -334,7 +337,7 @@ def NetDag(maindf, no_groups, coeff, max_iter, viz=False):
         plt.ylabel("EMD")
         plt.show()
     
-    return df_iter, all_scores, iter_no, down_durs, total_no_operations
+    return df_iter, all_scores, iter_no, down_durs, total_no_operations, possible_ops, candidate_ops
 
 def download_duration(df_final):
     model_sizes = {
@@ -398,11 +401,11 @@ def main(no_clients, no_groups, alpha, coeff, max_iter, no_classes=10, no_tests=
         # maindf = spread_bw_random(main_label_vectors, NO_CLIENTS, NO_GROUPS)
         maindf = spread_bw_random(main_label_vectors, NO_CLIENTS, NO_GROUPS, tiers)
         # print(maindf)
-        df_final, all_scores, iter_no, down_durs, total_no_operations = NetDag(maindf, NO_GROUPS, COEFF, MAX_ITER, viz=viz)
+        df_final, all_scores, iter_no, down_durs, total_no_operations, possible_ops, candidate_ops = NetDag(maindf, NO_GROUPS, COEFF, MAX_ITER, viz=viz)
         final_scores.append(np.mean(all_scores[-1]))
         durations.append(time() - s)
 
-    return df_final, all_scores, final_scores, iter_no, down_durs, np.mean(durations), total_no_operations
+    return df_final, all_scores, final_scores, iter_no, down_durs, np.mean(durations), total_no_operations, possible_ops, candidate_ops
 
 def process(
     no_clients,
@@ -413,7 +416,7 @@ def process(
     no_tests
 ):
     try:
-        df_final, all_scores, final_scores, iter_no, down_durs, avg_elapsed, total_no_operations = main(
+        df_final, all_scores, final_scores, iter_no, down_durs, avg_elapsed, total_no_operations, possible_ops, candidate_ops = main(
             no_clients=no_clients,
             no_groups=7,
             alpha=alpha,
@@ -433,6 +436,8 @@ def process(
             "emd": avgEMD,
             "final_iter": iter_no,
             "total_no_operations": total_no_operations,
+            "possible_ops": possible_ops,
+            "candidate_ops": candidate_ops,
             "download_duration": lastDur,
             "avg_elapsed_time": avg_elapsed
         }
@@ -453,6 +458,8 @@ def process(
             "emd": None,
             "final_iter": None,
             "total_no_operations": None,
+            "possible_ops": None,
+            "candidate_ops": None,
             "download_duration": None,
             "avg_elapsed_time": None
         }
@@ -518,4 +525,4 @@ if __name__ == "__main__":
     pool = Pool(processes=64)
     logs = pool.starmap(process, inputs)
     log_df = pd.DataFrame(logs)
-    log_df.to_csv("./data/alpha/test_04.csv")
+    log_df.to_csv("./data/alpha/test_10.csv")
