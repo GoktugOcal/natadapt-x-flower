@@ -184,6 +184,7 @@ def main(args):
 
 
     client_networks = client_networks_all[block_id]
+    client_networks = {str(k): v for k,v in client_networks.items()}
 
 
 
