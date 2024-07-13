@@ -174,12 +174,12 @@ def main(args):
     block_id = [block_id for block_id in ["block_0","block_1","block_2","block_3","block_4","block_5","block_6"] if block_id in MODEL_PATH][0]    
     # client_networks = client_networks_all[block_id]
 
-    client_networks_all = {}
-    with open(os.path.join("./data",DATASET_PATH,"client_groups.json")) as json_file:
-        bw_data = json.load(json_file)
-    for cid, tier in bw_data[block_id].items():
-        print(cid, tier)
-        client_networks_all[cid] = tiers[tier]
+    # client_networks_all = {}
+    # with open(os.path.join("./data",DATASET_PATH,"client_groups.json")) as json_file:
+    #     bw_data = json.load(json_file)
+    # for cid, tier in bw_data[block_id].items():
+    #     print(cid, tier)
+    #     client_networks_all[cid] = tiers[tier]
     client_networks = client_networks_all
 
 
