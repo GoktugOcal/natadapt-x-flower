@@ -183,6 +183,10 @@ def main(args):
     client_networks = client_networks_all
 
 
+    client_networks = client_networks_all[block_id]
+
+
+
     os.makedirs(WORKING_PATH, exist_ok=True)
 
     config_networks = client_networks.copy()
