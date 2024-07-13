@@ -300,6 +300,39 @@ tests = [
         "no_clients": 210,
         "data_path": "/users/goktug.ocal/thesis/netadapt-x-flower/data/alpha/Cifar10_NIID_210c_a03"
     },
+
+
+    #####
+    #####
+
+    {
+        "test_name": "fed_master_optimized_a03_210c_1_ft100",
+        "test_path": "/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/fedprox/fed_master_optimized_a03_210c_1_ft100",
+        "no_clients": 210,
+        "data_path": "/users/goktug.ocal/thesis/netadapt-x-flower/data/alpha/Cifar10_NIID_210c_a03"
+    },
+
+    {
+        "test_name": "fed_master_optimized_a03_210c_1_ft200",
+        "test_path": "/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/fedprox/fed_master_optimized_a03_210c_1_ft200",
+        "no_clients": 210,
+        "data_path": "/users/goktug.ocal/thesis/netadapt-x-flower/data/alpha/Cifar10_NIID_210c_a03"
+    },
+
+    {
+        "test_name": "fed_master_optimized_a03_210c_nr100",
+        "test_path": "/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/fedprox/fed_master_optimized_a03_210c_nr100",
+        "no_clients": 210,
+        "data_path": "/users/goktug.ocal/thesis/netadapt-x-flower/data/alpha/Cifar10_NIID_210c_a03"
+    },
+
+    {
+        "test_name": "fed_master_optimized_a03_210c_nr50",
+        "test_path": "/users/goktug.ocal/thesis/netadapt-x-flower/projects/fed_master/fedprox/fed_master_optimized_a03_210c_nr50",
+        "no_clients": 210,
+        "data_path": "/users/goktug.ocal/thesis/netadapt-x-flower/data/alpha/Cifar10_NIID_210c_a03"
+    },
+
 ]
 
 
