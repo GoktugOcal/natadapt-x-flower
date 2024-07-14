@@ -10,7 +10,7 @@ model_names=("iter_1_block_0_model_simp.pth.tar"
 
 worker_path="./projects/netadapt/netadapt_1/worker/"
 dataset_path="32_Cifar10_NIID_80c_a03"
-working_path="projects/pure_core/netadapt_fedprox_only_56c_2/netadapt_1_iter_1/"
+working_path="projects/pure_core/netadapt_fedprox_only_56c_3/netadapt_1_iter_1/"
 
 length=${#model_names[@]}
 
@@ -43,7 +43,7 @@ model_names=("iter_10_block_0_model_simp.pth.tar"
 
 worker_path="./projects/netadapt/netadapt_1/worker/"
 dataset_path="32_Cifar10_NIID_80c_a03"
-working_path="projects/pure_core/netadapt_fedprox_only_56c_2/netadapt_1_iter_10/"
+working_path="projects/pure_core/netadapt_fedprox_only_56c_3/netadapt_1_iter_10/"
 
 length=${#model_names[@]}
 
