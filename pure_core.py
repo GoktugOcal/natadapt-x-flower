@@ -109,27 +109,51 @@ client_networks_low = {
     7 : WEAK_NETWORK,
 }
 
+# client_networks_all = {
+#     "block_0" : {
+#         0 : STRONG_NETWORK,   1 : STRONG_NETWORK,   2 : STRONG_NETWORK,   3 : STRONG_NETWORK,   4 : STRONG_NETWORK,   5 : STRONG_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+#     },
+#     "block_1" : {
+#         0 : STRONG_NETWORK,   1 : NORMAL_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+#     },
+#     "block_2" : {
+#         0 : STRONG_NETWORK,   1 : STRONG_NETWORK,   2 : STRONG_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+#     },
+#     "block_3" : {
+#         0 : NORMAL_NETWORK,   1 : NORMAL_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+#     },
+#     "block_4" : {
+#         0 : WEAK_NETWORK,   1 : WEAK_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+#     },
+#     "block_5" : {
+#         0 : WEAK_NETWORK,   1 : WEAK_NETWORK,   2 : WEAK_NETWORK,   3 : WEAK_NETWORK,   4 : WEAK_NETWORK,   5 : WEAK_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+#     },
+#     "block_6" : {
+#         0 : WEAK_NETWORK,   1 : WEAK_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+#     },
+# }
+
 client_networks_all = {
     "block_0" : {
-        0 : STRONG_NETWORK,   1 : STRONG_NETWORK,   2 : STRONG_NETWORK,   3 : STRONG_NETWORK,   4 : STRONG_NETWORK,   5 : STRONG_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+        0 : STRONG_NETWORK,   1 : STRONG_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : WEAK_NETWORK,   6 : WEAK_NETWORK,   7 : WEAK_NETWORK,
     },
     "block_1" : {
-        0 : STRONG_NETWORK,   1 : NORMAL_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+        0 : STRONG_NETWORK,   1 : NORMAL_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : WEAK_NETWORK,
     },
     "block_2" : {
-        0 : STRONG_NETWORK,   1 : STRONG_NETWORK,   2 : STRONG_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+        0 : STRONG_NETWORK,   1 : STRONG_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : WEAK_NETWORK,
     },
     "block_3" : {
-        0 : NORMAL_NETWORK,   1 : NORMAL_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+        0 : STRONG_NETWORK,   1 : NORMAL_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : WEAK_NETWORK,
     },
     "block_4" : {
-        0 : WEAK_NETWORK,   1 : WEAK_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+        0 : STRONG_NETWORK,   1 : NORMAL_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : WEAK_NETWORK,
     },
     "block_5" : {
-        0 : WEAK_NETWORK,   1 : WEAK_NETWORK,   2 : WEAK_NETWORK,   3 : WEAK_NETWORK,   4 : WEAK_NETWORK,   5 : WEAK_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+        0 : STRONG_NETWORK,   1 : NORMAL_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : WEAK_NETWORK,
     },
     "block_6" : {
-        0 : WEAK_NETWORK,   1 : WEAK_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : NORMAL_NETWORK,
+        0 : STRONG_NETWORK,   1 : NORMAL_NETWORK,   2 : NORMAL_NETWORK,   3 : NORMAL_NETWORK,   4 : NORMAL_NETWORK,   5 : NORMAL_NETWORK,   6 : NORMAL_NETWORK,   7 : WEAK_NETWORK,
     },
 }
 
@@ -164,7 +188,7 @@ def main(args):
     if args.no_rounds: NO_ROUNDS = args.no_rounds
     if args.no_clients: NO_CLIENTS = args.no_clients
 
-    # if any(block_id in MODEL_PATH for block_id in ["block_0","block_1"]):
+    # if any(block_id in MODEL_PATH for block_id in ["block_0","block_1"]): 
     #     client_networks =  client_networks_high
     # elif any(block_id in MODEL_PATH for block_id in ["block_2","block_3","block_4"]):
     #     client_networks =  client_networks_medium
