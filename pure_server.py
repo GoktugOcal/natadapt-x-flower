@@ -8,7 +8,7 @@ import base64
 
 import json
 import pickle
-from time import time
+from time import time, sleep
 import torch
 import torchvision
 from torchvision import transforms
@@ -184,6 +184,13 @@ if __name__ == "__main__":
     
     os.makedirs(os.path.dirname(logfilename), exist_ok=True)
     os.makedirs(os.path.dirname(debug_logfilename), exist_ok=True)
+
+    if not os.path.exists(debug_logfilename):
+        while True:
+            os.makedirs(os.path.dirname(debug_logfilename), exist_ok=True)
+            if os.path.exists(debug_logfilename): break
+            sleep(3)
+
     logging.basicConfig(
         filename=debug_logfilename,
         format='%(asctime)s %(levelname)-8s %(message)s',

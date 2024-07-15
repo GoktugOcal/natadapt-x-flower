@@ -329,6 +329,9 @@ def main(args):
                 start = time.time()
                 
             # Read Logs
+            if not os.path.exists(os.path.join(WORKING_PATH,"logs_debug.txt")):
+                time.sleep(30)
+
             with open(os.path.join(WORKING_PATH,"logs_debug.txt"), "r") as f:
                 last_line = f.readlines()[-1]
                 # logging.debug(last_line)
@@ -337,6 +340,7 @@ def main(args):
                     temp_line = last_line
                 if "DONE" in last_line:
                     raise KeyboardInterrupt
+
 
         # servernode.host_cmd(
         #     f"docker exec -td DockerServer2 python pure_server.py "
